@@ -1,0 +1,10 @@
+.idea
+.vscode
+.gitignore
+.DS_Store
+**/.DS_Store
+node_modules
+packages/*/node_modules
+packages/*/lib
+packages/wemix-cli/templates/empty/template/package.json
+packages/wemix-cli/templates/custom/template/package.json

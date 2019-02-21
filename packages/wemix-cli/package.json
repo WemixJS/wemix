@@ -1,0 +1,48 @@
+{
+  "name": "@wemix/cli",
+  "version": "1.0.0",
+  "description": "小程序开发框架",
+  "main": "lib/wemix.js",
+  "bin": {
+    "wemix": "bin/wemix.js"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WemixJS/wemix.git"
+  },
+  "keywords": [
+    "微信小程序",
+    "小程序",
+    "脚手架",
+    "微信脚手架",
+    "wechat small program"
+  ],
+  "author": "sanshao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/WemixJS/wemix/issues"
+  },
+  "homepage": "https://github.com/WemixJS/wemix#readme",
+  "devDependencies": {},
+  "dependencies": {
+    "@babel/polyfill": "^7.2.5",
+    "async": "^2.6.2",
+    "chalk": "^2.4.2",
+    "commander": "^2.19.0",
+    "consolidate": "^0.15.1",
+    "enhanced-resolve": "^4.1.0",
+    "fs-extra": "^7.0.1",
+    "handlebars": "^4.1.0",
+    "inquirer": "^6.2.2",
+    "metalsmith": "^2.3.0",
+    "minimatch": "^3.0.4",
+    "multimatch": "^3.0.0",
+    "tapable": "^1.1.1",
+    "validate-npm-package-name": "^3.0.0",
+    "winston": "^3.2.1"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  }
+}

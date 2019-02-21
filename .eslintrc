@@ -1,0 +1,30 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "parserOptions": {
+    "parser": "babel-eslint",
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "ecmaFeatures": {
+    "impliedStrict": true
+  },
+  "extends": ["standard"],
+  "plugins": ["html"],
+  "rules": {
+    "comma-dangle": ["error", "always-multiline"],
+    "jsx-quotes": ["error", "prefer-double"],
+    "node/no-deprecated-api": "off",
+    "standard/no-callback-literal": "off"
+  },
+  "globals": {
+    "window": true,
+    "global": true,
+    "document": true,
+    "fetch": true,
+    "wx": true
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "editor.tabSize": 2,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "javascript.implicitProjectConfig.experimentalDecorators": true,
+  "javascript.suggest.autoImports": false,
+  "javascript.validate.enable": false,
+  "html.format.wrapAttributes": "force-aligned",
+  "html.validate.scripts": false,
+  "html.validate.styles": false,
+  "prettier.semi": false,
+  "prettier.eslintIntegration": true,
+  "prettier.stylelintIntegration": true,
+  "eslint.enable": true,
+  "eslint.validate": ["javascript", "javascriptreact", "html"]
+}

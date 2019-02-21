@@ -1,0 +1,43 @@
+
+{
+  "name": "{{name}}",
+  "version": "0.0.1",
+  "description": "{{description}}",
+  "main": "dist/app.js",
+  "scripts": {
+    {{#lint}}
+    "precommit": "lint-staged",
+    {{/lint}}
+    "local": "./node_modules/.bin/wemix build --env=development --watch",
+    "dev": "./node_modules/.bin/wemix build --env=development",
+    "prod": "./node_modules/.bin/wemix build --env production"
+  },
+  {{#lint}}
+  "lint-staged": {
+    "src/**/*.js": "./node_modules/.bin/eslint --fix",
+    "src/**/*.{css,less}": "./node_modules/.bin/stylelint"
+  },
+  {{/lint}}
+  "author": "{{author}}",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/polyfill": "^7.2.5"
+  },
+  "devDependencies": {
+    {{#lint}}
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.11.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-html": "^5.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "stylelint": "^9.9.0",
+    "stylelint-config-prettier": "^4.0.0",
+    "husky": "^1.2.1",
+    "lint-staged": "^8.1.0",
+    {{/lint}}
+    "@babel/preset-env": "^7.2.3"
+  }
+}
