@@ -2,14 +2,13 @@
  * @Description: 构建项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:43:33
- * @LastEditTime: 2019-02-21 11:40:51
+ * @LastEditTime: 2019-02-21 17:07:16
  */
 
 import wemix from '../core'
 import logger from '../utils/logger'
 
 export default function build (program) {
-  process.env.NODE_ENV = program.env
   // 解析wemix.config.js 以及命令行参数
   let compiler
   try {

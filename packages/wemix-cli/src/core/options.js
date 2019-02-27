@@ -2,25 +2,23 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-02-20 17:00:46
+ * @LastEditTime: 2019-02-26 17:00:32
  */
 
 import fs from 'fs-extra'
-import path from 'path'
+import npath from 'path'
 import * as util from '../utils'
 
 const DEFAULT_OPTIONS = {
   entryDir: { type: String, default: 'src' },
-  outputDir: { type: String, default: 'wechat' },
-  env: { type: String, default: 'development' },
+  outputDir: { type: String, default: 'dist' },
   watch: { type: Boolean, default: false },
   resolve: { type: Object, default: {} },
   module: { type: Object },
-  compile: { type: String, default: 'wechat' },
   plugins: { type: Array, default: [] },
 }
 
-const DEFAULT_CONFIG = path.resolve('wemix.config.js')
+const DEFAULT_CONFIG = npath.resolve('wemix.config.js')
 
 function check (t, val) {
   if (Array.isArray(t)) {
@@ -103,7 +101,7 @@ export const parse = function (
 
 export const convert = function (args) {
   const exitDefaultCfg = fs.existsSync(DEFAULT_CONFIG)
-  const exitAppointCfg = fs.existsSync(path.join(process.cwd(), args.config))
+  const exitAppointCfg = fs.existsSync(npath.join(process.cwd(), args.config))
   if (!exitDefaultCfg && !exitAppointCfg) {
     throw `No configuration file found in the current directory.` // eslint-disable-line
   }
@@ -113,25 +111,34 @@ export const convert = function (args) {
     opt = require(DEFAULT_CONFIG)
   }
   if (exitAppointCfg) {
-    opt = require(path.join(process.cwd(), args.config))
+    opt = require(npath.join(process.cwd(), args.config))
   }
 
   const argOpt = parse(args, DEFAULT_OPTIONS, true)
   if (typeof args.watch === 'boolean') {
     argOpt.watch = !!args.watch
   }
-  if (typeof args.env === 'string') {
-    argOpt.env = args.env
-  }
-  if (typeof args.compile === 'string') {
-    argOpt.compile = args.compile
-  }
 
   const config = Object.assign({}, parse(opt), argOpt)
-  if (config.env !== 'development' && config.env !== 'production') {
-    throw `Error env. Only support (development|production)` // eslint-disable-line
-  }
 
   config.context = process.cwd()
+  config.entryDir = npath.resolve(config.context, config.entryDir)
+  config.outputDir = npath.resolve(config.context, config.outputDir)
+  if (config.module && config.rules) {
+    config.rules.forEach(rule => {
+      if (!util.isReg(rule.test)) {
+        throw `Unexpected type: module.rules.test expect a [object RegExp]` // eslint-disable-line
+      }
+      if (rule.include && !util.isArray(rule.include)) {
+        throw `Unexpected type: module.rules.include expect a [object Array]` // eslint-disable-line
+      }
+      if (rule.exclude && !util.isArray(rule.exclude)) {
+        throw `Unexpected type: module.rules.exclude expect a [object Array]` // eslint-disable-line
+      }
+      if (!util.isArray(rule.use)) {
+        throw `Unexpected type: module.rules.use expect a [object Array]` // eslint-disable-line
+      }
+    })
+  }
   return config
 }

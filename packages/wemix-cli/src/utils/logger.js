@@ -2,7 +2,7 @@
  * @Description: 日志显示
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:49:29
- * @LastEditTime: 2019-02-20 16:10:04
+ * @LastEditTime: 2019-02-27 10:19:43
  */
 
 import winston from 'winston'
@@ -14,7 +14,7 @@ const myCustomLevels = {
   levels: {
     error: 0,
     warn: 1,
-    begin: 2,
+    start: 2,
     success: 3,
     info: 4,
     verbose: 5,
@@ -41,7 +41,7 @@ const myFormat = printf(info => {
     case 'success':
       level = chalk.yellow(level.toLocaleUpperCase())
       break
-    case 'begin':
+    case 'start':
       level = chalk.yellow(level.toLocaleUpperCase())
       break
     case 'warn':
@@ -60,7 +60,6 @@ const logger = winston.createLogger({
   levels: myCustomLevels.levels,
   level: 'info',
   format: winston.format.json(),
-  defaultMeta: { service: 'user-service' },
   transports: [
     new winston.transports.Console({
       format: combine(label({}), timestamp(), myFormat),

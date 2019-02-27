@@ -2,7 +2,7 @@
  * @Description: 入口文件
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:36:23
- * @LastEditTime: 2019-02-20 16:57:30
+ * @LastEditTime: 2019-02-21 17:07:24
  */
 
 import program from 'commander'
@@ -43,16 +43,6 @@ program
   .description('Compile')
   .action(build)
   .option('--config <config>', 'Path to the config file')
-  .option(
-    '--env <env>',
-    'Environment passed to the config',
-    /^(production|development)$/i
-  )
-  .option(
-    '--compile <compile>',
-    'Compile passed to the config',
-    /^(wechat|alipay)$/i
-  )
   .option('--entryDir <entryDir>', 'origin code dir')
   .option('--outputDir <outputDir>', 'compiled code dir')
   .option('-w, --watch', 'Watch the filesystem for changes')

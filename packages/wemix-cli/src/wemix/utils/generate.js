@@ -2,10 +2,10 @@
  * @Description: Generate
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:12:35
- * @LastEditTime: 2019-02-20 16:20:35
+ * @LastEditTime: 2019-02-26 17:02:06
  */
 
-import path from 'path'
+import npath from 'path'
 import Metalsmith from 'metalsmith'
 import multimatch from 'multimatch'
 import Handlebars from 'handlebars'
@@ -109,7 +109,7 @@ function logMessage (message, data) {
 
 export default function generate (name, stemSrc, to, done) {
   const opts = getOptions(name, stemSrc)
-  const metalsmith = Metalsmith(path.join(stemSrc, 'template'))
+  const metalsmith = Metalsmith(npath.join(stemSrc, 'template'))
   const data = Object.assign(metalsmith.metadata(), {
     destDirName: name,
     inPlace: true,

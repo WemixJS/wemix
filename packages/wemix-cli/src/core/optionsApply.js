@@ -2,14 +2,11 @@
  * @Description: resolve Options Apply
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:55:12
- * @LastEditTime: 2019-02-20 19:48:09
+ * @LastEditTime: 2019-02-21 19:09:28
  */
-
-import CompilePlugin from './plugins/compile'
 
 export default class OptionsApply {
   process (options, compiler, callback) {
-    new CompilePlugin().apply(compiler)
     compiler.hooks.afterPlugins.callAsync(callback)
     if (!compiler.inputFileSystem) {
       throw new Error('No input filesystem provided')

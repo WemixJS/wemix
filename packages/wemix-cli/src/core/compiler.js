@@ -2,10 +2,10 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-02-21 11:49:52
+ * @LastEditTime: 2019-02-27 12:08:22
  */
 
-import { AsyncSeriesHook } from 'tapable'
+import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
 
 import ResolverFactory from './resolverFactory'
 import logger from '../utils/logger'
@@ -19,18 +19,31 @@ export default class Compiler {
       afterPlugins: new AsyncSeriesHook([]),
       afterResolvers: new AsyncSeriesHook([]),
       beforeRun: new AsyncSeriesHook([]),
-      run: new AsyncSeriesHook(['compilation']),
-      beforeCompile: new AsyncSeriesHook([]),
+      run: new AsyncSeriesHook([]),
+      beforeCompile: new AsyncSeriesHook(['compilation']),
       compile: new AsyncSeriesHook(['compilation']),
+      beforeSingleCompile: new AsyncSeriesWaterfallHook(['data']),
+      singleCompile: new AsyncSeriesWaterfallHook(['data', 'rule']),
+      afterSingleCompile: new AsyncSeriesWaterfallHook(['data']),
       afterCompile: new AsyncSeriesHook(['compilation']),
-      emit: new AsyncSeriesHook([]),
+      emit: new AsyncSeriesHook(['compilation']),
       done: new AsyncSeriesHook([]),
       failed: new AsyncSeriesHook(['error']),
     }
     this.logger = logger
     this.running = false
-    this.cache = {}
     this.resolverFactory = new ResolverFactory()
+  }
+  getRule (path) {
+    const rules = this.options.module.rules
+    let rule
+    for (let index = 0; index < rules.length; index++) {
+      if (rules[index].test.test(path)) {
+        rule = rules[index]
+        break
+      }
+    }
+    return rule
   }
   run (callback) {
     if (this.running) {
@@ -54,11 +67,13 @@ export default class Compiler {
       return callback(err)
     }
 
-    const onCompiled = err => {
+    const onCompiled = (err, compilation) => {
       if (err) return finalCallback(err)
-      this.hooks.emit.callAsync(err => {
+      this.logger.start('开始写入')
+      this.hooks.emit.callAsync(compilation, err => {
         if (err) return finalCallback(err)
         this.hooks.done.callAsync(err => {
+          this.logger.success('写入成功')
           if (err) return finalCallback(err)
           return finalCallback(null)
         })
@@ -71,27 +86,30 @@ export default class Compiler {
 
       this.hooks.run.callAsync(err => {
         if (err) return finalCallback(err)
-        this.compile(new Map(), onCompiled)
+        this.compile(null, onCompiled)
       })
     })
   }
-  watch () {}
-  compile (map, callback) {
+  watch () {
+    // this.compile('有值才执行', onCompiled)
+  }
+  compile (modifiedFiles, callback) {
     let compilation
     if (!compilation || (compilation && compilation.writed)) {
-      compilation = new Compilation(this, map)
+      compilation = new Compilation(this, modifiedFiles)
     }
-    // this.hooks.beforeCompile.callAsync(err => {
-    //   if (err) return callback(err)
-    //   this.hooks.compile.callAsync(compilation, err => {
-    //     if (err) return callback(err)
+    this.hooks.beforeCompile.callAsync(compilation, err => {
+      if (err) return callback(err, compilation)
+      this.logger.start('开始编译')
+      this.hooks.compile.callAsync(compilation, err => {
+        if (err) return callback(err, compilation)
 
-    //     this.hooks.afterCompile.callAsync(compilation, err => {
-    //       if (err) return callback(err)
-
-    //       return callback(null)
-    //     })
-    //   })
-    // })
+        this.hooks.afterCompile.callAsync(compilation, err => {
+          if (err) return callback(err, compilation)
+          this.logger.success('编译成功')
+          return callback(null, compilation)
+        })
+      })
+    })
   }
 }

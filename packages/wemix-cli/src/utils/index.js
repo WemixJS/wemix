@@ -2,10 +2,12 @@
  * @Description: 工具方法
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:51:24
- * @LastEditTime: 2019-02-20 16:42:57
+ * @LastEditTime: 2019-02-26 17:01:27
  */
 
 import childProcess from 'child_process'
+import npath from 'path'
+import fs from 'fs-extra'
 
 /**
  * @description: 格式化日期
@@ -28,6 +30,35 @@ export const datetime = (date = new Date(), format = 'HH:mm:ss') => {
   return format.replace(/([a-z])\1+/gi, function (a) {
     return formats[a] || a
   })
+}
+
+/**
+ * @description: 获取目录下所有文件路径列表
+ */
+export const getFiles = function (dir = process.cwd(), prefix = '') {
+  dir = npath.normalize(dir)
+  if (!fs.existsSync(dir)) {
+    return []
+  }
+  let files = fs.readdirSync(dir)
+  let rst = []
+  files.forEach(item => {
+    let filepath = dir + npath.sep + item
+    let stat = fs.statSync(filepath)
+    if (stat.isFile()) {
+      if (!/^\.+/.test(item)) {
+        rst.push(prefix + item)
+      }
+    } else if (stat.isDirectory()) {
+      rst = rst.concat(
+        getFiles(
+          npath.normalize(dir + npath.sep + item),
+          npath.normalize(prefix + item + npath.sep)
+        )
+      )
+    }
+  })
+  return rst
 }
 
 /**
@@ -84,4 +115,8 @@ export const isBoolean = obj => {
 }
 export const isArray = obj => {
   return _toString.call(obj) === '[object Array]'
+}
+
+export const isReg = obj => {
+  return _toString.call(obj) === '[object RegExp]'
 }

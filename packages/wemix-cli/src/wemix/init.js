@@ -2,18 +2,18 @@
  * @Description: 初始化项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:44:27
- * @LastEditTime: 2019-02-20 16:29:16
+ * @LastEditTime: 2019-02-27 10:18:09
  */
 
 import fs from 'fs-extra'
-import path from 'path'
+import npath from 'path'
 import inquirer from 'inquirer'
 import logger from '../utils/logger'
 import * as util from '../utils'
 import generate from './utils/generate'
 
 function install () {
-  logger.begin('Install dependencies')
+  logger.start('Install dependencies')
   // 需要安装最新的wemix，因此不能提早写入package.json文件中
   const dependencies = ['@wemix/core']
   const devDependencies = []
@@ -37,7 +37,7 @@ function install () {
     })
     .then(() => {
       logger.success('Install dependencies')
-      logger.begin('Run dev')
+      logger.start('Run dev')
       const cmd = 'npm run dev'
       logger.info('Execute' + cmd)
       logger.info('May take a few minutes, please be patient...')
@@ -58,18 +58,18 @@ function install () {
 
 function create (name, program) {
   logger.success('Create directory ' + name)
-  logger.begin('Init project')
+  logger.start('Init project')
   if (!program.template) {
     program.template = 'custom'
   }
-  const tempDir = path.join(
+  const tempDir = npath.join(
     __dirname,
     '..',
-    path.sep,
+    npath.sep,
     '..',
-    path.sep,
+    npath.sep,
     'templates',
-    path.sep,
+    npath.sep,
     program.template
   )
 
@@ -85,7 +85,7 @@ export default function init (name, program) {
   if (!name || name === '.') {
     name = process
       .cwd()
-      .split(path.sep)
+      .split(npath.sep)
       .pop()
 
     // 使用当前目录作为项目根目录
@@ -95,7 +95,7 @@ export default function init (name, program) {
         'Not an empty directory, please execute "wemix new <projectName>"'
       )
     } else {
-      logger.begin('Create directory')
+      logger.start('Create directory')
       inquirer
         .prompt([
           {

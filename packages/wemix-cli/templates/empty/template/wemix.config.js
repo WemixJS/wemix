@@ -1,4 +1,4 @@
-const path = require('path')
+const npath = require('path')
 const postcssPresetEnv = require('postcss-preset-env')
 const cssnano = require('cssnano')
 const prod = process.env.NODE_ENV === 'production'
@@ -77,10 +77,10 @@ module.exports = {
   static: 'assets',
   resolve: {
     alias: {
-      pages: path.join(__dirname, 'src/pages'),
-      components: path.join(__dirname, 'src/components'),
-      assets: path.join(__dirname, 'src/assets'),
-      utils: path.join(__dirname, 'src/utils'),
+      pages: npath.join(__dirname, 'src/pages'),
+      components: npath.join(__dirname, 'src/components'),
+      assets: npath.join(__dirname, 'src/assets'),
+      utils: npath.join(__dirname, 'src/utils'),
     },
     extensions: ['.js', '.json'],
     modules: ['node_modules'],

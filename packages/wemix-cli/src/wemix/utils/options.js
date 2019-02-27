@@ -2,10 +2,10 @@
  * @Description: Options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:18:47
- * @LastEditTime: 2019-02-20 16:18:51
+ * @LastEditTime: 2019-02-26 17:02:17
  */
 
-import path from 'path'
+import npath from 'path'
 import validateName from 'validate-npm-package-name'
 import getGitUser from './gitUser'
 
@@ -54,7 +54,7 @@ function getMetadata (tempMeta) {
 }
 
 export default function getOptions (name, tempSrc) {
-  const opts = getMetadata(path.join(tempSrc, 'meta.js'))
+  const opts = getMetadata(npath.join(tempSrc, 'meta.js'))
   setDefault(opts, 'name', name)
   setValidateName(opts)
 
