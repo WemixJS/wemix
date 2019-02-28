@@ -2,7 +2,7 @@
  * @Description: FileSystem Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-02-20 18:59:10
+ * @LastEditTime: 2019-02-28 10:25:43
  */
 
 import CachedInputFileSystem from 'enhanced-resolve/lib/CachedInputFileSystem'
@@ -21,6 +21,7 @@ export default class FileSystemPlugin {
       if (compiler.inputFileSystem === inputFileSystem) {
         inputFileSystem.purge()
       }
+
       callback()
     })
   }

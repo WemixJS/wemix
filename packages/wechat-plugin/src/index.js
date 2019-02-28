@@ -2,13 +2,38 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-02-27 16:05:45
+ * @LastEditTime: 2019-02-28 18:03:18
  */
 
 import fs from 'fs-extra'
 import npath from 'path'
 
 export default class WechatPlugin {
+  callAsync (list, data, compiler, done) {
+    let index = 0
+    function next (err, data) {
+      if (index >= list.length) return done(null, data)
+      if (err) return done(err)
+      try {
+        const resolve = compiler.resolverFactory.get('normal', {})
+        resolve.resolve(
+          {},
+          process.cwd(),
+          list[index].loader,
+          {},
+          (err, file) => {
+            if (err) throw err
+            const fn = require(file).default
+            fn(data, list[index++].options, next)
+          }
+        )
+      } catch (err) {
+        compiler.logger.error(err.stack || err)
+        process.exit(1)
+      }
+    }
+    next(null, data)
+  }
   grabConfigFromScript (str, n) {
     let stash = []
     let rst = ''
@@ -52,7 +77,7 @@ export default class WechatPlugin {
                 json = new Function(code)() /* eslint-disable-line */
               }
             } catch (err) {
-              compiler.logger.error(err.stack || err)
+              throw err
             }
             const dist = `${npath.join(
               distPathParse.dir,
@@ -84,6 +109,11 @@ export default class WechatPlugin {
         origin: data,
         rule: rule,
       }
+    } else {
+      compilation.modules[distPath] = {
+        origin: data,
+        rule: rule,
+      }
     }
   }
   apply (compiler) {
@@ -93,12 +123,24 @@ export default class WechatPlugin {
       'WechatCompilePlugin',
       (compilation, callback) => {
         const promiseWaitCompile = []
+        const configPath = `${npath.join(
+          compiler.options.context,
+          'project.config.json'
+        )}`
         const splitFile = oriPath => {
-          const distPath = oriPath.replace(
-            compiler.options.entryDir,
-            compiler.options.outputDir
-          )
-          return new Promise(resolve => {
+          let distPath
+          if (oriPath === configPath) {
+            distPath = `${npath.join(
+              compiler.options.outputDir,
+              'project.config.json'
+            )}`
+          } else {
+            distPath = oriPath.replace(
+              compiler.options.entryDir,
+              compiler.options.outputDir
+            )
+          }
+          return new Promise((resolve, reject) => {
             const rule = compiler.getRule(oriPath)
             try {
               if (rule) {
@@ -125,11 +167,11 @@ export default class WechatPlugin {
                 resolve()
               }
             } catch (err) {
-              compiler.logger.error(err.stack || err)
-              resolve()
+              reject(err)
             }
           })
         }
+        compilation.waitCompile[configPath] = null
         for (const oriPath in compilation.waitCompile) {
           promiseWaitCompile.push(splitFile(oriPath))
         }
@@ -137,28 +179,25 @@ export default class WechatPlugin {
           .then(() => {
             const promiseModuleCompile = []
             const compileData = (distPath, module) => {
-              return new Promise(resolve => {
+              return new Promise((resolve, reject) => {
                 compiler.hooks.beforeSingleCompile.callAsync(
                   module.origin,
                   (err, rdata) => {
                     if (err) {
-                      compiler.logger.error(err.stack || err)
-                      return resolve()
+                      return reject(err)
                     }
                     compiler.hooks.singleCompile.callAsync(
                       rdata,
                       module.rule,
                       (err, rdata) => {
                         if (err) {
-                          compiler.logger.error(err.stack || err)
-                          return resolve()
+                          return reject(err)
                         }
                         compiler.hooks.afterSingleCompile.callAsync(
                           rdata,
                           (err, rdata) => {
                             if (err) {
-                              compiler.logger.error(err.stack || err)
-                              return resolve()
+                              return reject(err)
                             } else {
                               compilation.modules[distPath] = rdata
                               return resolve()
@@ -176,32 +215,38 @@ export default class WechatPlugin {
                 compileData(distPath, compilation.modules[distPath])
               )
             }
-            return Promise.all(promiseWaitCompile)
+            return Promise.all(promiseModuleCompile)
           })
           .then(() => {
             callback()
           })
           .catch(err => {
-            throw err
+            compiler.logger.error(err.stack || err)
           })
       }
     )
     // 执行loader
-    compiler.hooks.singleCompile.tapAsync('LoaderCompilePlugin', function (
-      data,
-      rule,
-      callback
-    ) {
-      if (rule && rule.use && rule.use.length) {
-        // rule.use.reduce((curUse, preUse) => {})
-      } else {
-        callback(null, data)
+    compiler.hooks.singleCompile.tapAsync(
+      'LoaderCompilePlugin',
+      (data, rule, callback) => {
+        if (rule && rule.use && rule.use.length) {
+          rule.use = rule.use.reverse()
+          this.callAsync(rule.use, data, compiler, callback)
+        } else {
+          callback(null, data)
+        }
       }
-    })
+    )
     // 写入到目标目录
     compiler.hooks.emit.tapAsync(
       'WechatEmitPlugin',
       (compilation, callback) => {
+        // 清空dist目录
+        try {
+          fs.emptyDirSync(compiler.options.outputDir)
+        } catch (err) {
+          return compiler.logger.error(err.stack || err)
+        }
         const promiseModuleCompile = []
         const writeData = (distPath, data) => {
           return fs.outputFile(distPath, data)
@@ -216,7 +261,7 @@ export default class WechatPlugin {
             callback()
           })
           .catch(err => {
-            throw err
+            compiler.logger.error(err.stack || err)
           })
       }
     )

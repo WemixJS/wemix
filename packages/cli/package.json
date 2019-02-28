@@ -1,7 +1,7 @@
 {
   "name": "@wemix/cli",
   "version": "1.0.0",
-  "description": "小程序开发框架",
+  "description": "小程序开发脚手架",
   "main": "lib/wemix.js",
   "bin": {
     "wemix": "bin/wemix.js"
@@ -12,11 +12,8 @@
     "url": "https://github.com/WemixJS/wemix.git"
   },
   "keywords": [
-    "微信小程序",
     "小程序",
-    "脚手架",
-    "微信脚手架",
-    "wechat small program"
+    "脚手架"
   ],
   "author": "sanshao",
   "license": "MIT",

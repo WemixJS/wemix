@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-02-27 19:05:23
+ * @LastEditTime: 2019-02-28 14:26:04
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -87,14 +87,14 @@ export default class Compiler {
 
       this.hooks.run.callAsync(err => {
         if (err) return finalCallback(err)
-        this.compile(null, onCompiled)
+        this.compile(null, onCompiled, true)
       })
     })
   }
   watch () {
     // this.compile('有值才执行', onCompiled)
   }
-  compile (modifiedFiles, callback) {
+  compile (modifiedFiles, callback, first) {
     const compilation = new Compilation(this, modifiedFiles)
     this.hooks.beforeCompile.callAsync(compilation, err => {
       if (err) return callback(err, compilation)

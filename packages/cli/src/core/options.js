@@ -2,7 +2,7 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-02-26 17:00:32
+ * @LastEditTime: 2019-02-28 15:07:57
  */
 
 import fs from 'fs-extra'
@@ -13,6 +13,7 @@ const DEFAULT_OPTIONS = {
   entryDir: { type: String, default: 'src' },
   outputDir: { type: String, default: 'dist' },
   watch: { type: Boolean, default: false },
+  progress: { type: Boolean, default: false },
   resolve: { type: Object, default: {} },
   module: { type: Object },
   plugins: { type: Array, default: [] },
@@ -117,6 +118,9 @@ export const convert = function (args) {
   const argOpt = parse(args, DEFAULT_OPTIONS, true)
   if (typeof args.watch === 'boolean') {
     argOpt.watch = !!args.watch
+  }
+  if (typeof args.progress === 'boolean') {
+    argOpt.progress = !!args.progress
   }
 
   const config = Object.assign({}, parse(opt), argOpt)

@@ -1,0 +1,20 @@
+{
+  "name": "@wemix/sass-loader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WemixJS/wemix.git"
+  },
+  "author": "sanshao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/WemixJS/wemix/issues"
+  },
+  "homepage": "https://github.com/WemixJS/wemix#readme",
+  "dependencies": {
+    "@babel/polyfill": "^7.2.5"
+  }
+}

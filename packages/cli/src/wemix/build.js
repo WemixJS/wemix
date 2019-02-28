@@ -2,7 +2,7 @@
  * @Description: 构建项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:43:33
- * @LastEditTime: 2019-02-21 17:07:16
+ * @LastEditTime: 2019-02-28 12:18:48
  */
 
 import wemix from '../core'
