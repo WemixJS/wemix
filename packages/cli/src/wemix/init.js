@@ -2,7 +2,7 @@
  * @Description: 初始化项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:44:27
- * @LastEditTime: 2019-02-27 10:18:09
+ * @LastEditTime: 2019-02-28 18:12:40
  */
 
 import fs from 'fs-extra'
@@ -15,7 +15,14 @@ import generate from './utils/generate'
 function install () {
   logger.start('Install dependencies')
   // 需要安装最新的wemix，因此不能提早写入package.json文件中
-  const dependencies = ['@wemix/core']
+  const dependencies = [
+    '@wemix/core',
+    '@wemix/wechat-plugin',
+    '@wemix/babel-loader',
+    '@wemix/css-loader',
+    '@wemix/postcss-loader',
+    '@wemix/less-loader',
+  ]
   const devDependencies = []
   // 安装依赖包
   const cmd = 'npm install --registry https://registry.npm.taobao.org'
