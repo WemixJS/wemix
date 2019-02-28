@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-02-28 14:26:04
+ * @LastEditTime: 2019-02-28 18:34:14
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -32,6 +32,7 @@ export default class Compiler {
     }
     this.logger = logger
     this.running = false
+    this.distConfig = null
     this.resolverFactory = new ResolverFactory()
   }
   getRule (path) {
@@ -51,11 +52,6 @@ export default class Compiler {
         'You ran Wemix twice. Each instance only supports a single concurrent compilation at a time.'
       )
     }
-    // const resolve = this.resolverFactory.get('normal', {})
-    // resolve.resolve({}, process.cwd(), './src/app.js', {}, (err, file) => {
-    //   if (err) console.log(err)
-    //   console.log('...', file)
-    // })
 
     const finalCallback = err => {
       this.running = false

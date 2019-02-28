@@ -3,14 +3,11 @@
   "name": "{{name}}",
   "version": "0.0.1",
   "description": "{{description}}",
-  "main": "dist/app.js",
   "scripts": {
     {{#lint}}
     "precommit": "lint-staged",
     {{/lint}}
-    "local": "./node_modules/.bin/wemix build --env=development --watch",
-    "dev": "./node_modules/.bin/wemix build --env=development",
-    "prod": "./node_modules/.bin/wemix build --env production"
+    "dev": "./node_modules/.bin/wemix build --config wemix.config.js --watch"
   },
   {{#lint}}
   "lint-staged": {

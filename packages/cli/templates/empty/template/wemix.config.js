@@ -1,94 +1,61 @@
-const npath = require('path')
-const postcssPresetEnv = require('postcss-preset-env')
-const cssnano = require('cssnano')
-const prod = process.env.NODE_ENV === 'production'
-
-const babel = {
-  presets: [
-    [
-      '@babel/preset-env',
-      {
-        debug: true,
-        targets: {
-          chrome: '35',
-          ios: '8',
-          android: '4.1',
-          browsers: [
-            'Chrome >= 35',
-            'ChromeAndroid >= 35',
-            'iOS >= 8',
-            'Android >= 4.1',
-          ],
-        },
-        useBuiltIns: 'usage',
-        modules: 'commonjs',
-      },
-    ],
-  ],
-  plugins: [
-  ],
-}
-
-const less = {}
-
-const postcss = {
-  plugins: [
-    postcssPresetEnv({
-      stage: 0,
-      browsers: [
-        'Chrome >= 35',
-        'ChromeAndroid >= 35',
-        'iOS >= 8',
-        'Android >= 4.1',
-      ],
-    }),
-  ],
-}
-
-let plugins = []
-
-if (prod) {
-  plugins = Object.assign(plugins, {
-    uglifyjs: {
-      filter: /\.js$/,
-      config: {},
-    },
-    imagemin: {
-      filter: /\.(jpg|png|jpeg)$/,
-      config: {
-        jpg: {
-          quality: 80,
-        },
-        png: {
-          quality: 80,
-        },
-      },
-    },
-  })
-  postcss.plugins.push(cssnano({
-    preset: 'default',
-    autoprefixer: false,
-    reduceIdents: false,
-    'postcss-zindex': false,
-  }))
-}
+const path = require('path')
+const WechatPlugin = require('@wemix/wechat-plugin').default
 
 module.exports = {
-  static: 'assets',
+  entryDir: path.join(__dirname, 'src'),
+  outputDir: path.join(__dirname, 'dist'),
   resolve: {
     alias: {
-      pages: npath.join(__dirname, 'src/pages'),
-      components: npath.join(__dirname, 'src/components'),
-      assets: npath.join(__dirname, 'src/assets'),
-      utils: npath.join(__dirname, 'src/utils'),
+      pages: path.join(__dirname, 'src/pages'),
+      components: path.join(__dirname, 'src/components'),
+      assets: path.join(__dirname, 'src/assets'),
+      utils: path.join(__dirname, 'src/utils'),
     },
-    extensions: ['.js', '.json'],
-    modules: ['node_modules'],
   },
-  compilers: {
-    less: less,
-    postcss: postcss,
-    babel: babel,
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        encoding: 'utf-8',
+        include: [
+          path.resolve(__dirname, 'node_modules/@rematch/core'),
+          path.resolve(__dirname, 'node_modules/@rematch/loading'),
+          path.resolve(__dirname, 'src'),
+        ],
+        use: [
+          {
+            loader: '@wemix/babel-loader',
+            options: {
+              configFile: path.resolve('babel.config.js'),
+            },
+          },
+        ],
+      },
+      {
+        test: /\.less$/,
+        encoding: 'utf-8',
+        use: [
+          { loader: '@wemix/css-loader' },
+          {
+            loader: '@wemix/postcss-loader',
+            options: {
+              configFile: path.resolve('postcss.config.js'),
+            },
+          },
+          { loader: '@wemix/less-loader' },
+        ],
+      },
+      {
+        test: /\.html/,
+        encoding: 'utf-8',
+      },
+      {
+        test: /\.json/,
+        encoding: 'utf-8',
+      },
+    ],
   },
-  plugins: plugins,
+  plugins: [
+    new WechatPlugin(),
+  ],
 }

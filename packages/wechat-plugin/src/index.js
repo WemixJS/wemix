@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-02-28 18:03:18
+ * @LastEditTime: 2019-02-28 18:50:39
  */
 
 import fs from 'fs-extra'
@@ -119,6 +119,24 @@ export default class WechatPlugin {
   apply (compiler) {
     // 拆分原文件为微信小程序支持的文件，遍历compilation.waitCompile到compilation.modules
     // 遍历compilation.modules,执行beforeSingleCompile singleCompile AfterSingleCompile
+    compiler.hooks.beforeRun.tapAsync('RemoveDistPlugin', callback => {
+      // 清空dist目录
+      const distPath = `${npath.join(
+        compiler.options.outputDir,
+        'project.config.json'
+      )}`
+      if (fs.existsSync(distPath)) {
+        compiler.distConfig = fs.readFileSync(distPath, 'utf-8')
+      }
+      try {
+        fs.emptyDirSync(compiler.options.outputDir)
+      } catch (err) {
+        compiler.logger.error(err.stack || err)
+        process.exit(1)
+      }
+
+      callback()
+    })
     compiler.hooks.compile.tapAsync(
       'WechatCompilePlugin',
       (compilation, callback) => {
@@ -149,6 +167,11 @@ export default class WechatPlugin {
                   data = fs.readFileSync(oriPath, rule.encoding)
                 } else {
                   data = fs.readFileSync(oriPath)
+                }
+                if (oriPath === configPath && compiler.distConfig) {
+                  data = JSON.parse(data)
+                  const distConfig = JSON.parse(compiler.distConfig)
+                  data = JSON.stringify(Object.assign(distConfig, data))
                 }
                 this.splitData(
                   compiler,
@@ -241,12 +264,6 @@ export default class WechatPlugin {
     compiler.hooks.emit.tapAsync(
       'WechatEmitPlugin',
       (compilation, callback) => {
-        // 清空dist目录
-        try {
-          fs.emptyDirSync(compiler.options.outputDir)
-        } catch (err) {
-          return compiler.logger.error(err.stack || err)
-        }
         const promiseModuleCompile = []
         const writeData = (distPath, data) => {
           return fs.outputFile(distPath, data)
