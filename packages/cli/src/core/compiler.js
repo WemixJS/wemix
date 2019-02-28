@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-02-27 12:08:22
+ * @LastEditTime: 2019-02-27 19:05:23
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -73,8 +73,9 @@ export default class Compiler {
       this.hooks.emit.callAsync(compilation, err => {
         if (err) return finalCallback(err)
         this.hooks.done.callAsync(err => {
-          this.logger.success('写入成功')
           if (err) return finalCallback(err)
+          this.logger.success('写入成功')
+          this.running = false
           return finalCallback(null)
         })
       })
@@ -94,10 +95,7 @@ export default class Compiler {
     // this.compile('有值才执行', onCompiled)
   }
   compile (modifiedFiles, callback) {
-    let compilation
-    if (!compilation || (compilation && compilation.writed)) {
-      compilation = new Compilation(this, modifiedFiles)
-    }
+    const compilation = new Compilation(this, modifiedFiles)
     this.hooks.beforeCompile.callAsync(compilation, err => {
       if (err) return callback(err, compilation)
       this.logger.start('开始编译')

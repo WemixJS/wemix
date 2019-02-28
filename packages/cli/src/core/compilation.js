@@ -2,7 +2,7 @@
  * @Description: Compilation
  * @LastEditors: sanshao
  * @Date: 2019-02-20 19:00:43
- * @LastEditTime: 2019-02-27 09:59:59
+ * @LastEditTime: 2019-02-27 19:05:10
  */
 import npath from 'path'
 import { getFiles } from '../utils'
@@ -23,7 +23,6 @@ export default class Compilation {
       })
       this.waitCompile = waitCompile
     }
-    this.compiler = compiler
     this.modules = {}
   }
 }
