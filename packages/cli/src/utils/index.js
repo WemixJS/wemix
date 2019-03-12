@@ -62,6 +62,32 @@ export const getFiles = function (dir = process.cwd(), prefix = '') {
 }
 
 /**
+ * @description: 获取目录下所有文件夹路径列表
+ */
+export const getDirectories = function (dir = process.cwd(), prefix = '') {
+  dir = npath.normalize(dir)
+  if (!fs.existsSync(dir)) {
+    return []
+  }
+  let files = fs.readdirSync(dir)
+  let rst = []
+  files.forEach(item => {
+    let filepath = dir + npath.sep + item
+    let stat = fs.statSync(filepath)
+    if (stat.isDirectory()) {
+      rst.push(filepath)
+      rst = rst.concat(
+        getDirectories(
+          npath.normalize(dir + npath.sep + item),
+          npath.normalize(prefix + item + npath.sep)
+        )
+      )
+    }
+  })
+  return rst
+}
+
+/**
  * @description: process exec
  */
 export const exec = function (cmd, quite) {

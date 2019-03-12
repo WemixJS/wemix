@@ -6,10 +6,13 @@
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
+import Watchpack from 'watchpack'
+import fs from 'fs-extra'
 
 import ResolverFactory from './resolverFactory'
 import logger from '../utils/logger'
 import Compilation from './compilation'
+import { getDirectories } from '../utils'
 
 export default class Compiler {
   constructor () {
@@ -35,6 +38,9 @@ export default class Compiler {
     this.running = false
     this.distConfig = null
     this.resolverFactory = new ResolverFactory()
+    this.wp = new Watchpack({
+      aggregateTimeout: 0,
+    })
   }
   getRule (path) {
     const rules = this.options.module.rules
@@ -47,6 +53,15 @@ export default class Compiler {
     }
     return rule
   }
+  finalCallback (err, callback) {
+    this.running = false
+
+    if (err) {
+      this.hooks.failed.callAsync(err)
+    }
+
+    return callback(err)
+  }
   run (callback) {
     if (this.running) {
       return callback(
@@ -54,33 +69,23 @@ export default class Compiler {
       )
     }
 
-    const finalCallback = err => {
-      this.running = false
-
-      if (err) {
-        this.hooks.failed.callAsync(err)
-      }
-
-      return callback(err)
-    }
-
     const onCompiled = (err, compilation) => {
-      if (err) return finalCallback(err)
+      if (err) return this.finalCallback(err, callback)
       this.logger.start('开始写入')
       this.hooks.emit.callAsync(compilation, err => {
-        if (err) return finalCallback(err)
+        if (err) return this.finalCallback(err, callback)
         this.hooks.done.callAsync(err => {
-          if (err) return finalCallback(err)
+          if (err) return this.finalCallback(err, callback)
           this.logger.success('写入成功')
           this.running = false
-          return finalCallback(null)
+          return this.finalCallback(null, callback)
         })
       })
     }
 
     this.running = true
     this.hooks.beforeRun.callAsync(err => {
-      if (err) return finalCallback(err)
+      if (err) return this.finalCallback(err, callback)
 
       this.hooks.run.callAsync(err => {
         if (err) return finalCallback(err)
@@ -88,8 +93,38 @@ export default class Compiler {
       })
     })
   }
-  watch () {
-    // this.compile('有值才执行', onCompiled)
+  watch (options, callback) {
+    const onCompiled = (err, compilation) => {
+      if (err) return this.finalCallback(err, callback)
+      this.logger.start('开始写入')
+      this.hooks.emit.callAsync(compilation, err => {
+        if (err) return this.finalCallback(err, callback)
+        this.hooks.done.callAsync(err => {
+          if (err) return this.finalCallback(err, callback)
+          this.logger.success('写入成功')
+          this.running = false
+          return this.finalCallback(null, callback)
+        })
+      })
+    }
+    const subDirs = getDirectories(this.options.entryDir)
+    const allDirs = [this.options.entryDir].concat(subDirs)
+    this.run(() => {
+      this.wp.watch([], allDirs, Date.now())
+      this.wp.on('change', (filePath, mtime) => {
+        if (mtime) {
+          if (!this.running) {
+            this.compile([filePath], onCompiled)
+          }
+        } else {
+          const distPath = filePath.replace(
+            this.options.entryDir,
+            this.options.outputDir
+          )
+          fs.remove(distPath)
+        }
+      })
+    })
   }
   compile (modifiedFiles, callback) {
     const compilation = new Compilation(this, modifiedFiles)
