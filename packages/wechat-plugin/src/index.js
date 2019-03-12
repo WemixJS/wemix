@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-12 10:32:34
+ * @LastEditTime: 2019-03-12 14:19:09
  */
 
 import fs from 'fs-extra'
@@ -45,7 +45,7 @@ export default class WechatPlugin {
             distPath,
             data
           )
-          if (compiler.options.mixs.test(distPath)) {
+          if (compiler.options.mixs && compiler.options.mixs.test(distPath)) {
             distPath = distPath.replace(pathParse.ext, '.wxs')
           }
           break
@@ -55,7 +55,7 @@ export default class WechatPlugin {
         case '.less':
         case '.sass':
         case '.scss':
-        case '.stylus':
+        case '.styl':
           distPath = distPath.replace(pathParse.ext, '.wxss')
           break
       }
@@ -71,6 +71,7 @@ export default class WechatPlugin {
   }
   // 递归遍历所有引用文件
   loopCompile (waitCompile, compiler, compilation, callback) {
+    const nextWaitCompile = {}
     const promiseWaitCompile = []
     // 待编译文件进行拆分
     for (const oriPath in waitCompile) {
@@ -86,6 +87,7 @@ export default class WechatPlugin {
       .then(() => {
         const promiseModuleCompile = []
         const compileData = (oriPath, module) => {
+          // ast 获取引用的路径
           return new Promise((resolve, reject) => {
             compiler.hooks.beforeSingleCompile.callAsync(
               module.origin,
@@ -129,7 +131,11 @@ export default class WechatPlugin {
         return Promise.all(promiseModuleCompile)
       })
       .then(() => {
-        callback()
+        if (Object.keys(nextWaitCompile).length) {
+          this.loopCompile(waitCompile, compiler, compilation, callback)
+        } else {
+          callback()
+        }
       })
       .catch(err => {
         compiler.logger.error(err.stack || err)

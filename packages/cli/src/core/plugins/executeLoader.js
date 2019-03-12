@@ -2,26 +2,29 @@
  * @Description: ExecuteLoader Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-12 10:22:59
+ * @LastEditTime: 2019-03-12 14:16:13
  */
 
 export default class ExecuteLoaderPlugin {
-  callAsync (list, originPath, data, compiler, done) {
+  callAsync (rule, originPath, data, compiler, done) {
     let index = 0
     function next (err, data) {
-      if (index >= list.length) return done(null, data)
+      if (index >= rule.use.length) return done(null, data)
       if (err) return done(err)
       try {
         const resolve = compiler.resolverFactory.get('normal', {})
         resolve.resolve(
           {},
           process.cwd(),
-          list[index].loader,
+          rule.use[index].loader,
           {},
           (err, file) => {
             if (err) throw err
             const fn = require(file).default
-            fn(data, list[index++].options, originPath, next)
+            const config = Object.assign({}, rule)
+            delete config.use
+            config.options = rule.use[index++].options
+            fn(data, config, originPath, next)
           }
         )
       } catch (err) {
@@ -37,8 +40,7 @@ export default class ExecuteLoaderPlugin {
       'LoaderCompilePlugin',
       (data, rule, originPath, callback) => {
         if (rule && rule.use && rule.use.length) {
-          rule.use = rule.use.reverse()
-          this.callAsync(rule.use, originPath, data, compiler, callback)
+          this.callAsync(rule, originPath, data, compiler, callback)
         } else {
           callback(null, data)
         }
