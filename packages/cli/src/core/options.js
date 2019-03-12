@@ -2,7 +2,7 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-02-28 19:33:20
+ * @LastEditTime: 2019-03-12 14:23:34
  */
 
 import fs from 'fs-extra'
@@ -22,7 +22,7 @@ const DEFAULT_OPTIONS = {
 
 const DEFAULT_CONFIG = npath.resolve('wemix.config.js')
 
-function check(t, val) {
+function check (t, val) {
   if (Array.isArray(t)) {
     return t.some(type => check(type, val))
   }
@@ -103,7 +103,8 @@ export const parse = function (
 
 export const convert = function (args) {
   const exitDefaultCfg = fs.existsSync(DEFAULT_CONFIG)
-  const exitAppointCfg = args.config && fs.existsSync(npath.join(process.cwd(), args.config))
+  const exitAppointCfg =
+    args.config && fs.existsSync(npath.resolve(process.cwd(), args.config))
   if (!exitDefaultCfg && !exitAppointCfg) {
     throw `No configuration file found in the current directory.` // eslint-disable-line
   }
@@ -113,7 +114,7 @@ export const convert = function (args) {
     opt = require(DEFAULT_CONFIG)
   }
   if (exitAppointCfg) {
-    opt = require(npath.join(process.cwd(), args.config))
+    opt = require(npath.resolve(process.cwd(), args.config))
   }
 
   const argOpt = parse(args, DEFAULT_OPTIONS, true)
