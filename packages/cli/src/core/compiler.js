@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-03-12 10:13:30
+ * @LastEditTime: 2019-03-12 16:39:38
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -88,7 +88,7 @@ export default class Compiler {
       if (err) return this.finalCallback(err, callback)
 
       this.hooks.run.callAsync(err => {
-        if (err) return finalCallback(err)
+        if (err) return this.finalCallback(err)
         this.compile(null, onCompiled, true)
       })
     })

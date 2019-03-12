@@ -2,11 +2,14 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-12 15:40:56
+ * @LastEditTime: 2019-03-18 13:20:02
  */
 
 import fs from 'fs-extra'
 import npath from 'path'
+import { parse } from '@babel/parser'
+import traverse from '@babel/traverse'
+import generator from '@babel/generator'
 
 export default class WechatPlugin {
   splitFile (oriPath, compiler, waitCompile) {
@@ -69,79 +72,6 @@ export default class WechatPlugin {
       resolve()
     })
   }
-  // 递归遍历所有引用文件
-  loopCompile (waitCompile, compiler, compilation, callback) {
-    compilation.waitCompile = {}
-    const promiseWaitCompile = []
-    // 待编译文件进行拆分
-    for (const oriPath in waitCompile) {
-      if (compilation.modifiedFileMTime(oriPath)) {
-        promiseWaitCompile.push(this.splitFile(oriPath, compiler, waitCompile))
-      }
-    }
-    if (promiseWaitCompile.length === 0) {
-      compiler.logger.info('无待编译文件')
-      return
-    }
-    Promise.all(promiseWaitCompile)
-      .then(() => {
-        const promiseModuleCompile = []
-        const compileData = (oriPath, module) => {
-          return new Promise((resolve, reject) => {
-            compiler.hooks.beforeSingleCompile.callAsync(
-              module.origin,
-              oriPath,
-              (err, rdata) => {
-                if (err) {
-                  return reject(err)
-                }
-                compiler.hooks.singleCompile.callAsync(
-                  rdata,
-                  module.rule,
-                  oriPath,
-                  (err, rdata) => {
-                    if (err) {
-                      return reject(err)
-                    }
-                    if (/\.js$/.test(oriPath)) {
-                      this.getNpmPath(rdata, compilation)
-                    }
-                    compiler.hooks.afterSingleCompile.callAsync(
-                      rdata,
-                      oriPath,
-                      (err, rdata) => {
-                        if (err) {
-                          return reject(err)
-                        } else {
-                          compilation.modules.normal[module.distPath] = rdata
-                          return resolve()
-                        }
-                      }
-                    )
-                  }
-                )
-              }
-            )
-          })
-        }
-        // 拆分后文件进行编译
-        for (const oriPath in waitCompile) {
-          promiseModuleCompile.push(compileData(oriPath, waitCompile[oriPath]))
-        }
-        return Promise.all(promiseModuleCompile)
-      })
-      .then(() => {
-        if (Object.keys(compilation.waitCompile).length) {
-          const waitCompile = Object.assign(compilation.waitCompile)
-          this.loopCompile(waitCompile, compiler, compilation, callback)
-        } else {
-          callback()
-        }
-      })
-      .catch(err => {
-        compiler.logger.error(err.stack || err)
-      })
-  }
   // json config 文件拆分
   splitConfig (compiler, waitCompile, oriPath, distPath, data) {
     distPath = distPath.replace('.js', '.json')
@@ -182,6 +112,75 @@ export default class WechatPlugin {
       return type
     }
   }
+  // 递归遍历所有引用文件
+  loopCompile (waitCompile, compiler, compilation, callback) {
+    compilation.waitCompile = {}
+    const promiseWaitCompile = []
+    // 待编译文件进行拆分
+    for (const oriPath in waitCompile) {
+      if (compilation.modifiedFileMTime(oriPath)) {
+        promiseWaitCompile.push(this.splitFile(oriPath, compiler, waitCompile))
+      }
+    }
+    if (promiseWaitCompile.length === 0) {
+      compiler.logger.info('无待编译文件')
+      return
+    }
+    Promise.all(promiseWaitCompile)
+      .then(() => {
+        const promiseModuleCompile = []
+        const compileData = (oriPath, module) => {
+          return new Promise((resolve, reject) => {
+            compiler.hooks.beforeSingleCompile.callAsync(
+              module.origin,
+              oriPath,
+              (err, rdata) => {
+                if (err) return reject(err)
+                compiler.hooks.singleCompile.callAsync(
+                  rdata,
+                  module.rule,
+                  oriPath,
+                  (err, rdata) => {
+                    if (err) return reject(err)
+                    compiler.hooks.afterSingleCompile.callAsync(
+                      rdata,
+                      oriPath,
+                      (err, rdata) => {
+                        if (err) return reject(err)
+                        rdata = this.matchWechatData(
+                          rdata,
+                          oriPath,
+                          compiler,
+                          compilation
+                        )
+                        compilation.modules.normal[module.distPath] = rdata
+                        return resolve()
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          })
+        }
+        // 拆分后文件进行编译
+        for (const oriPath in waitCompile) {
+          promiseModuleCompile.push(compileData(oriPath, waitCompile[oriPath]))
+        }
+        return Promise.all(promiseModuleCompile)
+      })
+      .then(() => {
+        if (Object.keys(compilation.waitCompile).length) {
+          const waitCompile = Object.assign(compilation.waitCompile)
+          this.loopCompile(waitCompile, compiler, compilation, callback)
+        } else {
+          callback()
+        }
+      })
+      .catch(err => {
+        compiler.logger.error(err.stack || err)
+      })
+  }
   apply (compiler) {
     // 拆分原文件为微信小程序支持的文件，遍历compilation.waitCompile到compilation.modules
     // 遍历compilation.modules,执行beforeSingleCompile singleCompile AfterSingleCompile
@@ -209,14 +208,54 @@ export default class WechatPlugin {
         this.loopCompile(waitCompile, compiler, compilation, callback)
       }
     )
-    // compiler.hooks.afterSingleCompile.tapAsync(
-    //   'WechatHackPlugin',
-    //   (data, path, callback) => {}
-    // )
   }
-  getNpmPath (data, compilation) {
-    const match = data.match(/require\(['"]([\w\d_\-./@]+)['"]\)/g)
-    console.log(match)
+  matchWechatData (data, oriPath, compiler, compilation) {
+    const parseOriPath = npath.parse(oriPath)
+    switch (parseOriPath.ext) {
+      case '.js':
+        // const resolve = compiler.resolverFactory.get('normal', {})
+        const ast = parse(data)
+        // const normalPaths = []
+        // const npmPaths = []
+        const t = []
+        traverse(ast, {
+          enter (path) {
+            if (
+              path.node.type === 'CallExpression' &&
+              path.node.callee.name === 'require'
+            ) {
+              // let npmPath = path.node.arguments[0].value
+              t.push(path.node.arguments[0])
+              // if (npmPath[0] && npmPath[0] !== '.' && npmPath[0] !== '/') {
+              //   const func = function (params) {
+              //     return resolve.resolve({}, process.cwd(), npmPath, {})
+              //   }
+              //   npmPaths.push(func)
+              // } else {
+              //   // const resolve = compiler.resolverFactory.get('normal', {})
+              //   // console.log(await resolve.resolve({}, process.cwd(), npmPath, {}))
+              //   // if (compiler.options.mixs.test(oriPath)) {
+              //   //   npmPath = /\.js/.test(npmPath)
+              //   //     ? npmPath.replace('.js', '.wxs')
+              //   //     : npmPath + '.wxs'
+              //   // }
+              // }
+              // path.node.arguments[0].value = npmPath
+            }
+          },
+        })
+        console.log('....', t.length)
+        t.forEach(item => {
+          item.value = 'hhhhhhhh'
+        })
+        data = generator(ast, {}, data)
+        break
+      case '.less':
+        console.log('data:', data)
+        data = data && data.replace(/\.less/gi, '.wxss')
+        break
+    }
+    return data
   }
   grabConfigFromScript (str, n) {
     let stash = []

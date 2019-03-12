@@ -2,7 +2,7 @@
  * @Description: Resolver Factory
  * @LastEditors: sanshao
  * @Date: 2019-02-20 19:00:16
- * @LastEditTime: 2019-02-20 19:01:18
+ * @LastEditTime: 2019-03-12 18:24:03
  */
 
 import { ResolverFactory as Factory } from 'enhanced-resolve'
@@ -39,6 +39,15 @@ export default class ResolverFactory {
       return resolver
     }
     const newResolver = this._create(type, resolveOptions)
+    const resolveBak = newResolver.resolve.bind(newResolver)
+    newResolver.resolve = function (...args) {
+      return new Promise(function (resolve, reject) {
+        resolveBak(...args, (err, path) => {
+          if (err) reject(err)
+          resolve(path)
+        })
+      })
+    }
     typedCaches.direct.set(resolveOptions, newResolver)
     typedCaches.stringified.set(ident, newResolver)
     return newResolver

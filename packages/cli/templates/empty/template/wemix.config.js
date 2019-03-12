@@ -47,6 +47,13 @@ module.exports = {
         ],
       },
       {
+        test: /\.scss$/,
+        encoding: 'utf-8',
+        use: [
+          { loader: '@wemix/sass-loader' },
+        ],
+      },
+      {
         test: /\.html/,
         encoding: 'utf-8',
       },

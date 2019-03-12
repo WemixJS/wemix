@@ -2,7 +2,7 @@
  * @Description: ExecuteLoader Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-12 14:16:13
+ * @LastEditTime: 2019-03-12 18:30:49
  */
 
 export default class ExecuteLoaderPlugin {
@@ -11,26 +11,20 @@ export default class ExecuteLoaderPlugin {
     function next (err, data) {
       if (index >= rule.use.length) return done(null, data)
       if (err) return done(err)
-      try {
-        const resolve = compiler.resolverFactory.get('normal', {})
-        resolve.resolve(
-          {},
-          process.cwd(),
-          rule.use[index].loader,
-          {},
-          (err, file) => {
-            if (err) throw err
-            const fn = require(file).default
-            const config = Object.assign({}, rule)
-            delete config.use
-            config.options = rule.use[index++].options
-            fn(data, config, originPath, next)
-          }
-        )
-      } catch (err) {
-        compiler.logger.error(err.stack || err)
-        process.exit(1)
-      }
+      const resolve = compiler.resolverFactory.get('normal', {})
+      resolve
+        .resolve({}, process.cwd(), rule.use[index].loader, {})
+        .then(path => {
+          const fn = require(path).default
+          const config = Object.assign({}, rule)
+          delete config.use
+          config.options = rule.use[index++].options
+          fn(data, config, originPath, next)
+        })
+        .catch(err => {
+          compiler.logger.error(err.stack || err)
+          process.exit(1)
+        })
     }
     next(null, data)
   }

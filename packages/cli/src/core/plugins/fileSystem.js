@@ -2,12 +2,11 @@
  * @Description: FileSystem Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-02-28 18:44:23
+ * @LastEditTime: 2019-03-12 16:41:15
  */
 
 import CachedInputFileSystem from 'enhanced-resolve/lib/CachedInputFileSystem'
 import NodeJsInputFileSystem from 'enhanced-resolve/lib/NodeJsInputFileSystem'
-// import WatchFileSystem from './watchFileSystem'
 
 export default class FileSystemPlugin {
   apply (compiler) {
@@ -16,7 +15,6 @@ export default class FileSystemPlugin {
       60000
     )
     const inputFileSystem = compiler.inputFileSystem
-    // compiler.watchFileSystem = new WatchFileSystem(compiler.inputFileSystem)
     compiler.hooks.beforeRun.tapAsync('FileSystemPlugin', callback => {
       if (compiler.inputFileSystem === inputFileSystem) {
         inputFileSystem.purge()
