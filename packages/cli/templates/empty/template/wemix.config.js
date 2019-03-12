@@ -4,6 +4,7 @@ const WechatPlugin = require('@wemix/wechat-plugin').default
 module.exports = {
   entryDir: path.join(__dirname, 'src'),
   outputDir: path.join(__dirname, 'dist'),
+  mixs: /-mixs\.js$/,
   resolve: {
     alias: {
       pages: path.join(__dirname, 'src/pages'),

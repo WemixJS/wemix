@@ -2,7 +2,7 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-02-28 15:07:57
+ * @LastEditTime: 2019-02-28 19:33:20
  */
 
 import fs from 'fs-extra'
@@ -14,6 +14,7 @@ const DEFAULT_OPTIONS = {
   outputDir: { type: String, default: 'dist' },
   watch: { type: Boolean, default: false },
   progress: { type: Boolean, default: false },
+  mixs: { type: RegExp },
   resolve: { type: Object, default: {} },
   module: { type: Object },
   plugins: { type: Array, default: [] },

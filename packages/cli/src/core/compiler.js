@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-02-28 18:34:14
+ * @LastEditTime: 2019-03-12 10:13:30
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -22,15 +22,16 @@ export default class Compiler {
       run: new AsyncSeriesHook([]),
       beforeCompile: new AsyncSeriesHook(['compilation']),
       compile: new AsyncSeriesHook(['compilation']),
-      beforeSingleCompile: new AsyncSeriesWaterfallHook(['data']),
-      singleCompile: new AsyncSeriesWaterfallHook(['data', 'rule']),
-      afterSingleCompile: new AsyncSeriesWaterfallHook(['data']),
+      beforeSingleCompile: new AsyncSeriesWaterfallHook(['data', 'path']),
+      singleCompile: new AsyncSeriesWaterfallHook(['data', 'rule', 'path']),
+      afterSingleCompile: new AsyncSeriesWaterfallHook(['data', 'path']),
       afterCompile: new AsyncSeriesHook(['compilation']),
       emit: new AsyncSeriesHook(['compilation']),
       done: new AsyncSeriesHook([]),
       failed: new AsyncSeriesHook(['error']),
     }
     this.logger = logger
+    this.cache = {}
     this.running = false
     this.distConfig = null
     this.resolverFactory = new ResolverFactory()
@@ -90,7 +91,7 @@ export default class Compiler {
   watch () {
     // this.compile('有值才执行', onCompiled)
   }
-  compile (modifiedFiles, callback, first) {
+  compile (modifiedFiles, callback) {
     const compilation = new Compilation(this, modifiedFiles)
     this.hooks.beforeCompile.callAsync(compilation, err => {
       if (err) return callback(err, compilation)
