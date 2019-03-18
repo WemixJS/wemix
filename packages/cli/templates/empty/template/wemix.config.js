@@ -1,5 +1,7 @@
 const path = require('path')
 const WechatPlugin = require('@wemix/wechat-plugin').default
+const UglifyJsPlugin = require('@wemix/uglifyJs-plugin').default
+const UglifyImgPlugin = require('@wemix/uglifyImg-plugin').default
 
 module.exports = {
   entryDir: path.join(__dirname, 'src'),
@@ -65,5 +67,7 @@ module.exports = {
   },
   plugins: [
     new WechatPlugin(),
+    new UglifyJsPlugin(),
+    new UglifyImgPlugin(),
   ],
 }

@@ -13,7 +13,6 @@ import npath from 'path'
 function _compile (data, config, path, next) {
   let loaderOptions =
     (config.options && loaderUtils.getOptions({ query: config.options })) || {}
-
   // 支持sourceMap
   if (
     Object.prototype.hasOwnProperty.call(loaderOptions, 'sourceMap') &&
@@ -29,7 +28,7 @@ function _compile (data, config, path, next) {
     filename: path,
     sourceMaps:
       loaderOptions.sourceMaps === undefined
-        ? config.options.sourceMap
+        ? config.options && config.options.sourceMap
         : loaderOptions.sourceMaps,
     sourceFileName: path,
   })

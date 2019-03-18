@@ -28,7 +28,9 @@
   "homepage": "https://github.com/WemixJS/wemix#readme",
   "author": "sanshao",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@babel/polyfill": "^7.4.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",
