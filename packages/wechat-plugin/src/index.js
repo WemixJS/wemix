@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-18 13:20:02
+ * @LastEditTime: 2019-03-19 00:52:31
  */
 
 import fs from 'fs-extra'
@@ -28,6 +28,7 @@ export default class WechatPlugin {
         compiler.options.entryDir,
         compiler.options.outputDir
       )
+      distPath = distPath.replace('node_modules', 'dist/npm')
     }
     return new Promise((resolve, reject) => {
       let wtype
@@ -147,14 +148,22 @@ export default class WechatPlugin {
                       oriPath,
                       (err, rdata) => {
                         if (err) return reject(err)
-                        rdata = this.matchWechatData(
+                        this.matchWechatData(
                           rdata,
                           oriPath,
+                          module,
                           compiler,
                           compilation
                         )
-                        compilation.modules.normal[module.distPath] = rdata
-                        return resolve()
+                          .then(data => {
+                            if (/node_modules/.test(oriPath)) {
+                              compilation.modules.npm[module.distPath] = data
+                            } else {
+                              compilation.modules.normal[module.distPath] = data
+                            }
+                            resolve()
+                          })
+                          .catch(reject)
                       }
                     )
                   }
@@ -165,7 +174,11 @@ export default class WechatPlugin {
         }
         // 拆分后文件进行编译
         for (const oriPath in waitCompile) {
-          promiseModuleCompile.push(compileData(oriPath, waitCompile[oriPath]))
+          if (waitCompile[oriPath]) {
+            promiseModuleCompile.push(
+              compileData(oriPath, waitCompile[oriPath])
+            )
+          }
         }
         return Promise.all(promiseModuleCompile)
       })
@@ -185,7 +198,7 @@ export default class WechatPlugin {
     // 拆分原文件为微信小程序支持的文件，遍历compilation.waitCompile到compilation.modules
     // 遍历compilation.modules,执行beforeSingleCompile singleCompile AfterSingleCompile
     compiler.hooks.beforeRun.tapAsync('RemoveDistPlugin', callback => {
-      // 清空dist目录
+      // 拷贝project.config.json
       const distPath = `${npath.join(
         compiler.options.outputDir,
         'project.config.json'
@@ -194,7 +207,6 @@ export default class WechatPlugin {
         if (fs.existsSync(distPath)) {
           compiler.distConfig = fs.readFileSync(distPath, 'utf-8')
         }
-        fs.emptyDirSync(compiler.options.outputDir)
       } catch (err) {
         compiler.logger.error(err.stack || err)
         process.exit(1)
@@ -209,53 +221,87 @@ export default class WechatPlugin {
       }
     )
   }
-  matchWechatData (data, oriPath, compiler, compilation) {
-    const parseOriPath = npath.parse(oriPath)
-    switch (parseOriPath.ext) {
-      case '.js':
-        // const resolve = compiler.resolverFactory.get('normal', {})
-        const ast = parse(data)
-        // const normalPaths = []
-        // const npmPaths = []
-        const t = []
-        traverse(ast, {
-          enter (path) {
-            if (
-              path.node.type === 'CallExpression' &&
-              path.node.callee.name === 'require'
-            ) {
-              // let npmPath = path.node.arguments[0].value
-              t.push(path.node.arguments[0])
-              // if (npmPath[0] && npmPath[0] !== '.' && npmPath[0] !== '/') {
-              //   const func = function (params) {
-              //     return resolve.resolve({}, process.cwd(), npmPath, {})
-              //   }
-              //   npmPaths.push(func)
-              // } else {
-              //   // const resolve = compiler.resolverFactory.get('normal', {})
-              //   // console.log(await resolve.resolve({}, process.cwd(), npmPath, {}))
-              //   // if (compiler.options.mixs.test(oriPath)) {
-              //   //   npmPath = /\.js/.test(npmPath)
-              //   //     ? npmPath.replace('.js', '.wxs')
-              //   //     : npmPath + '.wxs'
-              //   // }
-              // }
-              // path.node.arguments[0].value = npmPath
-            }
-          },
-        })
-        console.log('....', t.length)
-        t.forEach(item => {
-          item.value = 'hhhhhhhh'
-        })
-        data = generator(ast, {}, data)
-        break
-      case '.less':
-        console.log('data:', data)
-        data = data && data.replace(/\.less/gi, '.wxss')
-        break
-    }
-    return data
+  matchWechatData (data, oriPath, module, compiler, compilation) {
+    return new Promise((resolve, reject) => {
+      const parseOriPath = npath.parse(oriPath)
+      switch (parseOriPath.ext) {
+        case '.js':
+          const resolver = compiler.resolverFactory.get('normal', {})
+          const ast = parse(data)
+          const importPaths = []
+          traverse(ast, {
+            enter (path) {
+              if (
+                path.node.type === 'CallExpression' &&
+                path.node.callee.name === 'require'
+              ) {
+                const func = function (params) {
+                  const requirePath = path.node.arguments[0].value
+                  let baseDir = parseOriPath.dir
+                  if (
+                    requirePath[0] &&
+                    requirePath[0] !== '.' &&
+                    requirePath[0] !== '/'
+                  ) {
+                    baseDir = process.cwd()
+                  }
+                  return new Promise((resolve, reject) => {
+                    resolver
+                      .resolve({}, baseDir, requirePath, {})
+                      .then(absPath => {
+                        resolve({
+                          node: path.node.arguments[0],
+                          path: absPath,
+                        })
+                      })
+                      .catch(reject)
+                  })
+                }
+                importPaths.push(func())
+              }
+            },
+          })
+
+          Promise.all(importPaths)
+            .then(searched => {
+              let toPath
+              searched.forEach(item => {
+                if (/node_modules/.test(item.path)) {
+                  toPath = item.path.replace('node_modules', 'dist/npm')
+                  if (!compilation.modules.npm[toPath]) {
+                    compilation.waitCompile[item.path] = null
+                  }
+                } else {
+                  toPath = item.path.replace(
+                    compiler.options.entryDir,
+                    compiler.options.outputDir
+                  )
+                }
+                toPath = npath.relative(npath.dirname(module.distPath), toPath)
+                if (compiler.options.mixs.test(oriPath)) {
+                  toPath = /\.js/.test(toPath)
+                    ? toPath.replace('.js', '.wxs')
+                    : toPath + '.wxs'
+                }
+                item.node.value = toPath
+              })
+              data = generator(ast, {}, data).code
+              if (/node_modules/.test(oriPath)) {
+                data = this.npmCodeHack(oriPath, data)
+              }
+              data = this.WechatInsHack(compiler, oriPath, data, module)
+              resolve(data)
+            })
+            .catch(reject)
+          break
+        case '.less':
+          data = data && data.replace(/\.less/gi, '.wxss')
+          resolve(data)
+          break
+        default:
+          resolve(data)
+      }
+    })
   }
   grabConfigFromScript (str, n) {
     let stash = []
@@ -276,5 +322,99 @@ export default class WechatPlugin {
       }
     }
     return rst
+  }
+  npmCodeHack (filePath, content) {
+    const basename = npath.basename(filePath)
+
+    switch (basename) {
+      case 'lodash.js':
+      case '_global.js':
+      case 'lodash.min.js':
+        content = content.replace(/Function\(['"]return this['"]\)\(\)/, 'this')
+        // 支付宝hack
+        // content = content.replace(/Function\(['"]return this['"]\)\(\)/, '{}')
+        break
+      case 'mobx.js':
+        // 解决支付宝小程序全局window或global不存在的问题
+        content = content.replace(
+          /typeof window\s{0,}!==\s{0,}['"]undefined['"]\s{0,}\?\s{0,}window\s{0,}:\s{0,}global/,
+          'typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {}'
+        )
+        break
+      case '_html.js':
+        content = 'module.exports = false;'
+        break
+      case '_microtask.js':
+        content = content.replace('if(Observer)', 'if(false && Observer)')
+        // IOS 1.10.2 Promise BUG
+        content = content.replace(
+          'Promise && Promise.resolve',
+          'false && Promise && Promise.resolve'
+        )
+        break
+      case '_freeGlobal.js':
+        content = content.replace(
+          'module.exports = freeGlobal;',
+          'module.exports = freeGlobal || this || global || {};'
+        )
+        break
+    }
+    // 支付宝hack
+    // if (content.replace(/\s\r\n/g, '').length <= 0) {
+    //   content = '// Empty file'
+    // }
+    return content
+  }
+  WechatInsHack (compiler, oriPath, content, module) {
+    if (
+      module.wtype === 'app' ||
+      module.wtype === 'page' ||
+      module.wtype === 'component'
+    ) {
+      let replace = ''
+      content = content.replace(
+        /exports\.default\s*=\s*((\w+);)/gi,
+        (m, b, defaultExport) => {
+          if (defaultExport === 'undefined') {
+            return ''
+          }
+          if (module.wtype === 'app') {
+            const vars = content.match(/\((.+?)\.default\.app\)/)[1]
+            replace = `\nApp(${vars}.default.$createApp(${defaultExport}));\n`
+          } else if (module.wtype === 'page') {
+            const pagePath = npath
+              .join(
+                npath.relative(compiler.options.entryDir, module.dir),
+                module.name
+              )
+              .replace(/\\/gi, '/')
+            const vars = content.match(/\((.+?)\.default\.page\)/)[1]
+            replace = `\nPage(${vars}.default.$createPage(${defaultExport} , '${pagePath}'));\n`
+          } else if (module.wtype === 'component') {
+            const pagePath = npath
+              .join(
+                npath.relative(compiler.options.entryDir, module.dir),
+                module.name
+              )
+              .replace(/\\/gi, '/')
+            const vars = content.match(/\((.+?)\.default\.component\)/)[1]
+            replace = `\nComponent(${vars}.default.$createComponent(${defaultExport} , '${pagePath}'));\n`
+          }
+          return ''
+        }
+      )
+      content += replace
+    }
+    /**
+     * 转换 foobar instanceof Function 为 typeof foobar ==='function'
+     * 由于微信重定义了全局的Function对象，所以moment等npm库会出现异常
+     */
+    content = content.replace(/([\w[\]a-d.]+)\s*instanceof Function/g, function (
+      matchs,
+      word
+    ) {
+      return ' typeof ' + word + " ==='function' "
+    })
+    return content
   }
 }
