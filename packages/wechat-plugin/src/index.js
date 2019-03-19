@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-19 11:47:26
+ * @LastEditTime: 2019-03-21 15:59:20
  */
 
 import fs from 'fs-extra'
@@ -232,7 +232,9 @@ export default class WechatPlugin {
             (/getApp\(\)/.test(data) || /getCurrentPages\(\)/.test(data))
           ) {
             compiler.logger.warn(
-              'getApp() or getCurrentPages() is not allowed to use'
+              ` Warnning in ${oriPath}
+                getApp() or getCurrentPages() is not allowed to use
+              `
             )
           }
           const ast = parse(data)

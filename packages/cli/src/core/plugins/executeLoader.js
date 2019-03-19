@@ -2,7 +2,7 @@
  * @Description: ExecuteLoader Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-12 18:30:49
+ * @LastEditTime: 2019-03-21 19:23:23
  */
 
 export default class ExecuteLoaderPlugin {
@@ -34,6 +34,7 @@ export default class ExecuteLoaderPlugin {
       'LoaderCompilePlugin',
       (data, rule, originPath, callback) => {
         if (rule && rule.use && rule.use.length) {
+          rule.use = rule.use.reverse()
           this.callAsync(rule, originPath, data, compiler, callback)
         } else {
           callback(null, data)
