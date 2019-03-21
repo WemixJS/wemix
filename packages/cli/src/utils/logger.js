@@ -2,7 +2,7 @@
  * @Description: 日志显示
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:49:29
- * @LastEditTime: 2019-02-27 10:19:43
+ * @LastEditTime: 2019-03-25 09:37:15
  */
 
 import winston from 'winston'
@@ -29,7 +29,13 @@ const myFormat = printf(info => {
   const keys = Object.keys(info)
   keys.forEach(item => {
     if (item !== 'level' && item !== 'label' && item !== 'timestamp') {
-      messages.push(JSON.stringify(info[item]).replace(/\\n\s*/g, '\n'))
+      messages.push(
+        JSON.stringify(info[item])
+          .replace(/\\n\s*/g, '\n')
+          .replace(/^['|"](.+?)['|"]$/, function (m, b) {
+            return b
+          })
+      )
     }
   })
   message = messages.join('\n')

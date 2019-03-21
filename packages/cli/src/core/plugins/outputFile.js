@@ -2,7 +2,7 @@
  * @Description: OutputFile Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-18 23:20:08
+ * @LastEditTime: 2019-03-26 10:29:28
  */
 import fs from 'fs-extra'
 
@@ -17,24 +17,19 @@ export default class OutputFilePlugin {
           return fs.outputFile(distPath, data)
         }
         try {
-          fs.emptyDirSync(compiler.options.outputDir)
+          fs.emptyDirSync(compiler.options.output)
         } catch (err) {
           compiler.logger.error(err.stack || err)
           process.exit(1)
         }
-        fs.emptyDir(compiler.options.outputDir, err => {
+        fs.emptyDir(compiler.options.output, err => {
           if (err) {
             compiler.logger.error(err.stack || err)
             process.exit(1)
           }
-          for (const distPath in compilation.modules.normal) {
+          for (const distPath in compilation.modules) {
             promiseModuleCompile.push(
-              writeData(distPath, compilation.modules.normal[distPath])
-            )
-          }
-          for (const distPath in compilation.modules.npm) {
-            promiseModuleCompile.push(
-              writeData(distPath, compilation.modules.npm[distPath])
+              writeData(distPath, compilation.modules[distPath])
             )
           }
           Promise.all(promiseModuleCompile)

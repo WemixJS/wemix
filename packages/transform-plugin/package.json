@@ -1,5 +1,5 @@
 {
-  "name": "@wemix/wechat-plugin",
+  "name": "@wemix/transform-plugin",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
@@ -19,6 +19,8 @@
     "@babel/parser": "^7.3.4",
     "@babel/polyfill": "^7.2.5",
     "@babel/traverse": "^7.3.4",
-    "fs-extra": "^7.0.1"
+    "@babel/types": "^7.4.0",
+    "fs-extra": "^7.0.1",
+    "htmlparser2": "^3.10.1"
   }
 }

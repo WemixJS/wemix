@@ -2,28 +2,27 @@
  * @Description: ExecuteLoader Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-21 19:23:23
+ * @LastEditTime: 2019-03-25 17:13:08
  */
 
 export default class ExecuteLoaderPlugin {
-  callAsync (rule, originPath, data, compiler, done) {
+  callAsync (loader, originPath, data, compiler, done) {
     let index = 0
     function next (err, data) {
-      if (index >= rule.use.length) return done(null, data)
       if (err) return done(err)
+      if (index >= loader.use.length) return done(null, data)
       const resolve = compiler.resolverFactory.get('normal', {})
       resolve
-        .resolve({}, process.cwd(), rule.use[index].loader, {})
+        .resolve({}, process.cwd(), loader.use[index].loader, {})
         .then(path => {
           const fn = require(path).default
-          const config = Object.assign({}, rule)
+          const config = Object.assign({}, loader)
           delete config.use
-          config.options = rule.use[index++].options
+          config.options = loader.use[index++].options
           fn(data, config, originPath, next)
         })
         .catch(err => {
-          compiler.logger.error(err.stack || err)
-          process.exit(1)
+          done(err)
         })
     }
     next(null, data)
@@ -32,10 +31,10 @@ export default class ExecuteLoaderPlugin {
     // 执行loader
     compiler.hooks.singleCompile.tapAsync(
       'LoaderCompilePlugin',
-      (data, rule, originPath, callback) => {
-        if (rule && rule.use && rule.use.length) {
-          rule.use = rule.use.reverse()
-          this.callAsync(rule, originPath, data, compiler, callback)
+      (data, loader, originPath, callback) => {
+        if (loader && loader.use && loader.use.length) {
+          loader.use = loader.use.reverse()
+          this.callAsync(loader, originPath, data, compiler, callback)
         } else {
           callback(null, data)
         }

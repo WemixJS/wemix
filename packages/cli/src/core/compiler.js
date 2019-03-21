@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-03-12 16:39:38
+ * @LastEditTime: 2019-03-26 10:03:50
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -42,16 +42,16 @@ export default class Compiler {
       aggregateTimeout: 0,
     })
   }
-  getRule (path) {
-    const rules = this.options.module.rules
-    let rule
-    for (let index = 0; index < rules.length; index++) {
-      if (rules[index].test.test(path)) {
-        rule = rules[index]
+  getLoader (path) {
+    const loaders = this.options.loaders
+    let loader
+    for (let index = 0; index < loaders.length; index++) {
+      if (loaders[index].test.test(path)) {
+        loader = loaders[index]
         break
       }
     }
-    return rule
+    return loader
   }
   finalCallback (err, callback) {
     this.running = false
@@ -107,8 +107,9 @@ export default class Compiler {
         })
       })
     }
-    const subDirs = getDirectories(this.options.entryDir)
-    const allDirs = [this.options.entryDir].concat(subDirs)
+    // const subDirs = getDirectories(this.options.entry)
+    // const allDirs = [this.options.entry].concat(subDirs)
+    const allDirs = []
     this.run(() => {
       this.wp.watch([], allDirs, Date.now())
       this.wp.on('change', (filePath, mtime) => {
@@ -118,8 +119,8 @@ export default class Compiler {
           }
         } else {
           const distPath = filePath.replace(
-            this.options.entryDir,
-            this.options.outputDir
+            this.options.entry,
+            this.options.output
           )
           fs.remove(distPath)
         }

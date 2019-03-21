@@ -1,0 +1,233 @@
+/*
+ * @Description: wechat plugin
+ * @LastEditors: sanshao
+ * @Date: 2019-02-26 15:07:03
+ * @LastEditTime: 2019-03-26 14:20:58
+ */
+
+import fs from 'fs-extra'
+import npath from 'path'
+import {
+  getEntryConfigPath,
+  getOutputConfigPath,
+  getOutputPath,
+  transformJs,
+  transformHtml,
+  mergeProjectConfig,
+} from './groupTransform'
+
+export default class TransformPlugin {
+  /**
+   * @description: 拆分json配置文件 html文件转译
+   * @param {type}
+   * @return:
+   */
+
+  splitFile (
+    rdata,
+    oriPath,
+    pathParse,
+    distPath,
+    compiler,
+    compilation,
+    resolve,
+    reject
+  ) {
+    switch (pathParse.ext) {
+      // 拆分json配置文件 如果是app page component则还得处理对应的样式文件及html文件
+      case '.js':
+        transformJs(rdata, oriPath, pathParse, distPath, compiler, compilation)
+          .then((data, wtype) => {
+            compilation.modules[distPath] = data
+            resolve()
+          })
+          .catch(reject)
+        break
+      // 转译成小程序支持的格式
+      case '.html':
+        transformHtml(
+          rdata,
+          oriPath,
+          pathParse,
+          distPath,
+          compiler,
+          compilation
+        )
+          .then(data => {
+            compilation.modules[distPath] = data
+            resolve()
+          })
+          .catch(reject)
+        break
+      case '.css':
+      case '.less':
+      case '.sass':
+      case '.scss':
+      case '.acss':
+      case '.styl':
+        transformStyle(
+          rdata,
+          oriPath,
+          pathParse,
+          distPath,
+          compiler,
+          compilation
+        )
+          .then(data => {
+            compilation.modules[distPath] = data
+            resolve()
+          })
+          .catch(reject)
+        break
+      default:
+        if (oriPath === this.configPath && compiler.distConfig) {
+          mergeProjectConfig(oriPath, compiler)
+            .then(data => {
+              compilation.modules[distPath] = data
+              resolve()
+            })
+            .catch(reject)
+        } else {
+          compilation.modules[distPath] = data
+          resolve()
+        }
+    }
+  }
+  /**
+   * @description: 开始编译文件
+   * @param {type}
+   * @return:
+   */
+  transform (loader, oriPath, pathParse, distPath, compiler, compilation) {
+    return new Promise((resolve, reject) => {
+      if (pathParse.ext === '.html' || loader) {
+        compiler.hooks.beforeSingleCompile.callAsync(
+          null,
+          oriPath,
+          (err, rdata) => {
+            if (err) return reject(err)
+            compiler.hooks.singleCompile.callAsync(
+              rdata,
+              loader,
+              oriPath,
+              (err, rdata) => {
+                if (err) return reject(err)
+                compiler.hooks.afterSingleCompile.callAsync(
+                  rdata,
+                  oriPath,
+                  (err, rdata) => {
+                    if (err) return reject(err)
+                    try {
+                      if (!rdata) {
+                        rdata = fs.readFileSync(oriPath, 'utf-8')
+                      }
+                      // js 处理config到json文件
+                      // js app component page 找对应的html less
+                      // js 处理引用
+                      // js 包裹App() Page() Component()
+                      // js 处理npm hack
+                      // less 处理引用
+                      // html 处理替换成小程序支持的格式
+                      this.splitFile(
+                        rdata,
+                        oriPath,
+                        pathParse,
+                        distPath,
+                        compiler,
+                        compilation,
+                        resolve,
+                        reject
+                      )
+                    } catch (err) {
+                      reject(err)
+                    }
+                  }
+                )
+              }
+            )
+          }
+        )
+      } else {
+        compilation.modules[distPath] = { path: oriPath }
+      }
+    })
+  }
+  /**
+   * @description: 递归遍历文件
+   * @param {type}
+   * @return:
+   */
+  loopCompile (waitCompile, compiler, compilation, callback) {
+    compilation.waitCompile = {}
+    const promiseCompile = []
+    for (const oriPath in waitCompile) {
+      // 获取目标文件路径
+      let distPath
+      if (oriPath === this.configPath) {
+        distPath = this.distConfigPath
+      } else {
+        distPath = getOutputPath(oriPath, compiler)
+      }
+      // 文件有变动并且之前未编译过则加入编译队列
+      if (
+        compilation.modifiedFileMTime(oriPath) &&
+        !compilation.modules[distPath]
+      ) {
+        const loader = compiler.getLoader(oriPath)
+        const pathParse = npath.parse(oriPath)
+        if (/\.(js|less|sass|scss|acss|styl)$/.test(pathParse.ext) && !loader) {
+          compiler.logger.error(`${pathParse.ext} loader not found!`)
+          process.exit(1)
+        }
+        promiseCompile.push(
+          this.transform(
+            loader,
+            oriPath,
+            pathParse,
+            distPath,
+            compiler,
+            compilation
+          )
+        )
+      }
+    }
+    if (promiseCompile.length === 0) {
+      callback()
+    } else {
+      Promise.all(promiseCompile)
+        .then(() => {
+          if (Object.keys(compilation.waitCompile).length) {
+            const waitCompile = Object.assign(compilation.waitCompile)
+            this.loopCompile(waitCompile, compiler, compilation, callback)
+          } else {
+            callback()
+          }
+        })
+        .catch(err => {
+          compiler.logger.error(err.stack || err)
+        })
+    }
+  }
+  apply (compiler) {
+    compiler.hooks.beforeRun.tapAsync('RemoveDistPlugin', callback => {
+      this.configPath = getEntryConfigPath(compiler)
+      this.distConfigPath = getOutputConfigPath(compiler)
+      try {
+        if (fs.existsSync(this.distConfigPath)) {
+          compiler.distConfig = fs.readFileSync(this.distConfigPath, 'utf-8')
+        }
+      } catch (err) {
+        compiler.logger.error(err.stack || err)
+        process.exit(1)
+      }
+      callback()
+    })
+    compiler.hooks.compile.tapAsync(
+      'TransformPlugin',
+      (compilation, callback) => {
+        const waitCompile = Object.assign(compilation.waitCompile)
+        this.loopCompile(waitCompile, compiler, compilation, callback)
+      }
+    )
+  }
+}

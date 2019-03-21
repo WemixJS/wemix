@@ -2,7 +2,7 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-03-12 14:23:34
+ * @LastEditTime: 2019-03-25 17:10:36
  */
 
 import fs from 'fs-extra'
@@ -10,13 +10,10 @@ import npath from 'path'
 import * as util from '../utils'
 
 const DEFAULT_OPTIONS = {
-  entryDir: { type: String, default: 'src' },
-  outputDir: { type: String, default: 'dist' },
+  entry: { type: Array, default: ['src/app.js', 'src/assets'] },
+  export: { type: String, default: 'wechat' },
   watch: { type: Boolean, default: false },
-  progress: { type: Boolean, default: false },
-  mixs: { type: RegExp },
-  resolve: { type: Object, default: {} },
-  module: { type: Object },
+  loaders: { type: Array, default: [] },
   plugins: { type: Array, default: [] },
 }
 
@@ -93,7 +90,9 @@ export const parse = function (
       }
     } else {
       if (!check(defaultItem.type, val)) {
-        throw `Unexpected type: ${k} expect a ${defaultItem.type.name}` // eslint-disable-line
+        throw new Error(
+          `Unexpected type: ${k} expect a ${defaultItem.type.name}`
+        ) // eslint-disable-line
       }
       setValue(ret, k, val)
     }
@@ -106,7 +105,7 @@ export const convert = function (args) {
   const exitAppointCfg =
     args.config && fs.existsSync(npath.resolve(process.cwd(), args.config))
   if (!exitDefaultCfg && !exitAppointCfg) {
-    throw `No configuration file found in the current directory.` // eslint-disable-line
+    throw new Error(`No configuration file found in the current directory.`) // eslint-disable-line
   }
 
   let opt
@@ -126,23 +125,50 @@ export const convert = function (args) {
   }
 
   const config = Object.assign({}, parse(opt), argOpt)
+  if (
+    !config.export ||
+    (config.export !== 'wechat' &&
+      config.export !== 'alipay' &&
+      config.export !== 'tt' &&
+      config.export !== 'swan')
+  ) {
+    throw new Error(
+      `No export type found. Add --export <wechat|alipay|tt|swan>`
+    ) // eslint-disable-line
+  }
 
   config.context = process.cwd()
-  config.entryDir = npath.resolve(config.context, config.entryDir)
-  config.outputDir = npath.resolve(config.context, config.outputDir)
-  if (config.module && config.rules) {
-    config.rules.forEach(rule => {
-      if (!util.isReg(rule.test)) {
-        throw `Unexpected type: module.rules.test expect a [object RegExp]` // eslint-disable-line
+  if (toString.call(config.entry) !== '[object Array]') {
+    config.entry = [config.entry]
+  }
+  config.entry = config.entry.map(item => {
+    if (/app\.js/.test(item)) {
+      config.dir = npath.resolve(config.context, item.replace('/app.js', ''))
+    }
+    return npath.resolve(config.context, item)
+  })
+  config.output = npath.resolve(config.context, config.export)
+  if (config.loaders) {
+    config.loaders.forEach(loader => {
+      if (!util.isReg(loader.test)) {
+        throw new Error(
+          `Unexpected type: module.rules.test expect a [object RegExp]`
+        ) // eslint-disable-line
       }
-      if (rule.include && !util.isArray(rule.include)) {
-        throw `Unexpected type: module.rules.include expect a [object Array]` // eslint-disable-line
+      if (loader.include && !util.isArray(loader.include)) {
+        throw new Error(
+          `Unexpected type: module.rules.include expect a [object Array]`
+        ) // eslint-disable-line
       }
-      if (rule.exclude && !util.isArray(rule.exclude)) {
-        throw `Unexpected type: module.rules.exclude expect a [object Array]` // eslint-disable-line
+      if (loader.exclude && !util.isArray(loader.exclude)) {
+        throw new Error(
+          `Unexpected type: module.rules.exclude expect a [object Array]`
+        ) // eslint-disable-line
       }
-      if (!util.isArray(rule.use)) {
-        throw `Unexpected type: module.rules.use expect a [object Array]` // eslint-disable-line
+      if (!util.isArray(loader.use)) {
+        throw new Error(
+          `Unexpected type: module.rules.use expect a [object Array]`
+        ) // eslint-disable-line
       }
     })
   }

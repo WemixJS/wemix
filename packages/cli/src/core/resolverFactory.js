@@ -2,7 +2,7 @@
  * @Description: Resolver Factory
  * @LastEditors: sanshao
  * @Date: 2019-02-20 19:00:16
- * @LastEditTime: 2019-03-12 18:24:03
+ * @LastEditTime: 2019-03-25 09:15:34
  */
 
 import { ResolverFactory as Factory } from 'enhanced-resolve'
@@ -60,7 +60,6 @@ export default class ResolverFactory {
     if (!resolver) {
       throw new Error('No resolver created')
     }
-    // resolver.resolve = sealResolve(resolver.resolve, resolver)
     const childCache = new Map()
     resolver.withOptions = options => {
       const cacheEntry = childCache.get(options)

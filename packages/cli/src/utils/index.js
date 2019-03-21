@@ -2,7 +2,7 @@
  * @Description: 工具方法
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:51:24
- * @LastEditTime: 2019-02-26 17:01:27
+ * @LastEditTime: 2019-03-25 10:01:48
  */
 
 import childProcess from 'child_process'

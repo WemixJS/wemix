@@ -2,7 +2,7 @@
  * @Description: 入口文件
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:36:23
- * @LastEditTime: 2019-02-21 17:07:24
+ * @LastEditTime: 2019-03-25 10:24:56
  */
 
 import program from 'commander'
@@ -26,15 +26,22 @@ program
     /^(empty|custom)$/i,
     'custom'
   )
+  .option(
+    '-e, --export <export>',
+    'Choose a type [wechat|alipay|tt|swan]',
+    /^(wechat|alipay|tt|swan)$/i
+  )
   .on('--help', () => {
     console.log()
     console.log('  Example:')
     console.log()
     console.log(chalk.gray('   # create a new project with a custom template'))
-    console.log('  $ wemix new <projectName> -t custom')
+    console.log(
+      '  $ wemix new <projectName> --template custom --export wechata'
+    )
     console.log()
     console.log(chalk.gray('   # create a new project with an empty template'))
-    console.log('  $ wemix new <projectName> -t empty')
+    console.log('  $ wemix new <projectName> --template empty --export wechat')
     console.log()
   })
 
@@ -42,9 +49,13 @@ program
   .command('build')
   .description('Compile')
   .action(build)
-  .option('--config <config>', 'Path to the config file')
-  .option('--entryDir <entryDir>', 'origin code dir')
-  .option('--outputDir <outputDir>', 'compiled code dir')
+  .option(
+    '-e, --export <export>',
+    'Choose a type [wechat|alipay|tt|swan]',
+    /^(wechat|alipay|tt|swan)$/i
+  )
+  .option('-c, --config <config>', 'Path to the config file')
+  .option('-i, --entry <entry>', 'origin code dir or files')
   .option('-w, --watch', 'Watch the filesystem for changes')
   .option('--progress', 'Print compilation progress in percentage')
   .on('--help', () => {
@@ -52,10 +63,14 @@ program
     console.log('  Example:')
     console.log()
     console.log(chalk.gray('   # build in local'))
-    console.log('  $ wemix build --config wemix.development.config.js')
+    console.log(
+      '  $ wemix build --watch --config wemix.development.config.js --export wechat'
+    )
     console.log()
     console.log(chalk.gray('   # 构建线上版本'))
-    console.log('  $ wemix build --config wemix.production.config.js ')
+    console.log(
+      '  $ wemix build --config wemix.production.config.js --export wechat '
+    )
     console.log()
   })
 
