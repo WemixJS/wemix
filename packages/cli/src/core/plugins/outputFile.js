@@ -2,9 +2,10 @@
  * @Description: OutputFile Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-26 10:29:28
+ * @LastEditTime: 2019-03-26 23:19:47
  */
 import fs from 'fs-extra'
+import npath from 'path'
 
 export default class OutputFilePlugin {
   apply (compiler) {
@@ -14,6 +15,11 @@ export default class OutputFilePlugin {
       (compilation, callback) => {
         const promiseModuleCompile = []
         const writeData = (distPath, data) => {
+          if (data && data.path) {
+            const dir = npath.parse(distPath).dir
+            fs.ensureDirSync(dir)
+            return fs.copyFileSync(data.path, distPath)
+          }
           return fs.outputFile(distPath, data)
         }
         try {

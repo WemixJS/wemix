@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-26 14:20:58
+ * @LastEditTime: 2019-03-27 12:01:16
  */
 
 import fs from 'fs-extra'
@@ -13,7 +13,9 @@ import {
   getOutputPath,
   transformJs,
   transformHtml,
+  transformStyle,
   mergeProjectConfig,
+  splitConfig,
 } from './groupTransform'
 
 export default class TransformPlugin {
@@ -22,28 +24,58 @@ export default class TransformPlugin {
    * @param {type}
    * @return:
    */
-
-  splitFile (
+  beforeSingleCompile (oriPath, pathParse, distPath, compiler, compilation) {
+    return new Promise((resolve, reject) => {
+      let rdata = fs.readFileSync(oriPath, 'utf-8') || ''
+      switch (pathParse.ext) {
+        // 拆分json配置文件 如果是app page component则还得处理对应的样式文件及html文件
+        case '.js':
+          splitConfig(
+            rdata,
+            oriPath,
+            pathParse,
+            distPath,
+            compiler,
+            compilation,
+            resolve,
+            reject
+          )
+          break
+        default:
+          if (oriPath === this.configPath && compiler.distConfig) {
+            mergeProjectConfig(oriPath, compiler, resolve, reject)
+          } else {
+            resolve({ data: rdata })
+          }
+      }
+    })
+  }
+  afterSingleCompile (
     rdata,
     oriPath,
     pathParse,
     distPath,
     compiler,
     compilation,
+    type,
     resolve,
     reject
   ) {
     switch (pathParse.ext) {
       // 拆分json配置文件 如果是app page component则还得处理对应的样式文件及html文件
       case '.js':
-        transformJs(rdata, oriPath, pathParse, distPath, compiler, compilation)
-          .then((data, wtype) => {
-            compilation.modules[distPath] = data
-            resolve()
-          })
-          .catch(reject)
+        transformJs(
+          rdata,
+          oriPath,
+          pathParse,
+          distPath,
+          compiler,
+          compilation,
+          type,
+          resolve,
+          reject
+        )
         break
-      // 转译成小程序支持的格式
       case '.html':
         transformHtml(
           rdata,
@@ -51,13 +83,10 @@ export default class TransformPlugin {
           pathParse,
           distPath,
           compiler,
-          compilation
+          compilation,
+          resolve,
+          reject
         )
-          .then(data => {
-            compilation.modules[distPath] = data
-            resolve()
-          })
-          .catch(reject)
         break
       case '.css':
       case '.less':
@@ -71,28 +100,17 @@ export default class TransformPlugin {
           pathParse,
           distPath,
           compiler,
-          compilation
+          compilation,
+          resolve,
+          reject
         )
-          .then(data => {
-            compilation.modules[distPath] = data
-            resolve()
-          })
-          .catch(reject)
         break
       default:
-        if (oriPath === this.configPath && compiler.distConfig) {
-          mergeProjectConfig(oriPath, compiler)
-            .then(data => {
-              compilation.modules[distPath] = data
-              resolve()
-            })
-            .catch(reject)
-        } else {
-          compilation.modules[distPath] = data
-          resolve()
-        }
+        compilation.modules[distPath] = data
+        resolve()
     }
   }
+
   /**
    * @description: 开始编译文件
    * @param {type}
@@ -101,54 +119,58 @@ export default class TransformPlugin {
   transform (loader, oriPath, pathParse, distPath, compiler, compilation) {
     return new Promise((resolve, reject) => {
       if (pathParse.ext === '.html' || loader) {
-        compiler.hooks.beforeSingleCompile.callAsync(
-          null,
+        // js 处理config到json文件
+        // js app component page 找对应的html less
+        // js 处理引用
+        // less 处理引用
+        // html 处理替换成小程序支持的格式
+        this.beforeSingleCompile(
           oriPath,
-          (err, rdata) => {
-            if (err) return reject(err)
-            compiler.hooks.singleCompile.callAsync(
-              rdata,
-              loader,
+          pathParse,
+          distPath,
+          compiler,
+          compilation
+        )
+          .then(result => {
+            let { data, type } = result
+            compiler.hooks.beforeSingleCompile.callAsync(
+              data,
               oriPath,
               (err, rdata) => {
                 if (err) return reject(err)
-                compiler.hooks.afterSingleCompile.callAsync(
+                compiler.hooks.singleCompile.callAsync(
                   rdata,
+                  loader,
                   oriPath,
                   (err, rdata) => {
                     if (err) return reject(err)
-                    try {
-                      if (!rdata) {
-                        rdata = fs.readFileSync(oriPath, 'utf-8')
+                    compiler.hooks.afterSingleCompile.callAsync(
+                      rdata,
+                      oriPath,
+                      (err, rdata) => {
+                        if (err) return reject(err)
+                        this.afterSingleCompile(
+                          rdata,
+                          oriPath,
+                          pathParse,
+                          distPath,
+                          compiler,
+                          compilation,
+                          type,
+                          resolve,
+                          reject
+                        )
                       }
-                      // js 处理config到json文件
-                      // js app component page 找对应的html less
-                      // js 处理引用
-                      // js 包裹App() Page() Component()
-                      // js 处理npm hack
-                      // less 处理引用
-                      // html 处理替换成小程序支持的格式
-                      this.splitFile(
-                        rdata,
-                        oriPath,
-                        pathParse,
-                        distPath,
-                        compiler,
-                        compilation,
-                        resolve,
-                        reject
-                      )
-                    } catch (err) {
-                      reject(err)
-                    }
+                    )
                   }
                 )
               }
             )
-          }
-        )
+          })
+          .catch(reject)
       } else {
         compilation.modules[distPath] = { path: oriPath }
+        resolve()
       }
     })
   }
@@ -196,6 +218,7 @@ export default class TransformPlugin {
     } else {
       Promise.all(promiseCompile)
         .then(() => {
+          console.log(compilation.waitCompile)
           if (Object.keys(compilation.waitCompile).length) {
             const waitCompile = Object.assign(compilation.waitCompile)
             this.loopCompile(waitCompile, compiler, compilation, callback)

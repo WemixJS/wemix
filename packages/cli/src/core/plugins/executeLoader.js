@@ -2,7 +2,7 @@
  * @Description: ExecuteLoader Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-25 17:13:08
+ * @LastEditTime: 2019-03-26 17:36:46
  */
 
 export default class ExecuteLoaderPlugin {
@@ -31,10 +31,10 @@ export default class ExecuteLoaderPlugin {
     // 执行loader
     compiler.hooks.singleCompile.tapAsync(
       'LoaderCompilePlugin',
-      (data, loader, originPath, callback) => {
+      (data, loader, path, callback) => {
         if (loader && loader.use && loader.use.length) {
           loader.use = loader.use.reverse()
-          this.callAsync(loader, originPath, data, compiler, callback)
+          this.callAsync(loader, path, data, compiler, callback)
         } else {
           callback(null, data)
         }

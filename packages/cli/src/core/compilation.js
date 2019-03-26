@@ -2,7 +2,7 @@
  * @Description: Compilation
  * @LastEditors: sanshao
  * @Date: 2019-02-20 19:00:43
- * @LastEditTime: 2019-03-26 10:26:41
+ * @LastEditTime: 2019-03-27 11:21:10
  */
 import npath from 'path'
 import fs from 'fs'
@@ -46,5 +46,47 @@ export default class Compilation {
     } else {
       return false
     }
+  }
+  getPages (pages) {
+    if (!pages || !pages.length) {
+      this.compiler.logger.error(`app.json pages 配置有误，缺少页面相关配置`)
+      return new Set()
+    }
+    return new Set(pages)
+  }
+  resolvePath (pathParse, item) {
+    let path = npath.resolve(pathParse.dir, item)
+    if (path[0] === '/') {
+      path = npath.join(this.compiler.options.dir, path)
+    }
+    return path
+  }
+  getRequirePath (baseDir, requirePath) {
+    const resolver = this.compiler.resolverFactory.get('normal', {})
+    return new Promise((resolve, reject) => {
+      resolver
+        .resolve({}, baseDir, requirePath, {})
+        .then(absPath => {
+          resolve(absPath)
+        })
+        .catch(reject)
+    })
+  }
+
+  getSubPackages (pages, subpackages) {
+    if (!subpackages || !subpackages.length) {
+      return pages
+    }
+    subpackages.forEach(item => {
+      if (item.pages && item.pages.length) {
+        const root = item.root
+        item.pages.forEach(page => {
+          let pagePath = `${root}/${page}`
+          pagePath = pagePath.replace(/\/{2,}/g, '/')
+          pages.add(pagePath)
+        })
+      }
+    })
+    return pages
   }
 }

@@ -2,7 +2,7 @@
  * @Description: babel-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-03-12 14:17:13
+ * @LastEditTime: 2019-03-27 10:17:45
  */
 
 import { transformSync, loadPartialConfig } from '@babel/core'
@@ -10,10 +10,9 @@ import loaderUtils from 'loader-utils'
 import npath from 'path'
 
 // 编译
-function _compile (data, config, path, next) {
+function _compile (data, loader, path, next) {
   let loaderOptions =
-    (config.options && loaderUtils.getOptions({ query: config.options })) || {}
-
+    (loader.options && loaderUtils.getOptions({ query: loader.options })) || {}
   // 支持sourceMap
   if (
     Object.prototype.hasOwnProperty.call(loaderOptions, 'sourceMap') &&
@@ -29,16 +28,16 @@ function _compile (data, config, path, next) {
     filename: path,
     sourceMaps:
       loaderOptions.sourceMaps === undefined
-        ? config.options.sourceMap
+        ? loader.options && loader.options.sourceMap
         : loaderOptions.sourceMaps,
     sourceFileName: path,
   })
 
   const cfg = loadPartialConfig(programmaticOptions)
-  if (config) {
-    config.options = cfg.options
+  if (loader) {
+    loader.options = cfg.options
   }
-  const result = transformSync(data, config.options)
+  const result = transformSync(data, loader.options)
   return result
 }
 
@@ -50,9 +49,12 @@ function _dealPath (path) {
   return npath.resolve(process.cwd(), path)
 }
 
-export default function (data, config, path, next) {
-  const includeType = _type(config.include)
-  const excludeType = _type(config.exclude)
+export default function (data, loader, path, next) {
+  if (!data) {
+    return next(null, data)
+  }
+  const includeType = _type(loader.include)
+  const excludeType = _type(loader.exclude)
   let [result, include, exclude, exitInclude, exitExclude] = [
     {},
     [],
@@ -60,21 +62,21 @@ export default function (data, config, path, next) {
     false,
     false,
   ]
-  if (config.include && includeType !== '[object Array]') {
-    include.push(config.include)
+  if (loader.include && includeType !== '[object Array]') {
+    include.push(loader.include)
   } else {
-    include = config.include || []
+    include = loader.include || []
   }
 
-  if (config.exclude && excludeType !== '[object Array]') {
-    exclude.push(config.exclude)
+  if (loader.exclude && excludeType !== '[object Array]') {
+    exclude.push(loader.exclude)
   } else {
-    exclude = config.exclude || []
+    exclude = loader.exclude || []
   }
 
   for (let i = 0; i < include.length; i++) {
     if (_type(include[i]) === '[object RegExp]') {
-      if (config.include.test(path)) {
+      if (loader.include.test(path)) {
         exitInclude = true
         break
       }
@@ -87,7 +89,7 @@ export default function (data, config, path, next) {
   }
 
   if (exitInclude) {
-    result = _compile(data, config, path, next)
+    result = _compile(data, loader, path, next)
     if (result) {
       return next(null, result.code)
     }
@@ -95,7 +97,7 @@ export default function (data, config, path, next) {
 
   for (let i = 0; i < exclude.length; i++) {
     if (_type(exclude[i]) === '[object RegExp]') {
-      if (config.exclude.test(path)) {
+      if (loader.exclude.test(path)) {
         exitExclude = true
         break
       }
@@ -108,7 +110,7 @@ export default function (data, config, path, next) {
   }
 
   if (!exitExclude && !exitInclude) {
-    result = _compile(data, config, path, next)
+    result = _compile(data, loader, path, next)
     if (result) {
       return next(null, result.code)
     }
