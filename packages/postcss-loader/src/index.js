@@ -59,6 +59,18 @@ export default function (data, config, path, next) {
         config.options
       )
 
+      // 官方文档中不建议使用
+      /*
+      In most cases options.from && options.to are set by the third-party which integrates this package (CLI, gulp, webpack).
+      It's unlikely one needs to set/use options.from && options.to within a config file.
+      */
+      if (options.to) {
+        delete config.options.to
+      }
+      if (options.from) {
+        delete config.options.from
+      }
+
       // Set PostCSS Parser
       if (typeof options.parser === 'string') {
         options.parser = require(options.parser)
@@ -72,18 +84,6 @@ export default function (data, config, path, next) {
       // Set PostCSS Stringifier
       if (typeof options.stringifier === 'string') {
         options.stringifier = require(options.stringifier)
-      }
-
-      // 官方文档中不建议使用
-      /*
-      In most cases options.from && options.to are set by the third-party which integrates this package (CLI, gulp, webpack).
-      It's unlikely one needs to set/use options.from && options.to within a config file.
-      */
-      if (options.to) {
-        delete options.to
-      }
-      if (options.from) {
-        delete options.from
       }
 
       postcss(plugins)
