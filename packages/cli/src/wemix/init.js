@@ -18,6 +18,8 @@ function install () {
   const dependencies = [
     '@wemix/core',
     '@wemix/wechat-plugin',
+    '@wemix/uglifyJs-plugin',
+    '@wemix/uglifyImg-plugin',
     '@wemix/babel-loader',
     '@wemix/css-loader',
     '@wemix/postcss-loader',

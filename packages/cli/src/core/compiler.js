@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-03-26 10:03:50
+ * @LastEditTime: 2019-03-26 17:37:38
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -26,7 +26,7 @@ export default class Compiler {
       beforeCompile: new AsyncSeriesHook(['compilation']),
       compile: new AsyncSeriesHook(['compilation']),
       beforeSingleCompile: new AsyncSeriesWaterfallHook(['data', 'path']),
-      singleCompile: new AsyncSeriesWaterfallHook(['data', 'rule', 'path']),
+      singleCompile: new AsyncSeriesWaterfallHook(['data', 'loader', 'path']),
       afterSingleCompile: new AsyncSeriesWaterfallHook(['data', 'path']),
       afterCompile: new AsyncSeriesHook(['compilation']),
       emit: new AsyncSeriesHook(['compilation']),
