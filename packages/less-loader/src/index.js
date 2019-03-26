@@ -118,32 +118,14 @@ const _promise = data => {
 
 // 处理import
 const _handleImport = (data, imports) => {
-  let hasImport = true
-  while (hasImport) {
-    let length = 0
-    if (~data.indexOf('@import') && ~data.indexOf('.less')) {
-      let _import = data.substring(
-        data.indexOf('@import'),
-        data.indexOf('.less') + 5
-      )
-      length = _import.length
-      let close = data.substr(data.indexOf('.less') + 5, 1)
-      if (close === "'" || close === '"') {
-        _import += close
-        length++
-        let end = data.substr(data.indexOf('.less') + 6, 1)
-        if (end === ';') {
-          length++
-          _import += end
-        }
-      }
-      data = data.substr(length + 1)
-      imports.push(_import)
-      return data
-    } else {
-      hasImport = false
-      return data
-    }
+  if (~data.indexOf('@import') && ~data.indexOf('.less')) {
+    data = data.replace(/@import.*?less['"];?/g, function (word) {
+      imports.push(word)
+      return ''
+    })
+    return data
+  } else {
+    return data
   }
 }
 
@@ -166,7 +148,6 @@ export default function (data, config, path, next) {
       delete config.options.file
       console.warn(chalk.red('Please use data to compile!'))
     }
-
     less
       .render(data, loaderOptions)
       .then(output => {
@@ -175,7 +156,7 @@ export default function (data, config, path, next) {
         next(null, output.css)
       })
       .catch(e => {
-        next(null, e)
+        next(e, null)
       })
   })
 }
