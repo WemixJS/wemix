@@ -2,7 +2,7 @@
  * @Description: postcss-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-03-27 10:19:11
+ * @LastEditTime: 2019-03-27 17:21:52
  */
 
 import loaderUtils from 'loader-utils'
@@ -22,8 +22,6 @@ export default function (data, loader, path, next) {
   let loaderOptions =
     (loader.options && loaderUtils.getOptions({ query: loader.options })) || {}
   validateOptions(optionConfig, loaderOptions, 'PostCSS Loader')
-
-  const file = path
 
   const sourceMap = loaderOptions.sourceMap
 
@@ -52,7 +50,7 @@ export default function (data, loader, path, next) {
 
       let options = Object.assign(
         {
-          from: file,
+          from: path,
           map: sourceMap
             ? sourceMap === 'inline'
               ? { inline: true, annotation: false }
