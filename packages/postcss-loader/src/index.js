@@ -2,7 +2,7 @@
  * @Description: postcss-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-03-27 17:21:52
+ * @LastEditTime: 2019-03-27 17:29:47
  */
 
 import loaderUtils from 'loader-utils'
@@ -88,7 +88,7 @@ export default function (data, loader, path, next) {
       }
 
       postcss(plugins)
-        .process(data, {})
+        .process(data, options)
         .then(result => {
           let { css } = result
 

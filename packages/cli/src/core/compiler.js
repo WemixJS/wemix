@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-03-26 17:37:38
+ * @LastEditTime: 2019-03-27 18:22:51
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -119,7 +119,7 @@ export default class Compiler {
           }
         } else {
           const distPath = filePath.replace(
-            this.options.entry,
+            this.options.dir,
             this.options.output
           )
           fs.remove(distPath)
