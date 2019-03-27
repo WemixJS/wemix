@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-27 16:19:42
+ * @LastEditTime: 2019-03-27 16:22:23
  */
 
 import fs from 'fs-extra'
@@ -218,6 +218,7 @@ export default class TransformPlugin {
     } else {
       Promise.all(promiseCompile)
         .then(() => {
+          console.log(compilation.waitCompile)
           if (Object.keys(compilation.waitCompile).length) {
             const waitCompile = Object.assign(compilation.waitCompile)
             this.loopCompile(waitCompile, compiler, compilation, callback)
