@@ -16,6 +16,7 @@
   "homepage": "https://github.com/WemixJS/wemix#readme",
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "pretty-data": "^0.40.0"
+    "html-minifier": "^3.5.21",
+    "json-fmt": "^1.1.2"
   }
 }
