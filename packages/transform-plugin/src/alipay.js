@@ -10,10 +10,6 @@ export default {
         content = content.replace(/Function\(['"]return this['"]\)\(\)/, '{}')
         break
     }
-    if (content.replace(/\s\r\n/g, '').length <= 0) {
-      content = '// Empty file'
-    }
     return content
   },
-  insHack (content, oriPath, compiler, type, pathParse) {},
 }

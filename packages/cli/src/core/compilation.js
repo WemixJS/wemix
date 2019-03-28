@@ -2,7 +2,7 @@
  * @Description: Compilation
  * @LastEditors: sanshao
  * @Date: 2019-02-20 19:00:43
- * @LastEditTime: 2019-03-27 11:21:10
+ * @LastEditTime: 2019-03-28 15:49:29
  */
 import npath from 'path'
 import fs from 'fs'
@@ -61,13 +61,13 @@ export default class Compilation {
     }
     return path
   }
-  getRequirePath (baseDir, requirePath) {
+  getRequirePath (baseDir, requirePath, astPath) {
     const resolver = this.compiler.resolverFactory.get('normal', {})
     return new Promise((resolve, reject) => {
       resolver
         .resolve({}, baseDir, requirePath, {})
         .then(absPath => {
-          resolve(absPath)
+          resolve({ absPath, astPath })
         })
         .catch(reject)
     })

@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-28 12:05:04
+ * @LastEditTime: 2019-03-28 16:38:15
  */
 
 import fs from 'fs-extra'
@@ -16,6 +16,7 @@ import {
   transformStyle,
   mergeProjectConfig,
   splitConfig,
+  addAdapterCore,
 } from './groupTransform'
 
 export default class TransformPlugin {
@@ -30,6 +31,9 @@ export default class TransformPlugin {
       switch (pathParse.ext) {
         // 拆分json配置文件 如果是app page component则还得处理对应的样式文件及html文件
         case '.js':
+          if (/@wemix\/core\/index\.js$/.test(oriPath)) {
+            rdata = addAdapterCore(compiler)
+          }
           splitConfig(
             rdata,
             oriPath,

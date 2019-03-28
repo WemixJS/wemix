@@ -32,46 +32,11 @@ export default {
     }
     return content
   },
-  insHack (content, oriPath, compiler, type, pathParse) {
-    if (type === 'app' || type === 'page' || type === 'component') {
-      let replace = ''
-      content = content.replace(
-        /exports\.default\s*=\s*((\w+);)/gi,
-        (m, b, defaultExport) => {
-          if (defaultExport === 'undefined') {
-            return ''
-          }
-          if (type === 'app') {
-            const vars = content.match(/\((.+?)\.default\.app\)/)[1]
-            replace = `\nApp(${vars}.default.$createApp(${defaultExport}));\n`
-          } else if (type === 'page') {
-            const pagePath = npath
-              .join(
-                npath.relative(compiler.options.dir, pathParse.dir),
-                pathParse.name
-              )
-              .replace(/\\/gi, '/')
-            const vars = content.match(/\((.+?)\.default\.page\)/)[1]
-            replace = `\nPage(${vars}.default.$createPage(${defaultExport} , '${pagePath}'));\n`
-          } else if (type === 'component') {
-            const pagePath = npath
-              .join(
-                npath.relative(compiler.options.dir, pathParse.dir),
-                pathParse.name
-              )
-              .replace(/\\/gi, '/')
-            const vars = content.match(/\((.+?)\.default\.component\)/)[1]
-            replace = `\nComponent(${vars}.default.$createComponent(${defaultExport} , '${pagePath}'));\n`
-          }
-          return ''
-        }
-      )
-      content += replace
-    }
-    /**
-     * 转换 foobar instanceof Function 为 typeof foobar ==='function'
-     * 由于微信重定义了全局的Function对象，所以moment等npm库会出现异常
-     */
+  /**
+   * 转换 foobar instanceof Function 为 typeof foobar ==='function'
+   * 由于微信重定义了全局的Function对象，所以moment等npm库会出现异常
+   */
+  insHack (content) {
     content = content.replace(/([\w[\]a-d.]+)\s*instanceof Function/g, function (
       matchs,
       word
@@ -118,67 +83,6 @@ export default {
     compilation.modules[distPath] = data
     resolve()
   },
-  // js 包裹App() Page() Component()
-  // js 处理npm hack
-  // js 处理引用
-  transformJs (
-    data,
-    oriPath,
-    pathParse,
-    distPath,
-    compiler,
-    compilation,
-    type,
-    resolve,
-    reject
-  ) {
-    const requirePaths = []
-    if (data) {
-      const ast = parse(data)
-      // 将引用的路径放入待编译池中
-      traverse(ast, {
-        CallExpression (astPath) {
-          if (
-            astPath.node &&
-            astPath.node.callee &&
-            astPath.node.callee.name === 'require' &&
-            astPath.node.arguments &&
-            astPath.node.arguments[0]
-          ) {
-            const requirePath = astPath.node.arguments[0].value
-            if (
-              requirePath[0] &&
-              requirePath[0] !== '.' &&
-              requirePath[0] !== '/'
-            ) {
-              requirePaths.push(
-                compilation.getRequirePath(process.cwd(), requirePath)
-              )
-            } else {
-              requirePaths.push(
-                compilation.getRequirePath(pathParse.dir, requirePath)
-              )
-            }
-          }
-        },
-      })
-    }
-    Promise.all(requirePaths)
-      .then(paths => {
-        paths.forEach(item => {
-          compilation.waitCompile[item] = null
-        })
-        if (/node_modules/.test(oriPath)) {
-          data = this.npmCodeHack(data, oriPath)
-        }
-        if (type === 'app' || type === 'page' || type === 'component') {
-          data = this.insHack(data, oriPath, compiler, type, pathParse)
-        }
-        compilation.modules[distPath] = data
-        resolve()
-      })
-      .catch(reject)
-  },
   transformStyle (
     data,
     oriPath,
@@ -191,7 +95,7 @@ export default {
   ) {
     try {
       data = data.replace(/\/\*.+?\*\/|\/\/.*(?=[\n\r])/g, '')
-      data.replace(/@import\s*(["'])(.+?)\1;/g, function (m, $1, $2) {
+      data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (m, $1, $2) {
         const ext = npath.parse($2).ext
         const stylePath = compilation.resolvePath(pathParse, $2)
         compilation.waitCompile[stylePath] = null
@@ -237,16 +141,5 @@ export default {
     // 根据type不同转译出不同的json文件
 
     compilation.modules[jsonPath] = JSON.stringify(config)
-  },
-  mergeProjectConfig (oriPath, compiler, resolve, reject) {
-    try {
-      let data = fs.readFileSync(oriPath, 'utf8') || ''
-      data = (data && JSON.parse(data)) || {}
-      const distConfig = JSON.parse(compiler.distConfig)
-      data = JSON.stringify(Object.assign(distConfig, data))
-      resolve({ data: data })
-    } catch (err) {
-      reject(err)
-    }
   },
 }
