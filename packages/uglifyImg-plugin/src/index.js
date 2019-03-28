@@ -2,29 +2,23 @@
  * @Description: uglifyImg-plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-03-27 18:02:36
+ * @LastEditTime: 2019-03-28 10:36:15
  */
 import imagemin from 'imagemin'
-import imageminJpegtran from 'imagemin-jpegtran'
-import imageminPngquant from 'imagemin-pngquant'
 import npath from 'path'
 
-const uglifyImg = async (distPath, path, dir) => {
-  const result = await imagemin([dir], path, {
-    plugins: [
-      imageminJpegtran(),
-      imageminPngquant({
-        quality: [0.6, 0.8],
-      }),
-    ],
-  })
+const uglifyImg = async (path, dir, options, distPath) => {
+  const result = await imagemin([path], dir, options)
   return {
-    result,
+    code: result[0].data,
     distPath,
   }
 }
 
 export default class UglifyImgPlugin {
+  constructor (options) {
+    this.options = options
+  }
   apply (compiler) {
     compiler.hooks.emit.tapAsync('UglifyImgPlugin', (compilation, cb) => {
       const waitCompiles = []
@@ -35,14 +29,19 @@ export default class UglifyImgPlugin {
           toString.call(value) === '[object Object]'
         ) {
           waitCompiles.push(
-            uglifyImg(distPath, npath.dirname(value.path), value.path)
+            uglifyImg(
+              value.path,
+              npath.dirname(distPath),
+              this.options,
+              distPath
+            )
           )
         }
       }
       Promise.all(waitCompiles)
         .then(res => {
           res.forEach(item => {
-            compilation.modules[item.distPath] = item.result
+            compilation.modules[item.distPath] = item.code
           })
           cb()
         })

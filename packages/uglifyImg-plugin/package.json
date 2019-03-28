@@ -16,8 +16,6 @@
   "homepage": "https://github.com/WemixJS/wemix#readme",
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "imagemin": "^6.1.0",
-    "imagemin-jpegtran": "^6.0.0",
-    "imagemin-pngquant": "^7.0.0"
+    "imagemin": "^6.1.0"
   }
 }

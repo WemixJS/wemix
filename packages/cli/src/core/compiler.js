@@ -2,12 +2,13 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-03-27 18:22:51
+ * @LastEditTime: 2019-03-28 10:20:33
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
 import Watchpack from 'watchpack'
 import fs from 'fs-extra'
+import npath from 'path'
 
 import ResolverFactory from './resolverFactory'
 import logger from '../utils/logger'
@@ -71,12 +72,10 @@ export default class Compiler {
 
     const onCompiled = (err, compilation) => {
       if (err) return this.finalCallback(err, callback)
-      this.logger.start('开始写入')
       this.hooks.emit.callAsync(compilation, err => {
         if (err) return this.finalCallback(err, callback)
         this.hooks.done.callAsync(err => {
           if (err) return this.finalCallback(err, callback)
-          this.logger.success('写入成功')
           this.running = false
           return this.finalCallback(null, callback)
         })
@@ -96,20 +95,31 @@ export default class Compiler {
   watch (options, callback) {
     const onCompiled = (err, compilation) => {
       if (err) return this.finalCallback(err, callback)
-      this.logger.start('开始写入')
       this.hooks.emit.callAsync(compilation, err => {
         if (err) return this.finalCallback(err, callback)
         this.hooks.done.callAsync(err => {
           if (err) return this.finalCallback(err, callback)
-          this.logger.success('写入成功')
+          this.logger.info('Wemix is watching the files…')
           this.running = false
           return this.finalCallback(null, callback)
         })
       })
     }
-    // const subDirs = getDirectories(this.options.entry)
-    // const allDirs = [this.options.entry].concat(subDirs)
-    const allDirs = []
+    let baseDir = ''
+    for (let i = 0; i < this.options.entry.length; i++) {
+      const stats = fs.statSync(this.options.entry[i])
+      if (stats.isFile() && /app\.js$/.test(this.options.entry[i])) {
+        baseDir = npath.dirname(this.options.entry[i])
+        break
+      }
+    }
+    if (!baseDir) {
+      this.logger.error('app.js not found in entry')
+      process.exit(1)
+    }
+    let allDirs = []
+    const subDirs = getDirectories(baseDir)
+    allDirs = [baseDir].concat(subDirs)
     this.run(() => {
       this.wp.watch([], allDirs, Date.now())
       this.wp.on('change', (filePath, mtime) => {

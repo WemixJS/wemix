@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-27 16:27:54
+ * @LastEditTime: 2019-03-28 10:50:31
  */
 
 import fs from 'fs-extra'
@@ -26,7 +26,7 @@ export default class TransformPlugin {
    */
   beforeSingleCompile (oriPath, pathParse, distPath, compiler, compilation) {
     return new Promise((resolve, reject) => {
-      let rdata = fs.readFileSync(oriPath, 'utf-8') || ''
+      let rdata = fs.readFileSync(oriPath, 'utf8') || ''
       switch (pathParse.ext) {
         // 拆分json配置文件 如果是app page component则还得处理对应的样式文件及html文件
         case '.js':
@@ -236,7 +236,7 @@ export default class TransformPlugin {
       this.distConfigPath = getOutputConfigPath(compiler)
       try {
         if (fs.existsSync(this.distConfigPath)) {
-          compiler.distConfig = fs.readFileSync(this.distConfigPath, 'utf-8')
+          compiler.distConfig = fs.readFileSync(this.distConfigPath, 'utf8')
         }
       } catch (err) {
         compiler.logger.error(err.stack || err)

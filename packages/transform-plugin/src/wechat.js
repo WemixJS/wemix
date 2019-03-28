@@ -240,7 +240,7 @@ export default {
   },
   mergeProjectConfig (oriPath, compiler, resolve, reject) {
     try {
-      let data = fs.readFileSync(oriPath, 'utf-8') || ''
+      let data = fs.readFileSync(oriPath, 'utf8') || ''
       data = (data && JSON.parse(data)) || {}
       const distConfig = JSON.parse(compiler.distConfig)
       data = JSON.stringify(Object.assign(distConfig, data))

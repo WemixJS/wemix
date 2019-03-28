@@ -2,10 +2,13 @@
  * @Description: uglifyJs-plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-03-27 18:16:07
+ * @LastEditTime: 2019-03-28 09:37:55
  */
 import UglifyJs from 'uglify-js'
 export default class UglifyJsPlugin {
+  constructor (options) {
+    this.options = options
+  }
   apply (compiler) {
     compiler.hooks.emit.tapAsync('UglifyJsPlugin', (compilation, cb) => {
       for (const distPath in compilation.modules) {
@@ -14,7 +17,7 @@ export default class UglifyJsPlugin {
           /\.js$/.test(distPath) &&
           toString.call(value) === '[object String]'
         ) {
-          const result = UglifyJs.minify(value)
+          const result = UglifyJs.minify(value, this.options)
           if (result.error) {
             cb(result.error)
           } else {

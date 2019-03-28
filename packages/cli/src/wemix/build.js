@@ -2,7 +2,7 @@
  * @Description: 构建项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:43:33
- * @LastEditTime: 2019-02-28 12:18:48
+ * @LastEditTime: 2019-03-28 09:54:37
  */
 
 import wemix from '../core'
@@ -21,7 +21,6 @@ export default function build (program) {
     compiler = wemix(program, compilerCallback)
     if (program.watch) {
       compiler.watch({}, compilerCallback)
-      logger.info('\nWemix is watching the files…\n')
     } else {
       compiler.run(compilerCallback)
     }
