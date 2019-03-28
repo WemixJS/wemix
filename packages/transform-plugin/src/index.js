@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-28 10:50:31
+ * @LastEditTime: 2019-03-28 12:05:04
  */
 
 import fs from 'fs-extra'
@@ -20,7 +20,7 @@ import {
 
 export default class TransformPlugin {
   /**
-   * @description: 拆分json配置文件 html文件转译
+   * @description: 拆分json配置文件
    * @param {type}
    * @return:
    */
@@ -62,7 +62,6 @@ export default class TransformPlugin {
     reject
   ) {
     switch (pathParse.ext) {
-      // 拆分json配置文件 如果是app page component则还得处理对应的样式文件及html文件
       case '.js':
         transformJs(
           rdata,
@@ -231,7 +230,7 @@ export default class TransformPlugin {
     }
   }
   apply (compiler) {
-    compiler.hooks.beforeRun.tapAsync('RemoveDistPlugin', callback => {
+    compiler.hooks.beforeRun.tapAsync('ProjectConfigPlugin', callback => {
       this.configPath = getEntryConfigPath(compiler)
       this.distConfigPath = getOutputConfigPath(compiler)
       try {
