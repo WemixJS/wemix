@@ -2,7 +2,7 @@
  * @Description: ExecuteLoader Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-27 18:12:05
+ * @LastEditTime: 2019-03-28 18:00:04
  */
 
 export default class ExecuteLoaderPlugin {
@@ -15,7 +15,7 @@ export default class ExecuteLoaderPlugin {
       resolve
         .resolve({}, process.cwd(), loader.use[index].loader, {})
         .then(path => {
-          const fn = require(path).default
+          const fn = require(path)
           const config = Object.assign({}, loader)
           delete config.use
           config.options = loader.use[index++].options

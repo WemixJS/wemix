@@ -21,7 +21,7 @@ module.exports = function (api) {
       },
     ],
   ]
-  const plugins = []
+  const plugins = ['add-module-exports']
   return {
     presets,
     plugins,
