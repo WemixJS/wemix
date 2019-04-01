@@ -8,6 +8,7 @@
 import fs from 'fs-extra'
 import npath from 'path'
 import {
+  setAdapter,
   getEntryConfigPath,
   getOutputConfigPath,
   getOutputPath,
@@ -17,7 +18,7 @@ import {
   mergeProjectConfig,
   splitConfig,
   addAdapterCore,
-} from './groupTransform'
+} from './transformer'
 
 export default class TransformPlugin {
   /**
@@ -234,6 +235,7 @@ export default class TransformPlugin {
     }
   }
   apply (compiler) {
+    setAdapter(compiler)
     compiler.hooks.beforeRun.tapAsync('ProjectConfigPlugin', callback => {
       this.configPath = getEntryConfigPath(compiler)
       this.distConfigPath = getOutputConfigPath(compiler)

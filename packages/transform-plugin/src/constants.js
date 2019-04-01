@@ -1,4 +1,6 @@
 export const EXPORT_WECHAT = 'wechat'
+export const WECHAT_HTML_EXT = '.wxml'
+export const WECHAT_STYLE_EXT = '.wxss'
 export const EXPORT_ALIPAY = 'alipay'
 export const EXPORT_TT = 'tt'
 export const EXPORT_SWAN = 'swan'
