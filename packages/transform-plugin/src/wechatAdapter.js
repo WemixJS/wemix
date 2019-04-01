@@ -1,9 +1,23 @@
 import npath from 'path'
-import fs from 'fs-extra'
-import htmlparser from 'htmlparser2'
-import { parse } from '@babel/parser'
-import traverse from '@babel/traverse'
+import {
+  WECHAT_ATTRIBUTE,
+  WECHAT_HTML_EXT,
+  WECHAT_STYLE_EXT,
+} from './constants'
+
 export default {
+  attribute: WECHAT_ATTRIBUTE,
+  htmlExt: WECHAT_HTML_EXT,
+  cssExt: WECHAT_STYLE_EXT,
+  getCorePkg () {
+    return `require('./wechat')`
+  },
+  getEntryConfigPath (compiler) {
+    return `${npath.join(compiler.options.context, 'wechat.config.json')}`
+  },
+  getOutputConfigPath (compiler) {
+    return `${npath.join(compiler.options.output, 'project.config.json')}`
+  },
   npmCodeHack (content, filePath) {
     const basename = npath.basename(filePath)
     switch (basename) {
@@ -32,11 +46,7 @@ export default {
     }
     return content
   },
-  /**
-   * 转换 foobar instanceof Function 为 typeof foobar ==='function'
-   * 由于微信重定义了全局的Function对象，所以moment等npm库会出现异常
-   */
-  insHack (content) {
+  customHack (content) {
     content = content.replace(/([\w[\]a-d.]+)\s*instanceof Function/g, function (
       matchs,
       word
@@ -44,68 +54,6 @@ export default {
       return ' typeof ' + word + " ==='function' "
     })
     return content
-  },
-  getEntryConfigPath (compiler) {
-    return `${npath.join(compiler.options.context, 'wechat.config.json')}`
-  },
-  getOutputConfigPath (compiler) {
-    return `${npath.join(compiler.options.output, 'project.config.json')}`
-  },
-  getOutputPath (oriPath, compiler) {
-    let distPath = oriPath.replace(
-      compiler.options.dir,
-      compiler.options.output
-    )
-    distPath = distPath.replace(
-      'node_modules',
-      npath.join(compiler.options.export, npath.sep, 'npm')
-    )
-    distPath = distPath
-      .replace('.html', '.wxml')
-      .replace('.css', '.wxss')
-      .replace('.less', '.wxss')
-      .replace('.sass', '.wxss')
-      .replace('.scss', '.wxss')
-      .replace('.acss', '.wxss')
-      .replace('.styl', '.wxss')
-    return distPath
-  },
-  transformHtml (
-    data,
-    oriPath,
-    pathParse,
-    distPath,
-    compiler,
-    compilation,
-    resolve,
-    reject
-  ) {
-    compilation.modules[distPath] = data
-    resolve()
-  },
-  transformStyle (
-    data,
-    oriPath,
-    pathParse,
-    distPath,
-    compiler,
-    compilation,
-    resolve,
-    reject
-  ) {
-    try {
-      data = data.replace(/\/\*.+?\*\/|\/\/.*(?=[\n\r])/g, '')
-      data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (m, $1, $2) {
-        const ext = npath.parse($2).ext
-        const stylePath = compilation.resolvePath(pathParse, $2)
-        compilation.waitCompile[stylePath] = null
-        return m.replace(ext, '.wxss')
-      })
-      compilation.modules[distPath] = data
-      resolve()
-    } catch (err) {
-      reject(err)
-    }
   },
   splitConfig (config, pathParse, jsonPath, type, compilation) {
     if (config.mixins) {
