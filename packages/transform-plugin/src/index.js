@@ -2,23 +2,12 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-03-28 16:38:15
+ * @LastEditTime: 2019-04-01 11:29:02
  */
 
 import fs from 'fs-extra'
 import npath from 'path'
-import {
-  setAdapter,
-  getEntryConfigPath,
-  getOutputConfigPath,
-  getOutputPath,
-  transformJs,
-  transformHtml,
-  transformStyle,
-  mergeProjectConfig,
-  splitConfig,
-  addAdapterCore,
-} from './transformer'
+import Adapter from './adapter'
 
 export default class TransformPlugin {
   /**
@@ -33,9 +22,9 @@ export default class TransformPlugin {
         // 拆分json配置文件 如果是app page component则还得处理对应的样式文件及html文件
         case '.js':
           if (/@wemix\/core\/index\.js$/.test(oriPath)) {
-            rdata = addAdapterCore(compiler)
+            rdata = compiler.adapter.getCorePkg(compiler)
           }
-          splitConfig(
+          compiler.adapter.splitConfig(
             rdata,
             oriPath,
             pathParse,
@@ -48,7 +37,12 @@ export default class TransformPlugin {
           break
         default:
           if (oriPath === this.configPath && compiler.distConfig) {
-            mergeProjectConfig(oriPath, compiler, resolve, reject)
+            compiler.adapter.mergeProjectConfig(
+              oriPath,
+              compiler,
+              resolve,
+              reject
+            )
           } else {
             resolve({ data: rdata })
           }
@@ -68,7 +62,7 @@ export default class TransformPlugin {
   ) {
     switch (pathParse.ext) {
       case '.js':
-        transformJs(
+        compiler.adapter.transformJs(
           rdata,
           oriPath,
           pathParse,
@@ -81,7 +75,7 @@ export default class TransformPlugin {
         )
         break
       case '.html':
-        transformHtml(
+        compiler.adapter.transformHtml(
           rdata,
           oriPath,
           pathParse,
@@ -98,7 +92,7 @@ export default class TransformPlugin {
       case '.scss':
       case '.acss':
       case '.styl':
-        transformStyle(
+        compiler.adapter.transformStyle(
           rdata,
           oriPath,
           pathParse,
@@ -110,7 +104,7 @@ export default class TransformPlugin {
         )
         break
       default:
-        compilation.modules[distPath] = data
+        compilation.modules[distPath] = rdata
         resolve()
     }
   }
@@ -192,7 +186,7 @@ export default class TransformPlugin {
       if (oriPath === this.configPath) {
         distPath = this.distConfigPath
       } else {
-        distPath = getOutputPath(oriPath, compiler)
+        distPath = compiler.adapter.getOutputPath(oriPath, compiler)
       }
       // 文件有变动并且之前未编译过则加入编译队列
       if (
@@ -235,10 +229,10 @@ export default class TransformPlugin {
     }
   }
   apply (compiler) {
-    setAdapter(compiler)
     compiler.hooks.beforeRun.tapAsync('ProjectConfigPlugin', callback => {
-      this.configPath = getEntryConfigPath(compiler)
-      this.distConfigPath = getOutputConfigPath(compiler)
+      compiler.adapter = new Adapter(compiler)
+      this.configPath = compiler.adapter.getEntryConfigPath(compiler)
+      this.distConfigPath = compiler.adapter.getOutputConfigPath(compiler)
       try {
         if (fs.existsSync(this.distConfigPath)) {
           compiler.distConfig = fs.readFileSync(this.distConfigPath, 'utf8')

@@ -55,7 +55,7 @@ export default {
     })
     return content
   },
-  splitConfig (config, pathParse, jsonPath, type, compilation) {
+  splitJsonConfig (config, pathParse, jsonPath, type, compilation) {
     if (config.mixins) {
       config.mixins.forEach(item => {
         const jsPath = compilation.resolvePath(pathParse, item + '.js')
