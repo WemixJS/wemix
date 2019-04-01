@@ -18,34 +18,6 @@ export default {
   getOutputConfigPath (compiler) {
     return `${npath.join(compiler.options.output, 'project.config.json')}`
   },
-  npmCodeHack (content, filePath) {
-    const basename = npath.basename(filePath)
-    switch (basename) {
-      case 'lodash.js':
-      case '_global.js':
-      case 'lodash.min.js':
-        content = content.replace(/Function\(['"]return this['"]\)\(\)/, 'this')
-        break
-      case '_html.js':
-        content = 'module.exports = false;'
-        break
-      case '_microtask.js':
-        content = content.replace('if(Observer)', 'if(false && Observer)')
-        // IOS 1.10.2 Promise BUG
-        content = content.replace(
-          'Promise && Promise.resolve',
-          'false && Promise && Promise.resolve'
-        )
-        break
-      case '_freeGlobal.js':
-        content = content.replace(
-          'module.exports = freeGlobal;',
-          'module.exports = freeGlobal || this || global || {};'
-        )
-        break
-    }
-    return content
-  },
   customHack (content) {
     content = content.replace(/([\w[\]a-d.]+)\s*instanceof Function/g, function (
       matchs,

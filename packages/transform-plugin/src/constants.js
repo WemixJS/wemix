@@ -1,9 +1,15 @@
 export const EXPORT_WECHAT = 'wechat'
-export const WECHAT_HTML_EXT = '.wxml'
-export const WECHAT_STYLE_EXT = '.wxss'
 export const EXPORT_ALIPAY = 'alipay'
 export const EXPORT_TT = 'tt'
 export const EXPORT_SWAN = 'swan'
+export const WECHAT_HTML_EXT = '.wxml'
+export const WECHAT_STYLE_EXT = '.wxss'
+export const ALIPAY_HTML_EXT = '.axml'
+export const ALIPAY_STYLE_EXT = '.acss'
+export const TT_HTML_EXT = '.ttml'
+export const TT_STYLE_EXT = '.ttss'
+export const SWAN_HTML_EXT = '.swan'
+export const SWAN_STYLE_EXT = '.css'
 
 export const STANDARD_ATTRIBUTE = {
   if: 'if',
@@ -37,3 +43,6 @@ export const ALIPAY_ATTRIBUTE = {
   key: 'a:key',
   type: 'alipay',
 }
+
+export const TT_ATTRIBUTE = {}
+export const SWAN_ATTRIBUTE = {}
