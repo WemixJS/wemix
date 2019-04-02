@@ -2,7 +2,7 @@
  * @Description: Compilation
  * @LastEditors: sanshao
  * @Date: 2019-02-20 19:00:43
- * @LastEditTime: 2019-03-28 15:49:29
+ * @LastEditTime: 2019-04-02 19:07:57
  */
 import npath from 'path'
 import fs from 'fs'
@@ -40,10 +40,12 @@ export default class Compilation {
   }
   modifiedFileMTime (file) {
     const mtime = +fs.statSync(file).mtime
-    if (this.compiler.cache[file] !== mtime) {
+    const cacheTime = this.compiler.cache[file] || 0
+    if (mtime - cacheTime > 2000) {
       this.compiler.cache[file] = mtime
       return true
     } else {
+      this.compiler.cache[file] = mtime
       return false
     }
   }

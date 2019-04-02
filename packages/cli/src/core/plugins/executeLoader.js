@@ -2,7 +2,7 @@
  * @Description: ExecuteLoader Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-28 18:01:50
+ * @LastEditTime: 2019-04-02 19:25:34
  */
 
 export default class ExecuteLoaderPlugin {
@@ -29,18 +29,15 @@ export default class ExecuteLoaderPlugin {
   }
   apply (compiler) {
     // 执行loader
-    compiler.hooks.beforeCompile.tapAsync(
-      'ReverseLoaderPlugin',
-      (compilation, callback) => {
-        compiler.options.loaders = compiler.options.loaders || []
-        compiler.options.loaders.map(loader => {
-          if (loader && loader.use && loader.use.length) {
-            loader.use = loader.use.reverse()
-          }
-        })
-        callback()
-      }
-    )
+    compiler.hooks.beforeRun.tapAsync('ReverseLoaderPlugin', callback => {
+      compiler.options.loaders = compiler.options.loaders || []
+      compiler.options.loaders.map(loader => {
+        if (loader && loader.use && loader.use.length) {
+          loader.use = loader.use.reverse()
+        }
+      })
+      callback()
+    })
     compiler.hooks.singleCompile.tapAsync(
       'LoaderCompilePlugin',
       (data, loader, path, callback) => {

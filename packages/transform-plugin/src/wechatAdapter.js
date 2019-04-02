@@ -122,4 +122,13 @@ export default {
     })
     compilation.modules[jsonPath] = JSON.stringify(adpaterConfig)
   },
+  processProps (propsNode, props, compiler) {
+    for (const key in props) {
+      if (toString.call(props[key]) === '[object Object]') {
+        if (props[key].observer) {
+          compiler.logger.error('not support observer now!')
+        }
+      }
+    }
+  },
 }
