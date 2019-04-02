@@ -1,6 +1,8 @@
 export default class {
-  $init (wemix, $wxpage, pagePath) {
-    wemix.instance.pages[`/${pagePath}`] = this
+  $init (wemix, $wxpage, pagePath, ...args) {
+    this.options = args[0]
+    this.route = `/${pagePath}`
+    this.search = wemix.parseSearch(this.options)
     this.setData = (data, func) => {
       for (let key in data) {
         if (data[key] === undefined) {

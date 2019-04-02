@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-01 18:19:55
+ * @LastEditTime: 2019-04-02 16:54:51
  */
 
 import Adapter from './wechat'
@@ -35,48 +35,14 @@ class Wemix {
     _this.config.pages[`/${pagePath}`] = PageClass.config
     config['onLoad'] = function (...args) {
       this.page = new PageClass()
-      this.page.$init(_this, this, pagePath)
+      this.page.$init(_this, this, pagePath, ...args)
       this.page.setData(util.extend(PageClass.data || {}, true))
-      const stackPages = getCurrentPages()
-      if (stackPages.length >= 2) {
-        _this.route.previous = {
-          page:
-            '/' + stackPages[stackPages.length - 2].route ||
-            stackPages[stackPages.length - 2].__route__,
-          search: _this.parseSearch(stackPages[stackPages.length - 2].options),
-          options: stackPages[stackPages.length - 2].options,
-        }
-      }
-      _this.route.current = {
-        page:
-          '/' + stackPages[stackPages.length - 1].route ||
-          stackPages[stackPages.length - 1].__route__,
-        search: _this.parseSearch(stackPages[stackPages.length - 1].options),
-        options: stackPages[stackPages.length - 1].options,
-      }
       return this.page['onLoad'] && this.page['onLoad'].apply(this.page, args)
     }
     config['onShow'] = function (...args) {
-      const stackPages = getCurrentPages()
-      if (stackPages.length >= 2) {
-        _this.route.previous = {
-          page:
-            '/' + stackPages[stackPages.length - 2].route ||
-            stackPages[stackPages.length - 2].__route__,
-          search: _this.parseSearch(stackPages[stackPages.length - 2].options),
-          options: stackPages[stackPages.length - 2].options,
-        }
-      }
-      _this.route.current = {
-        page:
-          '/' + stackPages[stackPages.length - 1].route ||
-          stackPages[stackPages.length - 1].__route__,
-        search: _this.parseSearch(stackPages[stackPages.length - 1].options),
-        options: stackPages[stackPages.length - 1].options,
-      }
       this.timestamp = Date.now()
       const app = getApp()
-      app.app.onPageShow && app.app.onPageShow.apply(this.page, args)
+      app.app.onPageShow && app.app.onPageShow(args)
       return this.page['onShow'] && this.page['onShow'].apply(this.page, args)
     }
     config['onHide'] = function (...args) {
@@ -84,7 +50,7 @@ class Wemix {
       const app = getApp()
       const hide =
         this.page['onHide'] && this.page['onHide'].apply(this.page, args)
-      app.app.onPageHide && app.app.onPageHide.call(this.page, tp)
+      app.app.onPageHide && app.app.onPageHide(tp)
       return hide
     }
     config['onUnload'] = function (...args) {
@@ -92,7 +58,7 @@ class Wemix {
       const app = getApp()
       const unload =
         this.page['onUnload'] && this.page['onUnload'].apply(this.page, args)
-      app.app.onPageHide && app.app.onPageHide.call(this.page, tp)
+      app.app.onPageHide && app.app.onPageHide(tp)
       return unload
     }
     Object.getOwnPropertyNames(PageClass.prototype || []).forEach(v => {
@@ -133,6 +99,15 @@ class Wemix {
   }
   $createComponent () {
     return adapter.$createComponent()
+  }
+  getApp () {
+    return getApp().app
+  }
+  getCurrentPages () {
+    const pages = getCurrentPages()
+    return pages.map(page => {
+      return page.page
+    })
   }
   unparams (str) {
     let params = {}

@@ -89,6 +89,15 @@ const npmCodeHack = function (content, filePath) {
 const customHack = function (data, oriPath, compiler, type, pathParse) {
   if (/node_modules/.test(oriPath)) {
     data = npmCodeHack(data, oriPath)
+  } else {
+    if (/(getApp|getCurrentPages)\(\)/.test(data)) {
+      compiler.logger.warn(
+        oriPath + ': Use wemix.getApp() or wemix.getCurrentPages()'
+      )
+    }
+    if (/(wx|my|tt|swan)\./.test(data)) {
+      compiler.logger.warn(oriPath + ': wx|my|tt|swan replaceWith wemix')
+    }
   }
   if (/^(app|page|component)$/.test(type)) {
     data = wrapPageUp(data, oriPath, compiler, type, pathParse)
@@ -263,7 +272,7 @@ const splitConfig = function (
   resolve,
   reject
 ) {
-  let className, componentName, config, configNode
+  let className, componentName, configNode, propsNode
   try {
     const ast = parse(data, { sourceType: 'module' })
     traverse(ast, {
@@ -297,6 +306,12 @@ const splitConfig = function (
                     property.isIdentifier({ name: 'config' })
                   ) {
                     configNode = astPath
+                  }
+                  if (
+                    object.isIdentifier({ name: className }) &&
+                    property.isIdentifier({ name: 'properties' })
+                  ) {
+                    propsNode = astPath
                   }
                 },
               })
@@ -336,7 +351,7 @@ const splitConfig = function (
       }
       if (configNode) {
         // eslint-disable-next-line no-new-func
-        config = new Function(
+        const config = new Function(
           `return ${generator(configNode.get('right').node).code}`
         )()
         if (config.pages) {
@@ -361,6 +376,15 @@ const splitConfig = function (
           componentName,
           compilation
         )
+      }
+      if (propsNode) {
+        // eslint-disable-next-line no-new-func
+        const props = new Function(
+          `return ${generator(propsNode.get('right').node).code}`
+        )()
+        if (Object.keys(props).length > 0) {
+          this.platform.processProps(propsNode, props, compiler)
+        }
       }
     }
     data = generator(ast).code

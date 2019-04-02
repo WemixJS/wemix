@@ -2,7 +2,7 @@
  * @Description: alipayAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-02 15:30:31
+ * @LastEditTime: 2019-04-02 16:09:21
  */
 import npath from 'path'
 import { parse } from '@babel/parser'
@@ -127,5 +127,34 @@ export default {
       },
     })
     compilation.modules[jsonPath] = JSON.stringify(adpaterConfig)
+  },
+  processProps (propsNode, props, compiler) {
+    const newProps = {}
+    for (const key in props) {
+      if (toString.call(props[key]) === '[object Object]') {
+        if (props[key].observer) {
+          compiler.logger.error('not support observer now!')
+        }
+        newProps[key] = props[key].value
+      } else {
+        newProps[key] = props[key]
+      }
+    }
+    const propsTempName = 'properties'
+    let strCfg = JSON.stringify(newProps).replace(/"/g, `'`)
+    strCfg = `const ${propsTempName} = ${strCfg};`
+    const astCfg = parse(strCfg)
+    traverse(astCfg, {
+      VariableDeclarator (astPath) {
+        const id = astPath.get('id')
+        if (id.isIdentifier({ name: propsTempName })) {
+          propsNode
+            .get('right')
+            .replaceWith(
+              t.objectExpression(astPath.get('init').node.properties)
+            )
+        }
+      },
+    })
   },
 }

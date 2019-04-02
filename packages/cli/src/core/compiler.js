@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-03-28 10:20:33
+ * @LastEditTime: 2019-04-02 19:23:34
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -34,6 +34,7 @@ export default class Compiler {
       done: new AsyncSeriesHook([]),
       failed: new AsyncSeriesHook(['error']),
     }
+    this.watchFiles = []
     this.logger = logger
     this.cache = {}
     this.running = false
@@ -101,6 +102,10 @@ export default class Compiler {
           if (err) return this.finalCallback(err, callback)
           this.logger.info('Wemix is watching the files…')
           this.running = false
+          if (this.watchFiles.length) {
+            this.compile([].concat(this.watchFiles), onCompiled)
+            this.watchFiles = []
+          }
           return this.finalCallback(null, callback)
         })
       })
@@ -120,21 +125,18 @@ export default class Compiler {
     let allDirs = []
     const subDirs = getDirectories(baseDir)
     allDirs = [baseDir].concat(subDirs)
-    this.run(() => {
-      this.wp.watch([], allDirs, Date.now())
-      this.wp.on('change', (filePath, mtime) => {
-        if (mtime) {
-          if (!this.running) {
-            this.compile([filePath], onCompiled)
-          }
+    this.wp.watch([], allDirs, Date.now())
+    this.wp.on('change', (filePath, mtime) => {
+      if (mtime) {
+        if (!this.running) {
+          this.compile([filePath], onCompiled)
         } else {
-          const distPath = filePath.replace(
-            this.options.dir,
-            this.options.output
-          )
-          fs.remove(distPath)
+          this.watchFiles.push(filePath)
         }
-      })
+      } else {
+        const distPath = filePath.replace(this.options.dir, this.options.output)
+        fs.remove(distPath)
+      }
     })
   }
   compile (modifiedFiles, callback) {
