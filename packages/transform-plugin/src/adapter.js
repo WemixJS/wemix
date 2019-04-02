@@ -3,6 +3,7 @@ import npath from 'path'
 import { parse } from '@babel/parser'
 import traverse from '@babel/traverse'
 import generator from '@babel/generator'
+import * as t from '@babel/types'
 import {
   EXPORT_WECHAT,
   EXPORT_ALIPAY,
@@ -91,8 +92,13 @@ const customHack = function (data, oriPath, compiler, type, pathParse) {
   }
   if (/^(app|page|component)$/.test(type)) {
     data = wrapPageUp(data, oriPath, compiler, type, pathParse)
-    data = this.platform.customHack(data)
   }
+  data = data.replace(/([\w[\]a-d.]+)\s*instanceof Function/g, function (
+    matchs,
+    word
+  ) {
+    return ' typeof ' + word + " ==='function' "
+  })
   return data
 }
 
@@ -150,10 +156,10 @@ const transformJs = function (
     // 将引用的路径放入待编译池中
     traverse(ast, {
       CallExpression (astPath) {
-        const node = astPath.node
         const callee = astPath.get('callee')
         if (callee.isIdentifier({ name: 'require' })) {
-          const requirePath = node.arguments[0].value
+          const args = astPath.get('arguments')[0]
+          const requirePath = args.node.value
           const p = requirePath[0]
           if (p && p !== '.' && p !== '/') {
             requirePaths.push(
@@ -186,7 +192,8 @@ const transformJs = function (
           importDistPath =
             '.' + importDistPath.replace(compiler.options.output, '')
         }
-        item.astPath.node.arguments[0].value = importDistPath
+        const importReplace = item.astPath.get('arguments')[0]
+        importReplace.replaceWith(t.stringLiteral(importDistPath))
         compilation.waitCompile[item.absPath] = null
       })
       data = generator(ast).code
@@ -226,8 +233,25 @@ const transformStyle = function (
     reject(err)
   }
 }
-const splitJsonConfig = function (...args) {
-  this.platform.splitJsonConfig(...args)
+
+const adapterCorePkg = function (compiler, data, resolve, reject) {
+  const ast = parse(data, { sourceType: 'module' })
+  traverse(ast, {
+    ImportDeclaration (astPath) {
+      const source = astPath.get('source')
+      if (
+        source.isStringLiteral({ value: './wechat' }) &&
+        compiler.options.export !== 'wechat'
+      ) {
+        const replaceImport = t.importDeclaration(
+          astPath.node.specifiers,
+          t.stringLiteral(`./${compiler.options.export}`)
+        )
+        astPath.replaceWith(replaceImport)
+      }
+    },
+  })
+  resolve({ data: generator(ast).code })
 }
 const splitConfig = function (
   data,
@@ -239,46 +263,40 @@ const splitConfig = function (
   resolve,
   reject
 ) {
-  let className, componentName, config
+  let className, componentName, config, configNode
   try {
     const ast = parse(data, { sourceType: 'module' })
     traverse(ast, {
       ImportDeclaration (astPath) {
-        const node = astPath.node
-        const source = node.source
-        let value = source.value
-        const specifiers = node.specifiers
-        if (value === '@wemix/core' && specifiers[0] && specifiers[0].local) {
-          const name = specifiers[0].local.name
+        const source = astPath.get('source')
+        if (source.isStringLiteral({ value: '@wemix/core' })) {
+          const specifier = astPath.get('specifiers')[0]
+          const name = specifier.get('local').node.name
           traverse(ast, {
             ClassDeclaration (astPath) {
-              const superClass = astPath.node.superClass
-              const propertyName = superClass.property.name
+              const id = astPath.get('id')
+              const superClass = astPath.get('superClass')
+              const object = superClass.get('object')
+              const property = superClass.get('property')
               if (
-                superClass &&
-                superClass.object &&
-                superClass.object.name === name &&
-                (propertyName === 'app' ||
-                  propertyName === 'page' ||
-                  propertyName === 'component')
+                object.isIdentifier({ name: name }) &&
+                (property.isIdentifier({ name: 'app' }) ||
+                  property.isIdentifier({ name: 'page' }) ||
+                  property.isIdentifier({ name: 'component' }))
               ) {
+                className = id.node.name
+                componentName = property.node.name
               }
-              className = astPath.node.id.name
-              componentName = propertyName
               traverse(ast, {
                 AssignmentExpression (astPath) {
-                  const leftObject = astPath.node.left.object
-                  const leftProp = astPath.node.left.property
+                  const left = astPath.get('left')
+                  const object = left.get('object')
+                  const property = left.get('property')
                   if (
-                    leftObject &&
-                    leftObject.name === className &&
-                    leftProp &&
-                    leftProp.name === 'config'
+                    object.isIdentifier({ name: className }) &&
+                    property.isIdentifier({ name: 'config' })
                   ) {
-                    // eslint-disable-next-line no-new-func
-                    config = new Function(
-                      `return ${generator(astPath.node.right).code}`
-                    )()
+                    configNode = astPath
                   }
                 },
               })
@@ -316,7 +334,11 @@ const splitConfig = function (
           compilation.waitCompile[nearPath + '.html'] = null
         }
       }
-      if (config) {
+      if (configNode) {
+        // eslint-disable-next-line no-new-func
+        config = new Function(
+          `return ${generator(configNode.get('right').node).code}`
+        )()
         if (config.pages) {
           let pages = compilation.getPages(config.pages)
           pages = compilation.getSubPackages(pages, config.subpackages)
@@ -331,8 +353,8 @@ const splitConfig = function (
           })
         }
         const jsonPath = distPath.replace('.js', '.json')
-        splitJsonConfig.call(
-          this,
+        this.platform.splitJsonConfig(
+          configNode,
           config,
           pathParse,
           jsonPath,
@@ -341,6 +363,7 @@ const splitConfig = function (
         )
       }
     }
+    data = generator(ast).code
     resolve({ data: data, type: componentName })
   } catch (err) {
     reject(err)
@@ -364,8 +387,8 @@ export default class Adapter {
         break
     }
   }
-  getCorePkg () {
-    return this.platform.getCorePkg()
+  adapterCorePkg (...args) {
+    adapterCorePkg.call(this, ...args)
   }
   getEntryConfigPath (compiler) {
     return this.platform.getEntryConfigPath(compiler)

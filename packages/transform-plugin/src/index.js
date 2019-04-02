@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-04-01 11:29:02
+ * @LastEditTime: 2019-04-01 14:50:17
  */
 
 import fs from 'fs-extra'
@@ -22,18 +22,19 @@ export default class TransformPlugin {
         // 拆分json配置文件 如果是app page component则还得处理对应的样式文件及html文件
         case '.js':
           if (/@wemix\/core\/index\.js$/.test(oriPath)) {
-            rdata = compiler.adapter.getCorePkg(compiler)
+            compiler.adapter.adapterCorePkg(compiler, rdata, resolve, reject)
+          } else {
+            compiler.adapter.splitConfig(
+              rdata,
+              oriPath,
+              pathParse,
+              distPath,
+              compiler,
+              compilation,
+              resolve,
+              reject
+            )
           }
-          compiler.adapter.splitConfig(
-            rdata,
-            oriPath,
-            pathParse,
-            distPath,
-            compiler,
-            compilation,
-            resolve,
-            reject
-          )
           break
         default:
           if (oriPath === this.configPath && compiler.distConfig) {

@@ -11,6 +11,146 @@ export const TT_STYLE_EXT = '.ttss'
 export const SWAN_HTML_EXT = '.swan'
 export const SWAN_STYLE_EXT = '.css'
 
+export const WECHAT_APP_CONFIG = {
+  pages: 'pages',
+  debug: 'debug',
+  subpackages: 'subpackages',
+  window: {
+    navigationBarBackgroundColor: 'navigationBarBackgroundColor',
+    navigationBarTextStyle: 'navigationBarTextStyle',
+    navigationBarTitleText: 'navigationBarTitleText',
+    backgroundColor: 'backgroundColor',
+    backgroundTextStyle: 'backgroundTextStyle',
+    enablePullDownRefresh: 'enablePullDownRefresh',
+    onReachBottomDistance: 'onReachBottomDistance',
+  },
+  tabBar: {
+    color: 'color',
+    selectedColor: 'selectedColor',
+    backgroundColor: 'backgroundColor',
+    list: {
+      pagePath: 'pagePath',
+      text: 'text',
+      iconPath: 'iconPath',
+      selectedIconPath: 'selectedIconPath',
+    },
+  },
+}
+
+export const ALIPAY_APP_CONFIG = {
+  pages: 'pages',
+  window: {
+    titleBarColor: 'navigationBarBackgroundColor',
+    defaultTitle: 'navigationBarTitleText',
+    pullRefresh: 'enablePullDownRefresh',
+    allowsBounceVertical: 'YES',
+  },
+  tabBar: {
+    textColor: 'color',
+    selectedColor: 'selectedColor',
+    backgroundColor: 'backgroundColor',
+    items: {
+      pagePath: 'pagePath',
+      name: 'text',
+      icon: 'iconPath',
+      activeIcon: 'selectedIconPath',
+    },
+  },
+}
+
+export const TT_APP_CONFIG = {
+  pages: 'pages',
+  debug: 'debug',
+  window: {
+    navigationBarBackgroundColor: 'navigationBarBackgroundColor',
+    navigationBarTextStyle: 'navigationBarTextStyle',
+    navigationBarTitleText: 'navigationBarTitleText',
+    backgroundColor: 'backgroundColor',
+    backgroundTextStyle: 'backgroundTextStyle',
+    enablePullDownRefresh: 'enablePullDownRefresh',
+    onReachBottomDistance: 'onReachBottomDistance',
+  },
+  tabBar: {
+    color: 'color',
+    selectedColor: 'selectedColor',
+    backgroundColor: 'backgroundColor',
+    list: {
+      pagePath: 'pagePath',
+      text: 'text',
+      iconPath: 'iconPath',
+      selectedIconPath: 'selectedIconPath',
+    },
+  },
+}
+
+export const SWAN_APP_CONFIG = {
+  pages: 'pages',
+  subpackages: 'subpackages',
+  window: {
+    navigationBarBackgroundColor: 'navigationBarBackgroundColor',
+    navigationBarTextStyle: 'navigationBarTextStyle',
+    navigationBarTitleText: 'navigationBarTitleText',
+    backgroundColor: 'backgroundColor',
+    backgroundTextStyle: 'backgroundTextStyle',
+    enablePullDownRefresh: 'enablePullDownRefresh',
+    onReachBottomDistance: 'onReachBottomDistance',
+  },
+  tabBar: {
+    color: 'color',
+    selectedColor: 'selectedColor',
+    backgroundColor: 'backgroundColor',
+    list: {
+      pagePath: 'pagePath',
+      text: 'text',
+      iconPath: 'iconPath',
+      selectedIconPath: 'selectedIconPath',
+    },
+  },
+}
+
+export const WECHAT_PAGE_CONFIG = {
+  navigationBarBackgroundColor: 'navigationBarBackgroundColor',
+  navigationBarTextStyle: 'navigationBarTextStyle',
+  navigationBarTitleText: 'navigationBarTitleText',
+  backgroundColor: 'backgroundColor',
+  backgroundTextStyle: 'backgroundTextStyle',
+  enablePullDownRefresh: 'enablePullDownRefresh',
+  onReachBottomDistance: 'onReachBottomDistance',
+  mixins: 'mixins',
+  usingComponents: 'usingComponents',
+}
+
+export const ALIPAY_PAGE_CONFIG = {
+  titleBarColor: 'navigationBarBackgroundColor',
+  defaultTitle: 'navigationBarTitleText',
+  pullRefresh: 'enablePullDownRefresh',
+  allowsBounceVertical: 'YES',
+  mixins: 'mixins',
+  usingComponents: 'usingComponents',
+}
+export const TT_PAGE_CONFIG = {
+  navigationBarBackgroundColor: 'navigationBarBackgroundColor',
+  navigationBarTextStyle: 'navigationBarTextStyle',
+  navigationBarTitleText: 'navigationBarTitleText',
+  backgroundColor: 'backgroundColor',
+  backgroundTextStyle: 'backgroundTextStyle',
+  enablePullDownRefresh: 'enablePullDownRefresh',
+  onReachBottomDistance: 'onReachBottomDistance',
+  mixins: 'mixins',
+  usingComponents: 'usingComponents',
+}
+export const SWAN_PAGE_CONFIG = {
+  navigationBarBackgroundColor: 'navigationBarBackgroundColor',
+  navigationBarTextStyle: 'navigationBarTextStyle',
+  navigationBarTitleText: 'navigationBarTitleText',
+  backgroundColor: 'backgroundColor',
+  backgroundTextStyle: 'backgroundTextStyle',
+  enablePullDownRefresh: 'enablePullDownRefresh',
+  onReachBottomDistance: 'onReachBottomDistance',
+  mixins: 'mixins',
+  usingComponents: 'usingComponents',
+}
+
 export const STANDARD_ATTRIBUTE = {
   if: 'if',
   else: 'else',

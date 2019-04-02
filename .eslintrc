@@ -22,6 +22,8 @@
     "standard/computed-property-even-spacing": "off"
   },
   "globals": {
+    "getApp": true,
+    "getCurrentPages": true,
     "window": true,
     "global": true,
     "document": true,
