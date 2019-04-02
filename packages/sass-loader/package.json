@@ -16,6 +16,9 @@
   "homepage": "https://github.com/WemixJS/wemix#readme",
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "sass": "^1.17.2"
+    "neo-async": "^2.6.0",
+    "node-sass": "^4.11.0",
+    "sass": "^1.17.2",
+    "semver": "^6.0.0"
   }
 }
