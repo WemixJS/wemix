@@ -2,12 +2,9 @@
  * @Description: swanAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-03 17:03:22
+ * @LastEditTime: 2019-04-03 17:28:43
  */
 import npath from 'path'
-import { parse } from '@babel/parser'
-import traverse from '@babel/traverse'
-import * as t from '@babel/types'
 import {
   SWAN_ATTRIBUTE,
   SWAN_HTML_EXT,

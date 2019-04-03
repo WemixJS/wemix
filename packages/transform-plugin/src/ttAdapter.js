@@ -2,12 +2,9 @@
  * @Description: ttAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-03 17:03:12
+ * @LastEditTime: 2019-04-03 17:28:39
  */
 import npath from 'path'
-import { parse } from '@babel/parser'
-import traverse from '@babel/traverse'
-import * as t from '@babel/types'
 import {
   TT_ATTRIBUTE,
   TT_HTML_EXT,

@@ -1,7 +1,4 @@
 import npath from 'path'
-import { parse } from '@babel/parser'
-import traverse from '@babel/traverse'
-import * as t from '@babel/types'
 import {
   WECHAT_ATTRIBUTE,
   WECHAT_HTML_EXT,

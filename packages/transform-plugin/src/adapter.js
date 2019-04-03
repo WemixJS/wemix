@@ -57,7 +57,10 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
 }
 
 const customHack = function (data, oriPath, compiler, type, pathParse) {
-  if (/node_modules/.test(oriPath)) {
+  if (
+    /node_modules/.test(oriPath) &&
+    !/node_modules\/@wemix\/components/.test(oriPath)
+  ) {
     data = this.platform.npmCodeHack(data, oriPath)
   } else {
     if (/(getApp|getCurrentPages)\(\)/.test(data)) {
@@ -136,7 +139,7 @@ const transformHtml = function (
           }
         } else {
           const shortPath = oriPath.substr(oriPath.indexOf('src'))
-          console.warn(
+          compiler.logger.warn(
             `请勿使用原生语法: ${shortPath} line ${node.name.loc.start.line}  ${
               namespace.name
             }:${node.name.name.name}=${node.value.value}`
