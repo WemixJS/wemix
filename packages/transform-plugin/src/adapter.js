@@ -56,41 +56,9 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
   return content
 }
 
-const npmCodeHack = function (content, filePath) {
-  const basename = npath.basename(filePath)
-  switch (basename) {
-    case 'lodash.js':
-    case '_global.js':
-    case 'lodash.min.js':
-      content = content.replace(/Function\(['"]return this['"]\)\(\)/, 'this')
-      break
-    case '_html.js':
-      content = 'module.exports = false;'
-      break
-    case '_microtask.js':
-      content = content.replace('if(Observer)', 'if(false && Observer)')
-      // IOS 1.10.2 Promise BUG
-      content = content.replace(
-        'Promise && Promise.resolve',
-        'false && Promise && Promise.resolve'
-      )
-      break
-    case '_freeGlobal.js':
-      content = content.replace(
-        'module.exports = freeGlobal;',
-        'module.exports = freeGlobal || this || global || {};'
-      )
-      break
-  }
-  if (content.replace(/\s\r\n/g, '').length <= 0) {
-    content = '// Empty file'
-  }
-  return content
-}
-
 const customHack = function (data, oriPath, compiler, type, pathParse) {
   if (/node_modules/.test(oriPath)) {
-    data = npmCodeHack(data, oriPath)
+    data = this.platform.npmCodeHack(data, oriPath)
   } else {
     if (/(getApp|getCurrentPages)\(\)/.test(data)) {
       compiler.logger.warn(

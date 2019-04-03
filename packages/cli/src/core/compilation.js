@@ -2,7 +2,7 @@
  * @Description: Compilation
  * @LastEditors: sanshao
  * @Date: 2019-02-20 19:00:43
- * @LastEditTime: 2019-04-02 19:07:57
+ * @LastEditTime: 2019-04-02 20:16:40
  */
 import npath from 'path'
 import fs from 'fs'
@@ -57,9 +57,11 @@ export default class Compilation {
     return new Set(pages)
   }
   resolvePath (pathParse, item) {
-    let path = npath.resolve(pathParse.dir, item)
-    if (path[0] === '/') {
-      path = npath.join(this.compiler.options.dir, path)
+    let path
+    if (item[0] === '/') {
+      path = npath.join(this.compiler.options.dir, item)
+    } else {
+      path = npath.resolve(pathParse.dir, item)
     }
     return path
   }

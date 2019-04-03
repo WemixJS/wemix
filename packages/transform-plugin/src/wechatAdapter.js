@@ -77,13 +77,6 @@ export default {
       }
     }
     if (type === 'page' || type === 'component') {
-      config.mixins = []
-        .concat(config.mixins || [])
-        .concat(config.wechatMixins || [])
-      config.mixins.forEach(item => {
-        const jsPath = compilation.resolvePath(pathParse, item + '.js')
-        compilation.waitCompile[jsPath] = null
-      })
       config.usingComponents = Object.assign(
         config.usingComponents || {},
         config.wechatComponents || {}
@@ -130,5 +123,28 @@ export default {
         }
       }
     }
+  },
+  npmCodeHack (content, filePath) {
+    const basename = npath.basename(filePath)
+    switch (basename) {
+      case '_html.js':
+        content = 'module.exports = false;'
+        break
+      case '_microtask.js':
+        content = content.replace('if(Observer)', 'if(false && Observer)')
+        // IOS 1.10.2 Promise BUG
+        content = content.replace(
+          'Promise && Promise.resolve',
+          'false && Promise && Promise.resolve'
+        )
+        break
+      case '_freeGlobal.js':
+        content = content.replace(
+          'module.exports = freeGlobal;',
+          'module.exports = freeGlobal || this || global || {};'
+        )
+        break
+    }
+    return content
   },
 }
