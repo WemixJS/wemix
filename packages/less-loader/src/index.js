@@ -50,6 +50,7 @@ const grabConfigFromScript = (str, n) => {
 // promise
 const _promise = data => {
   return new Promise((resolve, reject) => {
+    data = data.replace(/\/\/\s@iconfont.*?\n/, '')
     if (~data.indexOf('@iconfont')) {
       data.replace(/@iconfont:\s*['"](.+)['"];/, (replace, url) => {
         if (url.indexOf('//') === 0) {

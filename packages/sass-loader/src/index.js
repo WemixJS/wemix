@@ -50,6 +50,7 @@ const grabConfigFromScript = (str, n) => {
 // promise
 const _promise = data => {
   return new Promise((resolve, reject) => {
+    data = data.replace(/\/\/\s@iconfont.*?\n/, '')
     if (~data.indexOf('@iconfont')) {
       data.replace(/@iconfont:\s*['"](.+)['"];/, (replace, url) => {
         if (url.indexOf('//') === 0) {
@@ -147,6 +148,7 @@ export default function (data, loader, path, next) {
     _promise(data).then(data => {
       const imports = []
       data = _handleImport(data, imports)
+      // data.replace(/\/\/.*?\n/, '')
       const loaderOptions =
         (loader.options && loaderUtils.getOptions({ query: loader.options })) ||
         {}
@@ -155,7 +157,7 @@ export default function (data, loader, path, next) {
         data,
         ...loaderOptions,
       })
-      console.log('----------', result.css)
+      next(null, result.css.toString())
     })
   } else {
     next(null, data)
