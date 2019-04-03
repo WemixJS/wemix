@@ -12,6 +12,7 @@ import parseOptions from './options.js'
 import optionConfig from './option'
 
 export default function (data, loader, path, next) {
+  console.log('=========', 333333, path)
   if (!data) {
     return next(null, data)
   }
