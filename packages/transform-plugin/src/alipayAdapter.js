@@ -26,9 +26,6 @@ export default {
   getEntryConfigPath (compiler) {
     return `${npath.join(compiler.options.context, 'alipay.config.json')}`
   },
-  getOutputConfigPath (compiler) {
-    return `${npath.join(compiler.options.output, 'project.config.json')}`
-  },
   processProps (propsNode, props, compiler) {
     const newProps = {}
     for (const key in props) {

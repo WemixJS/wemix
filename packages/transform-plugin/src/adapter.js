@@ -117,50 +117,66 @@ const transformHtml = function (
   resolve,
   reject
 ) {
-  const ast = parse('<CONTAINER>' + data + '</CONTAINER>', {
-    sourceType: 'module',
-    plugins: ['jsx'],
-  })
-  const _this = this
-  traverse(ast, {
-    JSXAttribute (astPath) {
-      const node = astPath.node
-      const type = node.name.type
-      if (type === 'JSXNamespacedName') {
-        const namespace = node.name.namespace
-        if (namespace.name === STANDARD_ATTRIBUTE_PREFIX) {
-          const attr = STANDARD_ATTRIBUTE_PREFIX + ':' + node.name.name.name
+  try {
+    data = data.replace(/<!--[\s\S]*?-->/g, '')
+    const ast = parse('<CONTAINER>' + data + '</CONTAINER>', {
+      sourceType: 'module',
+      plugins: ['jsx'],
+    })
+    const _this = this
+    traverse(ast, {
+      JSXAttribute (astPath) {
+        const node = astPath.node
+        const type = node.name.type
+        if (type === 'JSXNamespacedName') {
+          const namespace = node.name.namespace
+          if (namespace.name === STANDARD_ATTRIBUTE_PREFIX) {
+            const attr = STANDARD_ATTRIBUTE_PREFIX + ':' + node.name.name.name
+            for (let standardAttr in STANDARD_ATTRIBUTE) {
+              if (attr === STANDARD_ATTRIBUTE[standardAttr]) {
+                const newAttr = _this.platform.attribute[standardAttr].split(
+                  ':'
+                )
+                node.name.namespace.name = newAttr[0]
+                node.name.name.name = newAttr[1]
+              }
+            }
+          } else {
+            const shortPath = oriPath.substr(oriPath.indexOf('src'))
+            console.warn(
+              `请勿使用原生语法: ${shortPath} line ${
+                node.name.loc.start.line
+              }  ${namespace.name}:${node.name.name.name}=${node.value.value}`
+            )
+          }
+        } else if (type === 'JSXIdentifier') {
+          const attr = node.name.name
+          let replaced = false
           for (let standardAttr in STANDARD_ATTRIBUTE) {
             if (attr === STANDARD_ATTRIBUTE[standardAttr]) {
-              const newAttr = _this.platform.attribute[standardAttr].split(':')
-              node.name.namespace.name = newAttr[0]
-              node.name.name.name = newAttr[1]
+              const newAttr = _this.platform.attribute[standardAttr]
+              node.name.name = newAttr
+              replaced = true
             }
           }
-        } else {
-          const shortPath = oriPath.substr(oriPath.indexOf('src'))
-          compiler.logger.warn(
-            `请勿使用原生语法: ${shortPath} line ${node.name.loc.start.line}  ${
-              namespace.name
-            }:${node.name.name.name}=${node.value.value}`
-          )
-        }
-      } else if (type === 'JSXIdentifier') {
-        const attr = node.name.name
-        for (let standardAttr in STANDARD_ATTRIBUTE) {
-          if (attr === STANDARD_ATTRIBUTE[standardAttr]) {
-            const newAttr = _this.platform.attribute[standardAttr]
-            node.name.name = newAttr
+          if (
+            !replaced &&
+            attr.indexOf('bind') === 0 &&
+            _this.platform.name === EXPORT_WECHAT
+          ) {
+            node.name.name = 'on' + attr.substr(4)
           }
         }
-      }
-    },
-  })
-  compilation.modules[distPath] = generator(ast).code.replace(
-    /<\/?CONTAINER>;?/g,
-    ''
-  )
-  resolve()
+      },
+    })
+    compilation.modules[distPath] = generator(ast).code.replace(
+      /<\/?CONTAINER>;?/g,
+      ''
+    )
+    resolve()
+  } catch (e) {
+    reject(e)
+  }
 }
 const transformJs = function (
   data,
@@ -518,7 +534,8 @@ const splitConfig = function (
 
 export default class Adapter {
   constructor (compiler) {
-    switch (compiler.options.export) {
+    const platformName = compiler.options.export
+    switch (platformName) {
       case EXPORT_WECHAT:
         this.platform = wechat
         break
@@ -532,6 +549,7 @@ export default class Adapter {
         this.platform = swan
         break
     }
+    this.platform.name = platformName
   }
   adapterCorePkg (...args) {
     adapterCorePkg.call(this, ...args)
@@ -540,7 +558,7 @@ export default class Adapter {
     return this.platform.getEntryConfigPath(compiler)
   }
   getOutputConfigPath (compiler) {
-    return this.platform.getOutputConfigPath(compiler)
+    return `${npath.join(compiler.options.output, 'project.config.json')}`
   }
   getOutputPath (...args) {
     return getOutputPath.call(this, ...args)

@@ -17,9 +17,6 @@ export default {
   getEntryConfigPath (compiler) {
     return `${npath.join(compiler.options.context, 'wechat.config.json')}`
   },
-  getOutputConfigPath (compiler) {
-    return `${npath.join(compiler.options.output, 'project.config.json')}`
-  },
   processProps (propsNode, props, compiler) {
     for (const key in props) {
       if (toString.call(props[key]) === '[object Object]') {
