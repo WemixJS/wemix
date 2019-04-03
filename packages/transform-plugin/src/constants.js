@@ -151,15 +151,15 @@ export const SWAN_PAGE_CONFIG = {
   usingComponents: 'usingComponents',
 }
 
+export const STANDARD_ATTRIBUTE_PREFIX = 'wm'
 export const STANDARD_ATTRIBUTE = {
-  if: 'if',
-  else: 'else',
-  elseif: 'elseif',
-  for: 'for',
-  forItem: 'forItem',
-  forIndex: 'forIndex',
-  key: 'key',
-  type: 'detault',
+  if: 'wm:if',
+  else: 'wm:else',
+  elseif: 'wm:elseif',
+  for: 'wm:for',
+  forItem: 'wm:forItem',
+  forIndex: 'wm:forIndex',
+  key: 'wm:key',
 }
 
 export const WECHAT_ATTRIBUTE = {
@@ -170,7 +170,6 @@ export const WECHAT_ATTRIBUTE = {
   forItem: 'wx:for-item',
   forIndex: 'wx:for-index',
   key: 'wx:key',
-  type: 'wechat',
 }
 
 export const ALIPAY_ATTRIBUTE = {
@@ -181,7 +180,6 @@ export const ALIPAY_ATTRIBUTE = {
   forItem: 'a:for-item',
   forIndex: 'a:for-index',
   key: 'a:key',
-  type: 'alipay',
 }
 
 export const TT_ATTRIBUTE = {}

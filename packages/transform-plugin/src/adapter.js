@@ -9,6 +9,8 @@ import {
   EXPORT_ALIPAY,
   EXPORT_TT,
   EXPORT_SWAN,
+  STANDARD_ATTRIBUTE_PREFIX,
+  STANDARD_ATTRIBUTE,
 } from './constants'
 import wechat from './wechatAdapter'
 import alipay from './alipayAdapter'
@@ -144,7 +146,49 @@ const transformHtml = function (
   resolve,
   reject
 ) {
-  compilation.modules[distPath] = data
+  const ast = parse('<CONTAINER>' + data + '</CONTAINER>', {
+    sourceType: 'module',
+    plugins: ['jsx'],
+  })
+  const _this = this
+  traverse(ast, {
+    JSXAttribute (astPath) {
+      const node = astPath.node
+      const type = node.name.type
+      if (type === 'JSXNamespacedName') {
+        const namespace = node.name.namespace
+        if (namespace.name === STANDARD_ATTRIBUTE_PREFIX) {
+          const attr = STANDARD_ATTRIBUTE_PREFIX + ':' + node.name.name.name
+          for (let standardAttr in STANDARD_ATTRIBUTE) {
+            if (attr === STANDARD_ATTRIBUTE[standardAttr]) {
+              const newAttr = _this.platform.attribute[standardAttr].split(':')
+              node.name.namespace.name = newAttr[0]
+              node.name.name.name = newAttr[1]
+            }
+          }
+        } else {
+          const shortPath = oriPath.substr(oriPath.indexOf('src'))
+          console.warn(
+            `请勿使用原生语法: ${shortPath} line ${node.name.loc.start.line}  ${
+              namespace.name
+            }:${node.name.name.name}=${node.value.value}`
+          )
+        }
+      } else if (type === 'JSXIdentifier') {
+        const attr = node.name.name
+        for (let standardAttr in STANDARD_ATTRIBUTE) {
+          if (attr === STANDARD_ATTRIBUTE[standardAttr]) {
+            const newAttr = _this.platform.attribute[standardAttr]
+            node.name.name = newAttr
+          }
+        }
+      }
+    },
+  })
+  compilation.modules[distPath] = generator(ast).code.replace(
+    /<\/?CONTAINER>;?/g,
+    ''
+  )
   resolve()
 }
 const transformJs = function (
