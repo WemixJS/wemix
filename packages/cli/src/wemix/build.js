@@ -2,7 +2,7 @@
  * @Description: 构建项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:43:33
- * @LastEditTime: 2019-04-02 19:22:55
+ * @LastEditTime: 2019-04-03 14:30:43
  */
 
 import wemix from '../core'
@@ -20,7 +20,7 @@ export default function build (program) {
     }
     compiler = wemix(program, compilerCallback)
     compiler.removeDist = true
-    if (program.watch) {
+    if (compiler.options.watch) {
       compiler.run(function (error) {
         if (error) {
           compilerCallback(error)

@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-04-02 19:23:34
+ * @LastEditTime: 2019-04-03 14:32:03
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -77,6 +77,9 @@ export default class Compiler {
         if (err) return this.finalCallback(err, callback)
         this.hooks.done.callAsync(err => {
           if (err) return this.finalCallback(err, callback)
+          if (this.options.watch) {
+            this.logger.info('Wemix is watching the files…')
+          }
           this.running = false
           return this.finalCallback(null, callback)
         })

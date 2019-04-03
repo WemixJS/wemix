@@ -274,6 +274,111 @@ const adapterCorePkg = function (compiler, data, resolve, reject) {
   })
   resolve({ data: generator(ast).code })
 }
+const splitJsonConfig = function (
+  configNode,
+  config,
+  pathParse,
+  jsonPath,
+  type,
+  compiler,
+  compilation
+) {
+  const adpaterConfig = {}
+  if (type === 'app') {
+    for (const key in this.platform.appConfig) {
+      if (key === 'window') {
+        if (config[key]) {
+          const window = {}
+          for (const skey in this.platform.appConfig[key]) {
+            if (config[key][skey] !== undefined) {
+              window[skey] = config[key][skey]
+            }
+          }
+          adpaterConfig[key] = window
+        }
+      } else if (key === 'tabBar') {
+        if (config[key]) {
+          const tabBar = {}
+          for (const skey in this.platform.appConfig[key]) {
+            if (skey === this.platform.tabName) {
+              const list = config[key][skey].map(item => {
+                const tab = Object.assign(
+                  {},
+                  this.platform.appConfig[key][skey]
+                )
+                for (const tkey in tab) {
+                  tab[tkey] = item[tab[tkey]]
+                }
+                return tab
+              })
+              tabBar[skey] = list
+            } else {
+              if (config[key][skey] !== undefined) {
+                tabBar[skey] = config[key][skey]
+              }
+            }
+          }
+          adpaterConfig[key] = tabBar
+        }
+      } else {
+        if (config[this.platform.appConfig[key]] !== undefined) {
+          adpaterConfig[key] = config[this.platform.appConfig[key]]
+        }
+      }
+    }
+    if (config[`${compiler.options.export}`]) {
+      for (const key in config[`${compiler.options.export}`]) {
+        if (
+          toString.call(config[`${compiler.options.export}`][key]) ===
+          '[object Object]'
+        ) {
+          adpaterConfig[key] = Object.assign(
+            adpaterConfig[key] || {},
+            config[`${compiler.options.export}`][key] || {}
+          )
+        } else {
+          adpaterConfig[key] = config[`${compiler.options.export}`][key]
+        }
+      }
+    }
+  }
+  if (type === 'page' || type === 'component') {
+    config.usingComponents = Object.assign(
+      config.usingComponents || {},
+      config[`${compiler.options.export}Components`] || {}
+    )
+    for (const key in config.usingComponents) {
+      const jsPath = compilation.resolvePath(
+        pathParse,
+        config.usingComponents[key] + '.js'
+      )
+      compilation.waitCompile[jsPath] = null
+    }
+    for (const key in this.platform.pageConfig) {
+      if (config[this.platform.pageConfig[key]] !== undefined) {
+        adpaterConfig[key] = config[this.platform.pageConfig[key]]
+      }
+    }
+  }
+  if (type === 'component') {
+    adpaterConfig.component = true
+  }
+  const configTempName = 'config'
+  let strCfg = JSON.stringify(adpaterConfig).replace(/"/g, `'`)
+  strCfg = `const ${configTempName} = ${strCfg};`
+  const astCfg = parse(strCfg)
+  traverse(astCfg, {
+    VariableDeclarator (astPath) {
+      const id = astPath.get('id')
+      if (id.isIdentifier({ name: configTempName })) {
+        configNode
+          .get('right')
+          .replaceWith(t.objectExpression(astPath.get('init').node.properties))
+      }
+    },
+  })
+  compilation.modules[jsonPath] = JSON.stringify(adpaterConfig)
+}
 const splitConfig = function (
   data,
   oriPath,
@@ -380,12 +485,14 @@ const splitConfig = function (
           })
         }
         const jsonPath = distPath.replace('.js', '.json')
-        this.platform.splitJsonConfig(
+        splitJsonConfig.call(
+          this,
           configNode,
           config,
           pathParse,
           jsonPath,
           componentName,
+          compiler,
           compilation
         )
       }
