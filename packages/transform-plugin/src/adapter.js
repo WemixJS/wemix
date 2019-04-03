@@ -59,7 +59,7 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
 const customHack = function (data, oriPath, compiler, type, pathParse) {
   if (
     /node_modules/.test(oriPath) &&
-    !/node_modules\/@wemix\/components/.test(oriPath)
+    !/node_modules\/@wemix\/wmcomponents/.test(oriPath)
   ) {
     data = this.platform.npmCodeHack(data, oriPath)
   } else {
