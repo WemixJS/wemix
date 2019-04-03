@@ -116,7 +116,6 @@ export const WECHAT_PAGE_CONFIG = {
   backgroundTextStyle: 'backgroundTextStyle',
   enablePullDownRefresh: 'enablePullDownRefresh',
   onReachBottomDistance: 'onReachBottomDistance',
-  mixins: 'mixins',
   usingComponents: 'usingComponents',
 }
 
@@ -125,7 +124,6 @@ export const ALIPAY_PAGE_CONFIG = {
   defaultTitle: 'navigationBarTitleText',
   pullRefresh: 'enablePullDownRefresh',
   allowsBounceVertical: 'YES',
-  mixins: 'mixins',
   usingComponents: 'usingComponents',
 }
 export const TT_PAGE_CONFIG = {
@@ -136,7 +134,6 @@ export const TT_PAGE_CONFIG = {
   backgroundTextStyle: 'backgroundTextStyle',
   enablePullDownRefresh: 'enablePullDownRefresh',
   onReachBottomDistance: 'onReachBottomDistance',
-  mixins: 'mixins',
   usingComponents: 'usingComponents',
 }
 export const SWAN_PAGE_CONFIG = {
@@ -147,7 +144,6 @@ export const SWAN_PAGE_CONFIG = {
   backgroundTextStyle: 'backgroundTextStyle',
   enablePullDownRefresh: 'enablePullDownRefresh',
   onReachBottomDistance: 'onReachBottomDistance',
-  mixins: 'mixins',
   usingComponents: 'usingComponents',
 }
 

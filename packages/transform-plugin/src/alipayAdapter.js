@@ -2,7 +2,7 @@
  * @Description: alipayAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-02 20:15:55
+ * @LastEditTime: 2019-04-03 13:01:29
  */
 import npath from 'path'
 import { parse } from '@babel/parser'
@@ -37,6 +37,13 @@ export default {
             const window = {}
             for (const skey in this.appConfig[key]) {
               if (config[key][skey] !== undefined) {
+                if (skey === 'pullRefresh') {
+                  if (config[key][skey]) {
+                    window['allowsBounceVertical'] = 'YES'
+                  } else {
+                    window['allowsBounceVertical'] = 'NO'
+                  }
+                }
                 window[skey] = config[key][skey]
               }
             }
@@ -96,6 +103,13 @@ export default {
       }
       for (const key in this.pageConfig) {
         if (config[this.pageConfig[key]] !== undefined) {
+          if (key === 'pullRefresh') {
+            if (config[this.pageConfig[key]]) {
+              window['allowsBounceVertical'] = 'YES'
+            } else {
+              window['allowsBounceVertical'] = 'NO'
+            }
+          }
           adpaterConfig[key] = config[this.pageConfig[key]]
         }
       }
