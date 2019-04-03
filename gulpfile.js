@@ -35,9 +35,7 @@ const filelog = title => {
 }
 
 gulp.task('clean', () =>
-  gulp
-    .src(['packages/*/lib', '!packages/wmcomponents/lib'], { read: false })
-    .pipe(clean())
+  gulp.src('packages/*/lib', { read: false }).pipe(clean())
 )
 
 gulp.task('build', ['clean'], () => {
