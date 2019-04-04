@@ -15,8 +15,9 @@
   },
   "homepage": "https://github.com/WemixJS/wemix#readme",
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "@babel/runtime": "^7.4.3",
-    "loader-utils": "^1.2.3",
+    "https": "^1.0.0",
     "stylus": "^0.54.5"
   }
 }

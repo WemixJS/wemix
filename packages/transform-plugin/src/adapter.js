@@ -107,6 +107,47 @@ const mergeProjectConfig = function (oriPath, compiler, resolve, reject) {
   }
 }
 
+const updateComponentsRef = function (
+  tags,
+  pathParse,
+  distPath,
+  compilation,
+  compiler
+) {
+  const checkIfNeedUpdate = function (tags, configObj) {
+    let components = []
+    if (configObj.usingComponents) {
+      for (const com in configObj.usingComponents) {
+        components.push(com)
+      }
+    }
+    for (let i = 0; i < tags.length; i++) {
+      if (~components.indexOf(tags[i])) {
+        tags.splice(i, 1)
+      }
+    }
+    if (tags.length) {
+      // configObj.usingComponents['Button'] = '/test/button'
+      // fs.writeJson(jsonFilePath, configObj)
+    }
+  }
+  const configFilePath =
+    distPath.substr(0, distPath.lastIndexOf('/') + 1) + pathParse.name + '.json'
+  const configFileStr = compilation.modules[configFilePath]
+  if (configFileStr) {
+    const configObj = JSON.parse(configFileStr)
+    checkIfNeedUpdate(tags, configObj)
+  } else if (fs.existsSync(configFilePath)) {
+    fs.readJSON(configFilePath, (err, configObj) => {
+      if (!err) {
+        checkIfNeedUpdate(tags, configObj)
+      } else {
+        compiler.logger.warn('读取文件失败', configFilePath)
+      }
+    })
+  }
+}
+
 const transformHtml = function (
   data,
   oriPath,
@@ -118,12 +159,13 @@ const transformHtml = function (
   reject
 ) {
   try {
-    data = data.replace(/<!--[\s\S]*?-->/g, '')
-    const ast = parse('<CONTAINER>' + data + '</CONTAINER>', {
+    data = data.replace(/\s*<!--[\s\S]*?-->\s*/g, '')
+    const ast = parse(`<CONTAINER>${data}</CONTAINER>`, {
       sourceType: 'module',
       plugins: ['jsx'],
     })
     const _this = this
+    let tags = []
     traverse(ast, {
       JSXAttribute (astPath) {
         const node = astPath.node
@@ -137,13 +179,20 @@ const transformHtml = function (
                 const newAttr = _this.platform.attribute[standardAttr].split(
                   ':'
                 )
-                node.name.namespace.name = newAttr[0]
-                node.name.name.name = newAttr[1]
+                if (newAttr.length > 1) {
+                  node.name.namespace.name = newAttr[0]
+                  node.name.name.name = newAttr[1]
+                } else {
+                  node.name.type = 'JSXIdentifier'
+                  delete node.name.namespace
+                  delete node.name.name
+                  node.name.name = newAttr[0]
+                }
               }
             }
           } else {
             const shortPath = oriPath.substr(oriPath.indexOf('src'))
-            console.warn(
+            compiler.logger.warn(
               `请勿使用原生语法: ${shortPath} line ${
                 node.name.loc.start.line
               }  ${namespace.name}:${node.name.name.name}=${node.value.value}`
@@ -168,7 +217,15 @@ const transformHtml = function (
           }
         }
       },
+      JSXOpeningElement (astPath) {
+        const node = astPath.node
+        const tagName = node.name.name
+        if (!~tags.indexOf(tagName)) {
+          tags.push(tagName)
+        }
+      },
     })
+    updateComponentsRef(tags, pathParse, distPath, compilation, compiler)
     compilation.modules[distPath] = generator(ast).code.replace(
       /<\/?CONTAINER>;?/g,
       ''
