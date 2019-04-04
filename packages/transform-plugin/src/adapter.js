@@ -118,7 +118,7 @@ const transformHtml = function (
   reject
 ) {
   try {
-    data = data.replace(/<!--[\s\S]*?-->/g, '')
+    data = data.replace(/\s*<!--[\s\S]*?-->\s*/g, '')
     const ast = parse('<CONTAINER>' + data + '</CONTAINER>', {
       sourceType: 'module',
       plugins: ['jsx'],

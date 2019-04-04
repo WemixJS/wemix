@@ -151,10 +151,10 @@ export const STANDARD_ATTRIBUTE_PREFIX = 'wm'
 export const STANDARD_ATTRIBUTE = {
   if: 'wm:if',
   else: 'wm:else',
-  elseif: 'wm:elseif',
+  elseif: 'wm:elif',
   for: 'wm:for',
-  forItem: 'wm:forItem',
-  forIndex: 'wm:forIndex',
+  forItem: 'wm:for-item',
+  forIndex: 'wm:for-index',
   key: 'wm:key',
   bindtap: 'bindtap',
   bindlongtap: 'bindlongtap',
