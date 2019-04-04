@@ -4,6 +4,8 @@
  * @Date: 2019-02-28 14:32:47
  * @LastEditTime: 2019-03-27 10:11:17
  */
+import https from 'https'
+import stylus from 'stylus'
 
 const accMul = (arg1, arg2) => {
   let m = 0
@@ -125,8 +127,20 @@ const _handleImport = (data, imports) => {
   }
 }
 export default function (data, loader, path, next) {
-  if (!data) {
-    return next(null, data)
+  if (data) {
+    _promise(data).then(data => {
+      const imports = []
+      data = _handleImport(data, imports)
+      const instance = stylus(data)
+
+      instance.render((err, css) => {
+        if (err) {
+          next(err)
+        }
+        next(null, css)
+      })
+    })
+  } else {
+    next(null, data)
   }
-  next(null, data)
 }
