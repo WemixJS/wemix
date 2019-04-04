@@ -137,8 +137,15 @@ const transformHtml = function (
                 const newAttr = _this.platform.attribute[standardAttr].split(
                   ':'
                 )
-                node.name.namespace.name = newAttr[0]
-                node.name.name.name = newAttr[1]
+                if (newAttr.length > 1) {
+                  node.name.namespace.name = newAttr[0]
+                  node.name.name.name = newAttr[1]
+                } else {
+                  node.name.type = 'JSXIdentifier'
+                  delete node.name.namespace
+                  delete node.name.name
+                  node.name.name = newAttr[0]
+                }
               }
             }
           } else {
