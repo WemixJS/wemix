@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-04-02 18:57:37
+ * @LastEditTime: 2019-04-04 09:55:21
  */
 
 import fs from 'fs-extra'

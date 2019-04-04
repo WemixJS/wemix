@@ -221,22 +221,51 @@ const transformJs = function (
           'node_modules',
           npath.join(compiler.options.export, npath.sep, 'npm')
         )
-        const relative = npath.relative(
-          npath.dirname(distPath),
-          compiler.options.output
-        )
-        if (relative) {
-          importDistPath =
-            relative + importDistPath.replace(compiler.options.output, '')
+        // 备份npm包为后面输出的时候合并npm文件做准备
+        if (
+          /\/npm\//.test(importDistPath) &&
+          !/\/npm\/@wemix\/wmcomponents/.test(importDistPath)
+        ) {
+          if (typeof compiler.vendors[importDistPath] === 'undefined') {
+            compiler.vendors[importDistPath] = compiler.vendorId++
+            compiler.overrideVendors = true
+          }
+          // 替换require('')为global.__wemix_require(compiler.vendors[importDistPath])
+          const callee = item.astPath.get('callee')
+          if (/\/npm\//.test(distPath)) {
+            callee.replaceWith(t.identifier('__wemix_require'))
+          } else {
+            callee.replaceWith(t.identifier('global.__wemix_require'))
+          }
+          const importReplace = item.astPath.get('arguments')[0]
+          importReplace.replaceWith(
+            t.stringLiteral(compiler.vendors[importDistPath].toString())
+          )
         } else {
-          importDistPath =
-            '.' + importDistPath.replace(compiler.options.output, '')
+          // 替换require
+          const relative = npath.relative(
+            npath.dirname(distPath),
+            compiler.options.output
+          )
+          if (relative) {
+            importDistPath =
+              relative + importDistPath.replace(compiler.options.output, '')
+          } else {
+            importDistPath =
+              '.' + importDistPath.replace(compiler.options.output, '')
+          }
+          const importReplace = item.astPath.get('arguments')[0]
+          importReplace.replaceWith(t.stringLiteral(importDistPath))
         }
-        const importReplace = item.astPath.get('arguments')[0]
-        importReplace.replaceWith(t.stringLiteral(importDistPath))
         compilation.waitCompile[item.absPath] = null
       })
       data = generator(ast).code
+      if (type === 'app') {
+        data = data.replace(
+          '"use strict";',
+          `"use strict";\nrequire("${compiler.vendorName}");`
+        )
+      }
       compilation.modules[distPath] = customHack.call(
         this,
         data,

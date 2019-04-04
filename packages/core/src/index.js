@@ -2,9 +2,12 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-02 16:54:51
+ * @LastEditTime: 2019-04-04 18:01:42
  */
 
+import app from './app'
+import page from './page'
+import component from './component'
 import Adapter from './wechat'
 import util from './util'
 const adapter = new Adapter()
@@ -137,4 +140,7 @@ class Wemix {
   }
 }
 const wemix = new Wemix()
+wemix.app = app
+wemix.page = page
+wemix.component = component
 export default wemix

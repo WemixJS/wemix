@@ -2,13 +2,15 @@
  * @Description: Core index
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:38:23
- * @LastEditTime: 2019-04-03 14:30:02
+ * @LastEditTime: 2019-04-04 14:05:39
  */
 
+import npath from 'path'
 import * as parseOptions from './options'
 import Compiler from './compiler'
 import FileSystemPlugin from './plugins/fileSystem'
 import OutputFilePlugin from './plugins/outputFile'
+import VendorPlugin from './plugins/vendor'
 import ExecuteLoaderPlugin from './plugins/executeLoader'
 import OptionsApply from './optionsApply'
 
@@ -19,6 +21,7 @@ const wemix = function (options, callback) {
   new FileSystemPlugin().apply(compiler)
   // singleCompile hooks 第一个执行loaders
   new ExecuteLoaderPlugin().apply(compiler)
+  new VendorPlugin().apply(compiler)
   if (Array.isArray(options.plugins)) {
     for (const plugin of options.plugins) {
       if (typeof plugin === 'function') {
@@ -32,6 +35,10 @@ const wemix = function (options, callback) {
   compiler.hooks.environment.callAsync(callback)
   compiler.hooks.afterEnvironment.callAsync(callback)
   compiler.options = new OptionsApply().process(options, compiler, callback)
+  compiler.vendorDistPath = npath.join(
+    compiler.options.output,
+    compiler.vendorName
+  )
   return compiler
 }
 

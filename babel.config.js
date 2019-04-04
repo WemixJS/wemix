@@ -4,7 +4,7 @@ module.exports = function (api) {
     [
       '@babel/preset-env',
       {
-        debug: true,
+        debug: false,
         targets: {
           chrome: '35',
           ios: '8',
@@ -16,12 +16,24 @@ module.exports = function (api) {
             'Android >= 4.1',
           ],
         },
-        useBuiltIns: 'usage',
+        useBuiltIns: false,
         modules: 'commonjs',
       },
     ],
   ]
-  const plugins = ['add-module-exports']
+  const plugins = [
+    [
+      '@babel/plugin-transform-runtime',
+      {
+        absoluteRuntime: false,
+        corejs: false,
+        helpers: false,
+        regenerator: true,
+        useESModules: false,
+      },
+    ],
+    'add-module-exports',
+  ]
   return {
     presets,
     plugins,

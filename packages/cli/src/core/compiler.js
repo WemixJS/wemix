@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-04-03 14:32:03
+ * @LastEditTime: 2019-04-04 14:05:46
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -34,6 +34,10 @@ export default class Compiler {
       done: new AsyncSeriesHook([]),
       failed: new AsyncSeriesHook(['error']),
     }
+    this.vendorName = './vendor.js'
+    this.vendors = {}
+    this.vendorId = 0
+    this.overrideVendors = false
     this.watchFiles = []
     this.logger = logger
     this.cache = {}

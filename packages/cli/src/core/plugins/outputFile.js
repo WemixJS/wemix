@@ -2,7 +2,7 @@
  * @Description: OutputFile Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-03-28 15:03:05
+ * @LastEditTime: 2019-04-04 18:04:10
  */
 import fs from 'fs-extra'
 import npath from 'path'
@@ -20,12 +20,18 @@ export default class OutputFilePlugin {
     }
     compiler.logger.start('开始写入')
     for (const distPath in compilation.modules) {
-      promiseModuleCompile.push(
-        writeData(distPath, compilation.modules[distPath])
-      )
+      if (
+        !/\/npm\//.test(distPath) ||
+        /\/npm\/@wemix\/wmcomponents/.test(distPath)
+      ) {
+        promiseModuleCompile.push(
+          writeData(distPath, compilation.modules[distPath])
+        )
+      }
     }
     Promise.all(promiseModuleCompile)
       .then(() => {
+        compiler.overrideVendors = false
         compiler.logger.success('写入成功')
         callback()
       })
@@ -36,7 +42,7 @@ export default class OutputFilePlugin {
   apply (compiler) {
     // 写入到目标目录
     compiler.hooks.emit.tapAsync(
-      'WechatEmitPlugin',
+      'OutputFilePlugin',
       (compilation, callback) => {
         if (compiler.removeDist) {
           compiler.removeDist = false

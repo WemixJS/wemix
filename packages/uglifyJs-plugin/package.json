@@ -15,7 +15,7 @@
   },
   "homepage": "https://github.com/WemixJS/wemix#readme",
   "dependencies": {
-    "@babel/polyfill": "^7.2.5"
+    "@babel/runtime": "^7.4.3"
   },
   "devDependencies": {
     "uglify-js": "^3.5.0"
