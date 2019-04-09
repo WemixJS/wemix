@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 17:01:46
+ * @LastEditTime: 2019-04-09 17:30:16
  */
 
 import app from './app'
@@ -64,7 +64,7 @@ class Wemix {
       return hide
     }
     config['onUnload'] = function (...args) {
-      deleteAllComponent(this.__wxWebviewId__)
+      deleteAllComponent(this.page.__wxWebviewId__)
       const tp = Date.now() - this.timestamp
       const app = getApp()
       const unload =

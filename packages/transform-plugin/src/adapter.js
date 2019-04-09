@@ -259,7 +259,7 @@ const transformHtml = function (
           }
           if (attr === 'id') {
             const astNodeCopy = JSON.parse(JSON.stringify(astPath.node))
-            astNodeCopy.name.name = 'wemix-id'
+            astNodeCopy.name.name = 'wemixCopyId'
             astPath.insertAfter(astNodeCopy)
           }
         }

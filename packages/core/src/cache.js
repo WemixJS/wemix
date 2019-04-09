@@ -29,7 +29,7 @@ export const deleteComponent = function (webviewId, id, nodeId) {
   const components = componentIns[webviewId][id]
   if (components) {
     for (let i = 0; i < components.length; i++) {
-      if (components[i].__wxExparserNodeId__ === nodeId) {
+      if (components[i].__exparserNodeId__ === nodeId) {
         componentIns[webviewId][id].splice(i, 1)
         break
       }

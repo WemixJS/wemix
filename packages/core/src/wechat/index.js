@@ -2,18 +2,23 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 16:57:11
+ * @LastEditTime: 2019-04-09 17:26:52
  */
 
 import { diffData, mergeData, filterData } from '../util'
-import { setComponent, deleteComponent } from '../cache'
+import {
+  setComponent,
+  deleteComponent,
+  getComponent,
+  getAllComponent,
+} from '../cache'
 export default class Wechat {
   $createComponent (ComponentClass, wemix) {
     const config = {
       methods: {},
     }
     config['properties'] = Object.assign(
-      { wemixId: { type: String, value: '' } },
+      { wemixCopyId: { type: String, value: '' } },
       ComponentClass.properties || {}
     )
     config['created'] = function () {
@@ -23,15 +28,13 @@ export default class Wechat {
     }
     config['attached'] = function (...args) {
       this.component.setData(this.component.data)
-      this.component.__wxWebviewId__ = this.__wxWebviewId__
-      this.component.__wxExparserNodeId__ = this.__wxExparserNodeId__
-      if (this.component.props.wemixId) {
-        setComponent(
-          this.__wxWebviewId__,
-          this.component.props.wemixId,
-          this.component
-        )
-      }
+      this.component.__webviewId__ = this.__wxWebviewId__
+      this.component.__exparserNodeId__ = this.__wxExparserNodeId__
+      setComponent(
+        this.component.__webviewId__,
+        this.component.props.wemixCopyId || 'default',
+        this.component
+      )
       return (
         this.component['onLoad'] &&
         this.component['onLoad'].apply(this.component, args)
@@ -42,9 +45,9 @@ export default class Wechat {
         this.component['onUnload'] &&
         this.component['onUnload'].apply(this.component, args)
       deleteComponent(
-        this.__wxWebviewId__,
-        this.component.props.wemixId,
-        this.__wxExparserNodeId__
+        this.component.__webviewId__,
+        this.component.props.wemixCopyId,
+        this.__exparserNodeId__
       )
       return unload
     }
@@ -109,6 +112,12 @@ export default class Wechat {
             mergeData(wemix, differData, this.data)
             $wxcomponent.setData(differData, func)
           }
+        }
+        this.selectComponent = function (id) {
+          return getComponent(this.__webviewId__, id.replace('#', ''))
+        }
+        this.selectAllComponent = function () {
+          return getAllComponent(this.__webviewId__)
         }
         const defineObj = {}
         $wxcomponent.propsKeys.forEach(key => {
