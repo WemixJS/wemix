@@ -2,33 +2,51 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 14:36:15
+ * @LastEditTime: 2019-04-09 16:57:11
  */
 
 import { diffData, mergeData, filterData } from '../util'
+import { setComponent, deleteComponent } from '../cache'
 export default class Wechat {
   $createComponent (ComponentClass, wemix) {
     const config = {
       methods: {},
     }
-    config['properties'] = ComponentClass.properties
+    config['properties'] = Object.assign(
+      { wemixId: { type: String, value: '' } },
+      ComponentClass.properties || {}
+    )
     config['created'] = function () {
       this.component = new ComponentClass()
-      this.propsKeys = Object.keys(ComponentClass.properties || {})
+      this.propsKeys = Object.keys(config['properties'])
       this.component.$init(wemix, this)
     }
     config['attached'] = function (...args) {
       this.component.setData(this.component.data)
+      this.component.__wxWebviewId__ = this.__wxWebviewId__
+      this.component.__wxExparserNodeId__ = this.__wxExparserNodeId__
+      if (this.component.props.wemixId) {
+        setComponent(
+          this.__wxWebviewId__,
+          this.component.props.wemixId,
+          this.component
+        )
+      }
       return (
         this.component['onLoad'] &&
         this.component['onLoad'].apply(this.component, args)
       )
     }
     config['detached'] = function (...args) {
-      return (
+      const unload =
         this.component['onUnload'] &&
         this.component['onUnload'].apply(this.component, args)
+      deleteComponent(
+        this.__wxWebviewId__,
+        this.component.props.wemixId,
+        this.__wxExparserNodeId__
       )
+      return unload
     }
     Object.getOwnPropertyNames(ComponentClass.prototype || []).forEach(v => {
       if (

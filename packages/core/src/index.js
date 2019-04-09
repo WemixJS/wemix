@@ -2,12 +2,13 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 14:30:52
+ * @LastEditTime: 2019-04-09 17:01:46
  */
 
 import app from './app'
 import page from './page'
 import Adapter from './wechat'
+import { deleteAllComponent } from './cache'
 const adapter = new Adapter()
 class Wemix {
   constructor () {
@@ -63,6 +64,7 @@ class Wemix {
       return hide
     }
     config['onUnload'] = function (...args) {
+      deleteAllComponent(this.__wxWebviewId__)
       const tp = Date.now() - this.timestamp
       const app = getApp()
       const unload =
