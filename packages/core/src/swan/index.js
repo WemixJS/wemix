@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 09:48:25
+ * @LastEditTime: 2019-04-09 10:51:01
  */
 
 import { diffData, mergeData } from '../util'
@@ -11,6 +11,7 @@ export default class Swan {
   $createComponent (ComponentClass) {
     const [config, _this] = [{ methods: {} }, this]
     config['data'] = _this.data || {}
+    config['properties'] = ComponentClass.properties
     config['created'] = function () {
       this.component = new ComponentClass()
       this.component.$init(_this, this)
@@ -77,7 +78,7 @@ export default class Swan {
   getComponent () {
     return class {
       $init (wemix, $wxcomponent) {
-        this.data = this.data || {}
+        this.data = Object.assign(this.data || {}, $wxcomponent.data)
         this.setData = (data, func) => {
           if (!wemix.isObject(data)) {
             throw new Error('Data should be an ["object Object"]')
