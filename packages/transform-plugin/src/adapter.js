@@ -251,10 +251,10 @@ const transformHtml = function (
           }
           if (
             !replaced &&
-            attr.indexOf('bindon') === 0 &&
-            _this.platform.name === EXPORT_SWAN
+            attr.indexOf('bind') === 0 &&
+            _this.platform.name === EXPORT_ALIPAY
           ) {
-            name.replaceWith(t.jsxIdentifier(attr.replace('bindon', 'on')))
+            name.replaceWith(t.jsxIdentifier(attr.replace('bind', 'on')))
           }
         }
       },
