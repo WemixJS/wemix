@@ -257,6 +257,11 @@ const transformHtml = function (
           ) {
             name.replaceWith(t.jsxIdentifier(attr.replace('bind', 'on')))
           }
+          if (attr === 'id') {
+            const astNodeCopy = JSON.parse(JSON.stringify(astPath.node))
+            astNodeCopy.name.name = 'wemix-id'
+            astPath.insertAfter(astNodeCopy)
+          }
         }
       },
       JSXOpeningElement (astPath) {
