@@ -8,7 +8,7 @@
 import app from './app'
 import page from './page'
 import Adapter from './wechat'
-import { deleteAllComponent } from './cache'
+import { deleteAllComponents } from './cache'
 const adapter = new Adapter()
 class Wemix {
   constructor () {
@@ -64,7 +64,7 @@ class Wemix {
       return hide
     }
     config['onUnload'] = function (...args) {
-      deleteAllComponent(this.page.__wxWebviewId__)
+      deleteAllComponents(this.page.__wxWebviewId__)
       const tp = Date.now() - this.timestamp
       const app = getApp()
       const unload =

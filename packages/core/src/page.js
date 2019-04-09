@@ -2,10 +2,10 @@
  * @Description: extends Page
  * @LastEditors: sanshao
  * @Date: 2019-04-05 20:45:45
- * @LastEditTime: 2019-04-09 17:30:02
+ * @LastEditTime: 2019-04-09 20:07:26
  */
 import { diffData, mergeData } from './util'
-import { getComponent, getAllComponent } from './cache'
+import { getComponent, getAllComponents } from './cache'
 export default class {
   $init (wemix, $wxpage, pagePath, ...args) {
     this.__webviewId__ = $wxpage.__wxWebviewId__
@@ -25,11 +25,13 @@ export default class {
         $wxpage.setData(differData, func)
       }
     }
-    this.selectComponent = function (id) {
-      return getComponent(this.__webviewId__, id.replace('#', ''))
+    this.selectComponent = function (selector) {
+      if (selector) {
+        return getComponent(this.__webviewId__, selector)
+      }
     }
-    this.selectAllComponent = function () {
-      return getAllComponent(this.__webviewId__)
+    this.selectAllComponents = function (selector) {
+      return getAllComponents(this.__webviewId__, selector)
     }
   }
 }

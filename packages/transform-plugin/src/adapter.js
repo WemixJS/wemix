@@ -258,9 +258,14 @@ const transformHtml = function (
             name.replaceWith(t.jsxIdentifier(attr.replace('bind', 'on')))
           }
           if (attr === 'id') {
-            const astNodeCopy = JSON.parse(JSON.stringify(astPath.node))
-            astNodeCopy.name.name = 'wemixCopyId'
-            astPath.insertAfter(astNodeCopy)
+            astPath.insertAfter(
+              t.jsxAttribute(t.jsxIdentifier('wemixCopyId'), value.node)
+            )
+          }
+          if (attr === 'class') {
+            astPath.insertAfter(
+              t.jsxAttribute(t.jsxIdentifier('wemixCopyClass'), value.node)
+            )
           }
         }
       },
