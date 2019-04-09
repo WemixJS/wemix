@@ -1,96 +1,112 @@
-export default {
-  extend () {
-    let options, name, src, copy, copyIsArray, clone
-    let target = arguments[0] || {}
-    let i = 1
-    let length = arguments.length
-    let deep = false
-    let self = this
+/*
+ * @Description: util
+ * @LastEditors: sanshao
+ * @Date: 2019-04-05 20:43:27
+ * @LastEditTime: 2019-04-05 22:51:37
+ */
 
-    // Handle a deep copy situation
-    if (typeof target === 'boolean') {
-      deep = target
-
-      // Skip the boolean and the target
-      target = arguments[i] || {}
-      i++
+const parseKey = function (e) {
+  for (
+    var t = e.length, n = [], o = '', r = 0, i = !1, a = !1, u = 0;
+    u < t;
+    u++
+  ) {
+    var c = e[u]
+    if (c === '\\') {
+      if (
+        u + 1 < t &&
+        (e[u + 1] === '.' ||
+          e[u + 1] === '[' ||
+          e[u + 1] === ']' ||
+          e[u + 1] === '\\')
+      ) {
+        o += e[u + 1]
+        u++
+      } else {
+        o += '\\'
+      }
+    } else if (c === '.') {
+      if (o) {
+        n.push(o)
+        o = ''
+      }
+    } else if (c === '[') {
+      if ((o && (n.push(o), (o = '')), n.length === 0)) {
+        throw new Error('The path string should not start with []: ' + e)
+      }
+      a = !0
+      i = !1
+    } else if (c === ']') {
+      if (!i) {
+        throw new Error(
+          'There should be digits inside [] in the path string: ' + e
+        )
+      }
+      a = !1
+      n.push(r)
+      r = 0
+    } else if (a) {
+      if (c < '0' || c > '9') {
+        throw new Error(
+          'Only digits (0-9) can be put inside [] in the path string: ' + e
+        )
+      }
+      i = !0
+      r = 10 * r + c.charCodeAt(0) - 48
+    } else {
+      o += c
     }
-
-    // Handle case when target is a string or something (possible in deep copy)
-    if (typeof target !== 'object' && !(typeof target === 'function')) {
-      target = {}
-    }
-
-    // Extend jQuery itself if only one argument is passed
-    if (i === length) {
-      target = this
-      i--
-    }
-
-    for (; i < length; i++) {
-      // Only deal with non-null/undefined values
-      if ((options = arguments[i])) {
-        // Extend the base object
-        for (name in options) {
-          src = target[name]
-          copy = options[name]
-
-          // Prevent never-ending loop
-          if (target === copy) {
-            continue
-          }
-
-          // Recurse if we're merging plain objects or arrays
-          if (
-            deep &&
-            copy &&
-            (self.isPlainObject(copy) || (copyIsArray = Array.isArray(copy)))
-          ) {
-            if (copyIsArray) {
-              copyIsArray = false
-              clone = src && Array.isArray(src) ? src : []
-            } else {
-              clone = src && self.isPlainObject(src) ? src : {}
-            }
-
-            // Never move original objects, clone them
-            target[name] = self.extend(deep, clone, copy)
-
-            // Don't bring in undefined values => bring undefined values
-          } else {
-            target[name] = copy
-          }
-        }
+  }
+  if ((o && n.push(o), t === 0)) {
+    throw new Error('The path string should not be empty')
+  }
+  return n
+}
+// 数组没有做diff，成本太大
+export const diffData = function (wemix, differData, wxData, data, lastDotKey) {
+  let cacheWXData = wxData
+  let cacheData = data
+  for (const key in cacheData) {
+    let newDotKey = lastDotKey + key
+    if (wemix.isObject(cacheData[key])) {
+      if (wemix.isObject(cacheWXData[key])) {
+        diffData(wemix, differData, cacheWXData[key], cacheData[key], newDotKey)
+      } else {
+        differData[newDotKey] = cacheData[key]
+      }
+    } else if (wemix.isArray(cacheData[key])) {
+      differData[newDotKey] = cacheData[key]
+    } else if (
+      wemix.isNumber(cacheData[key]) ||
+      wemix.isNull(cacheData[key]) ||
+      wemix.isBoolean(cacheData[key]) ||
+      wemix.isString(cacheData[key]) ||
+      wemix.isSymbol(cacheData[key])
+    ) {
+      if (cacheWXData[key] !== cacheData[key]) {
+        differData[newDotKey] = cacheData[key]
       }
     }
+  }
+}
 
-    // Return the modified object
-    return target
-  },
-  isPlainObject (obj) {
-    let proto, Ctor
-
-    // Detect obvious negatives
-    // Use toString instead of jQuery.type to catch host objects
-    if (!obj || Object.prototype.toString.call(obj) !== '[object Object]') {
-      return false
+export const mergeData = function (wemix, differData, data) {
+  for (let key in differData) {
+    const keys = parseKey(key)
+    let cache = data
+    for (let i = 0; i < keys.length; i++) {
+      if (keys.length - i === 1) {
+        cache[keys[i]] = differData[key]
+      } else {
+        if (cache[keys[i]] === undefined) {
+          if (wemix.isNumber(keys[i + 1])) {
+            cache[keys[i]] = []
+          } else {
+            cache[keys[i]] = {}
+          }
+        }
+        cache = cache[keys[i]]
+      }
     }
-
-    proto = Object.getPrototypeOf(obj)
-
-    // Objects with no prototype (e.g., `Object.create( null )`) are plain
-    if (!proto) {
-      return true
-    }
-
-    // Objects with prototype are plain iff they were constructed by a global Object function
-    Ctor =
-      Object.prototype.hasOwnProperty.call(proto, 'constructor') &&
-      proto.constructor
-    return (
-      typeof Ctor === 'function' &&
-      Object.prototype.hasOwnProperty.toString.call(Ctor) ===
-        Object.prototype.hasOwnProperty.toString.call(Object)
-    )
-  },
+  }
 }

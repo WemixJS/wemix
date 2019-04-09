@@ -1,48 +1,25 @@
+/*
+ * @Description: extends Page
+ * @LastEditors: sanshao
+ * @Date: 2019-04-05 20:45:45
+ * @LastEditTime: 2019-04-05 22:52:29
+ */
+import { diffData, mergeData } from './util'
 export default class {
   $init (wemix, $wxpage, pagePath, ...args) {
+    this.data = this.data || {}
     this.options = args[0]
     this.route = `/${pagePath}`
-    this.search = wemix.parseSearch(this.options)
+    let strOpt = wemix.stringify(this.options, false)
+    this.search = strOpt ? '?' + strOpt : strOpt
     this.setData = (data, func) => {
-      for (let key in data) {
-        if (data[key] === undefined) {
-          delete data[key]
-        }
+      if (!wemix.isObject(data)) {
+        throw new Error('Data should be an ["object Object"]')
       }
-      $wxpage.setData(data, func)
+      const differData = {}
+      diffData(wemix, differData, $wxpage.data, data, '')
+      mergeData(wemix, differData, this.data)
+      $wxpage.setData(differData, func)
     }
-    // this.emit = (config = {}, ...args) => {
-    //   config = Object.assign({ listenCurrentRoute: false }, config)
-    //   if (config.listenerName) {
-    //     const pages = getCurrentPages()
-    //     if (config.listenCurrentRoute) {
-    //       const route = pages[pages.length - 1].route || pages[pages.length - 1].__route__
-    //       if (route && wemix.instance.pages && wemix.instance.pages[`/${route}`]) {
-    //         const samePages = Object.keys(wemix.instance.pages[`/${route}`]) || []
-    //         samePages.forEach(item => {
-    //           const currentPageInstance = wemix.instance.pages[`/${route}`][item]
-    //           currentPageInstance.constructor['listeners'] &&
-    //             currentPageInstance.constructor['listeners'][config.listenerName] &&
-    //             currentPageInstance.constructor['listeners'][config.listenerName].apply(currentPageInstance, args)
-    //           checkComListeners(wemix, wemix.config.pages[`/${route}`], currentPageInstance.__wxWebviewId__, config.listenerName, args)
-    //         })
-    //       }
-    //     } else {
-    //       pages.forEach((page) => {
-    //         const route = page.route || page.__route__
-    //         if (route && wemix.instance.pages && wemix.instance.pages[`/${route}`]) {
-    //           const samePages = Object.keys(wemix.instance.pages[`/${route}`]) || []
-    //           samePages.forEach(item => {
-    //             const currentPageInstance = wemix.instance.pages[`/${route}`][item]
-    //             currentPageInstance.constructor['listeners'] &&
-    //               currentPageInstance.constructor['listeners'][config.listenerName] &&
-    //               currentPageInstance.constructor['listeners'][config.listenerName].apply(currentPageInstance, args)
-    //             checkComListeners(wemix, wemix.config.pages[`/${route}`], currentPageInstance.__wxWebviewId__, config.listenerName, args)
-    //           })
-    //         }
-    //       })
-    //     }
-    //   }
-    // }
   }
 }

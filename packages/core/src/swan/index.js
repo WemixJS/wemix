@@ -2,11 +2,12 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 10:01:40
+ * @LastEditTime: 2019-04-09 09:48:25
  */
 
 import { diffData, mergeData } from '../util'
-export default class Wechat {
+
+export default class Swan {
   $createComponent (ComponentClass) {
     const [config, _this] = [{ methods: {} }, this]
     config['data'] = _this.data || {}
