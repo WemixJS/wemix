@@ -58,6 +58,7 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
 }
 
 const customHack = function (data, oriPath, compiler, type, pathParse) {
+  data = data.replace(/process\.env\.NODE_ENV/g, `"${compiler.options.env}"`)
   if (
     /node_modules/.test(oriPath) &&
     !/node_modules\/@wemix\/wmcomponents/.test(oriPath)

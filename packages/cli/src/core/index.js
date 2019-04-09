@@ -2,7 +2,7 @@
  * @Description: Core index
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:38:23
- * @LastEditTime: 2019-04-04 14:05:39
+ * @LastEditTime: 2019-04-09 15:33:07
  */
 
 import npath from 'path'
@@ -35,6 +35,7 @@ const wemix = function (options, callback) {
   compiler.hooks.environment.callAsync(callback)
   compiler.hooks.afterEnvironment.callAsync(callback)
   compiler.options = new OptionsApply().process(options, compiler, callback)
+  process.env.NODE_ENV = compiler.options.env
   compiler.vendorDistPath = npath.join(
     compiler.options.output,
     compiler.vendorName
