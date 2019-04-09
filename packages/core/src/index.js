@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 09:47:29
+ * @LastEditTime: 2019-04-09 14:30:52
  */
 
 import app from './app'
@@ -20,6 +20,7 @@ class Wemix {
     config['onLaunch'] = function (...args) {
       this.app = new AppClass()
       this.app.$init(_this, AppClass)
+      this.app['onLaunch'] && this.app['onLaunch'].apply(this.app, args)
     }
     Object.getOwnPropertyNames(AppClass.prototype || []).forEach(v => {
       if (
@@ -29,8 +30,8 @@ class Wemix {
         v !== 'onPageShow' &&
         v !== 'onPageHide'
       ) {
-        config[v] = (...args) => {
-          return _this[v] && _this[v].apply(_this, args)
+        config[v] = function (...args) {
+          return this.app[v] && this.app[v].apply(this.app, args)
         }
       }
     })
@@ -39,17 +40,19 @@ class Wemix {
   $createPage (PageClass, pagePath) {
     const [config, _this] = [{}, this]
     _this.config.pages[`/${pagePath}`] = PageClass.config
-    config['data'] = _this.data || {}
     config['onLoad'] = function (...args) {
       this.page = new PageClass()
       this.page.$init(_this, this, pagePath, ...args)
+      this.page.setData(this.page.data)
       return this.page['onLoad'] && this.page['onLoad'].apply(this.page, args)
     }
     config['onShow'] = function (...args) {
       this.timestamp = Date.now()
       const app = getApp()
+      const page =
+        this.page['onShow'] && this.page['onShow'].apply(this.page, args)
       app.app.onPageShow && app.app.onPageShow(args)
-      return this.page['onShow'] && this.page['onShow'].apply(this.page, args)
+      return page
     }
     config['onHide'] = function (...args) {
       const tp = Date.now() - this.timestamp
@@ -104,7 +107,7 @@ class Wemix {
     return config
   }
   $createComponent (ComponentClass, pagePath) {
-    return adapter.$createComponent(ComponentClass)
+    return adapter.$createComponent(ComponentClass, this)
   }
   getApp () {
     return getApp().app
@@ -142,7 +145,7 @@ class Wemix {
     return str.join('&')
   }
   isString (str) {
-    return toString.call(str) === '[object Strinig]'
+    return toString.call(str) === '[object String]'
   }
   isArray (arr) {
     return toString.call(arr) === '[object Array]'

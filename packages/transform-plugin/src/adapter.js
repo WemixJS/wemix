@@ -335,6 +335,10 @@ const transformJs = function (
           'node_modules',
           npath.join(compiler.options.export, npath.sep, 'npm')
         )
+        importDistPath = importDistPath.replace(
+          compiler.options.dir,
+          compiler.options.output
+        )
         // 备份npm包为后面输出的时候合并npm文件做准备
         if (
           /\/npm\//.test(importDistPath) &&
@@ -346,7 +350,10 @@ const transformJs = function (
           }
           // 替换require('')为global.__wemix_require(compiler.vendors[importDistPath])
           const callee = item.astPath.get('callee')
-          if (/\/npm\//.test(distPath) && !/npm\/@wemix\/wmcomponents\//.test(distPath)) {
+          if (
+            /\/npm\//.test(distPath) &&
+            !/npm\/@wemix\/wmcomponents\//.test(distPath)
+          ) {
             callee.replaceWith(t.identifier('__wemix_require'))
           } else {
             callee.replaceWith(t.identifier('global.__wemix_require'))

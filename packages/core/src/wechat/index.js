@@ -2,20 +2,23 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 10:01:40
+ * @LastEditTime: 2019-04-09 14:36:15
  */
 
-import { diffData, mergeData } from '../util'
+import { diffData, mergeData, filterData } from '../util'
 export default class Wechat {
-  $createComponent (ComponentClass) {
-    const [config, _this] = [{ methods: {} }, this]
-    config['data'] = _this.data || {}
+  $createComponent (ComponentClass, wemix) {
+    const config = {
+      methods: {},
+    }
+    config['properties'] = ComponentClass.properties
     config['created'] = function () {
       this.component = new ComponentClass()
-      this.component.$init(_this, this)
-      this.triggerEvent('onRef', this.component)
+      this.propsKeys = Object.keys(ComponentClass.properties || {})
+      this.component.$init(wemix, this)
     }
     config['attached'] = function (...args) {
+      this.component.setData(this.component.data)
       return (
         this.component['onLoad'] &&
         this.component['onLoad'].apply(this.component, args)
@@ -81,11 +84,26 @@ export default class Wechat {
           if (!wemix.isObject(data)) {
             throw new Error('Data should be an ["object Object"]')
           }
-          const differData = {}
-          diffData(wemix, differData, $wxcomponent.data, data, '')
-          mergeData(wemix, differData, this.data)
-          $wxcomponent.setData(differData, func)
+          if (!wemix.isEmptyObject(data)) {
+            const differData = {}
+            diffData(wemix, differData, $wxcomponent.data, data, '')
+            filterData(differData, $wxcomponent.propsKeys)
+            mergeData(wemix, differData, this.data)
+            $wxcomponent.setData(differData, func)
+          }
         }
+        const defineObj = {}
+        $wxcomponent.propsKeys.forEach(key => {
+          defineObj[key] = {
+            enumerable: true,
+            configurable: true,
+            get () {
+              return $wxcomponent.data[key]
+            },
+          }
+        })
+        this.props = {}
+        Object.defineProperties(this.props, defineObj)
         this.triggerEvent = (name, details) => {
           $wxcomponent.triggerEvent(name, details)
         }

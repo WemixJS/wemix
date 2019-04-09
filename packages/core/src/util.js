@@ -2,7 +2,7 @@
  * @Description: util
  * @LastEditors: sanshao
  * @Date: 2019-04-05 20:43:27
- * @LastEditTime: 2019-04-05 22:51:37
+ * @LastEditTime: 2019-04-09 14:27:12
  */
 
 const parseKey = function (e) {
@@ -77,10 +77,10 @@ export const diffData = function (wemix, differData, wxData, data, lastDotKey) {
     } else if (wemix.isArray(cacheData[key])) {
       differData[newDotKey] = cacheData[key]
     } else if (
-      wemix.isNumber(cacheData[key]) ||
-      wemix.isNull(cacheData[key]) ||
-      wemix.isBoolean(cacheData[key]) ||
       wemix.isString(cacheData[key]) ||
+      wemix.isNumber(cacheData[key]) ||
+      wemix.isBoolean(cacheData[key]) ||
+      wemix.isNull(cacheData[key]) ||
       wemix.isSymbol(cacheData[key])
     ) {
       if (cacheWXData[key] !== cacheData[key]) {
@@ -108,5 +108,22 @@ export const mergeData = function (wemix, differData, data) {
         cache = cache[keys[i]]
       }
     }
+  }
+}
+
+export const filterData = function (differData, propsKeys) {
+  const filter = {}
+  let include = false
+  for (let key in differData) {
+    const keys = parseKey(key)
+    if (!propsKeys.includes(keys[0])) {
+      filter[key] = differData[key]
+    } else {
+      include = true
+    }
+  }
+  differData = filter
+  if (include) {
+    console.error('Do not set parent data in component instance')
   }
 }

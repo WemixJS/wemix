@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 09:48:20
+ * @LastEditTime: 2019-04-09 14:43:16
  */
 
 import { diffData, mergeData } from '../util'
@@ -11,6 +11,7 @@ export default class Alipay {
   $createComponent (ComponentClass) {
     const [config, _this] = [{ methods: {} }, this]
     config['data'] = _this.data || {}
+    config['props'] = ComponentClass.properties
     config['onInit'] = function () {
       this.component = new ComponentClass()
       this.component.$init(_this, this)
@@ -78,7 +79,8 @@ export default class Alipay {
   getComponent () {
     return class {
       $init (wemix, $wxcomponent) {
-        this.data = this.data || {}
+        // props
+        // this.data = Object.assign(this.data || {}, $wxcomponent.data)
         this.setData = (data, func) => {
           if (!wemix.isObject(data)) {
             throw new Error('Data should be an ["object Object"]')
@@ -89,7 +91,7 @@ export default class Alipay {
           $wxcomponent.setData(differData, func)
         }
         this.triggerEvent = (name, details) => {
-          $wxcomponent.props[name]({ detail: { details } })
+          $wxcomponent.props[`on${name}`]({ detail: { details } })
         }
       }
     }
