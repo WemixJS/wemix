@@ -256,3 +256,7 @@ export const SWAN_ATTRIBUTE = {
   catchtouchcancel: 'catchtouchcancel',
   catchtouchend: 'catchtouchend',
 }
+
+export const REPLACE_COMPONENT = {
+  View: 'view',
+}

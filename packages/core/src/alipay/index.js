@@ -2,26 +2,28 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 10:01:40
+ * @LastEditTime: 2019-04-09 09:48:20
  */
 
 import { diffData, mergeData } from '../util'
-export default class Wechat {
+
+export default class Alipay {
   $createComponent (ComponentClass) {
     const [config, _this] = [{ methods: {} }, this]
     config['data'] = _this.data || {}
-    config['created'] = function () {
+    config['onInit'] = function () {
       this.component = new ComponentClass()
       this.component.$init(_this, this)
-      this.triggerEvent('onRef', this.component)
+      this.props.onSelectComponent &&
+        this.props.onRef({ detail: this.component })
     }
-    config['attached'] = function (...args) {
+    config['didMount'] = function (...args) {
       return (
         this.component['onLoad'] &&
         this.component['onLoad'].apply(this.component, args)
       )
     }
-    config['detached'] = function (...args) {
+    config['didUnmount'] = function (...args) {
       return (
         this.component['onUnload'] &&
         this.component['onUnload'].apply(this.component, args)
@@ -87,7 +89,7 @@ export default class Wechat {
           $wxcomponent.setData(differData, func)
         }
         this.triggerEvent = (name, details) => {
-          $wxcomponent.triggerEvent(name, details)
+          $wxcomponent.props[name]({ detail: { details } })
         }
       }
     }

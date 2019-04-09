@@ -11,6 +11,7 @@ import {
   EXPORT_SWAN,
   STANDARD_ATTRIBUTE_PREFIX,
   STANDARD_ATTRIBUTE,
+  REPLACE_COMPONENT,
 } from './constants'
 import wechat from './wechatAdapter'
 import alipay from './alipayAdapter'
@@ -114,38 +115,77 @@ const updateComponentsRef = function (
   compilation,
   compiler
 ) {
-  const checkIfNeedUpdate = function (tags, configObj) {
-    let components = []
+  const checkIfNeedUpdate = function (
+    jsonFilePath,
+    tags,
+    configObj,
+    resolve,
+    reject,
+    readFile
+  ) {
+    const components = []
+    const newTags = []
     if (configObj.usingComponents) {
       for (const com in configObj.usingComponents) {
         components.push(com)
       }
     }
     for (let i = 0; i < tags.length; i++) {
-      if (~components.indexOf(tags[i])) {
-        tags.splice(i, 1)
+      if (!~components.indexOf(tags[i]) && /^[A-Z]/.test(tags[i])) {
+        newTags.push(tags[i])
       }
     }
-    if (tags.length) {
-      // configObj.usingComponents['Button'] = '/test/button'
-      // fs.writeJson(jsonFilePath, configObj)
-    }
-  }
-  const configFilePath =
-    distPath.substr(0, distPath.lastIndexOf('/') + 1) + pathParse.name + '.json'
-  const configFileStr = compilation.modules[configFilePath]
-  if (configFileStr) {
-    const configObj = JSON.parse(configFileStr)
-    checkIfNeedUpdate(tags, configObj)
-  } else if (fs.existsSync(configFilePath)) {
-    fs.readJSON(configFilePath, (err, configObj) => {
-      if (!err) {
-        checkIfNeedUpdate(tags, configObj)
-      } else {
-        compiler.logger.warn('读取文件失败', configFilePath)
+    if (newTags.length) {
+      newTags.forEach(item => {
+        const comDir = npath.join(
+          process.cwd(),
+          `/node_modules/@wemix/wmcomponents/${
+            compiler.options.export
+          }/${item.toLowerCase()}/index.js`
+        )
+        compilation.waitCompile[comDir] = null
+        configObj.usingComponents[item] = `/npm/@wemix/wmcomponents/${
+          compiler.options.export
+        }/${item.toLowerCase()}/index`
+      })
+      try {
+        if (readFile) {
+          fs.writeJsonSync(jsonFilePath, configObj)
+        } else {
+          compilation.modules[jsonFilePath] = JSON.stringify(configObj)
+        }
+      } catch (error) {
+        compiler.logger.error('写入文件失败', jsonFilePath)
       }
-    })
+    }
+    resolve()
   }
+  return new Promise((resolve, reject) => {
+    const configFilePath = distPath.replace(npath.parse(distPath).ext, '.json')
+    const configFileStr = compilation.modules[configFilePath]
+    if (configFileStr) {
+      const configObj = JSON.parse(configFileStr)
+      checkIfNeedUpdate(configFilePath, tags, configObj, resolve, reject, false)
+    } else if (fs.existsSync(configFilePath)) {
+      fs.readJSON(configFilePath, (err, configObj) => {
+        if (!err) {
+          checkIfNeedUpdate(
+            configFilePath,
+            tags,
+            configObj,
+            resolve,
+            reject,
+            true
+          )
+        } else {
+          compiler.logger.error('读取文件失败', configFilePath)
+          resolve()
+        }
+      })
+    } else {
+      resolve()
+    }
+  })
 }
 
 const transformHtml = function (
@@ -168,25 +208,23 @@ const transformHtml = function (
     let tags = []
     traverse(ast, {
       JSXAttribute (astPath) {
-        const node = astPath.node
-        const type = node.name.type
-        if (type === 'JSXNamespacedName') {
-          const namespace = node.name.namespace
-          if (namespace.name === STANDARD_ATTRIBUTE_PREFIX) {
-            const attr = STANDARD_ATTRIBUTE_PREFIX + ':' + node.name.name.name
+        const name = astPath.get('name')
+        const value = astPath.get('value')
+        const innerName = name.get('name')
+        if (name.node.type === 'JSXNamespacedName') {
+          const namespace = astPath.get('name').get('namespace')
+          if (namespace.node.name === STANDARD_ATTRIBUTE_PREFIX) {
+            const attr = STANDARD_ATTRIBUTE_PREFIX + ':' + innerName.node.name
             for (let standardAttr in STANDARD_ATTRIBUTE) {
               if (attr === STANDARD_ATTRIBUTE[standardAttr]) {
                 const newAttr = _this.platform.attribute[standardAttr].split(
                   ':'
                 )
                 if (newAttr.length > 1) {
-                  node.name.namespace.name = newAttr[0]
-                  node.name.name.name = newAttr[1]
+                  namespace.replaceWith(t.jsxIdentifier(newAttr[0]))
+                  innerName.replaceWith(t.jsxIdentifier(newAttr[1]))
                 } else {
-                  node.name.type = 'JSXIdentifier'
-                  delete node.name.namespace
-                  delete node.name.name
-                  node.name.name = newAttr[0]
+                  name.replaceWith(t.jsxIdentifier(newAttr[0]))
                 }
               }
             }
@@ -194,43 +232,62 @@ const transformHtml = function (
             const shortPath = oriPath.substr(oriPath.indexOf('src'))
             compiler.logger.warn(
               `请勿使用原生语法: ${shortPath} line ${
-                node.name.loc.start.line
-              }  ${namespace.name}:${node.name.name.name}=${node.value.value}`
+                name.node.loc.start.line
+              }  ${namespace.node.name}:${innerName.node.name}=${
+                value.node.value
+              }`
             )
           }
-        } else if (type === 'JSXIdentifier') {
-          const attr = node.name.name
+        } else if (name.node.type === 'JSXIdentifier') {
+          const attr = name.node.name
           let replaced = false
           for (let standardAttr in STANDARD_ATTRIBUTE) {
             if (attr === STANDARD_ATTRIBUTE[standardAttr]) {
               const newAttr = _this.platform.attribute[standardAttr]
-              node.name.name = newAttr
+              name.replaceWith(t.jsxIdentifier(newAttr))
               replaced = true
+              break
             }
           }
           if (
             !replaced &&
-            attr.indexOf('bind') === 0 &&
-            _this.platform.name === EXPORT_WECHAT
+            attr.indexOf('bindon') === 0 &&
+            _this.platform.name === EXPORT_SWAN
           ) {
-            node.name.name = 'on' + attr.substr(4)
+            name.replaceWith(t.jsxIdentifier(attr.replace('bindon', 'on')))
           }
         }
       },
       JSXOpeningElement (astPath) {
-        const node = astPath.node
-        const tagName = node.name.name
-        if (!~tags.indexOf(tagName)) {
-          tags.push(tagName)
+        const tagName = astPath.get('name').node.name
+        if (!~tags.indexOf(tagName) && tagName !== 'CONTAINER') {
+          if (REPLACE_COMPONENT[tagName]) {
+            astPath
+              .get('name')
+              .replaceWith(t.JSXIdentifier(REPLACE_COMPONENT[tagName]))
+          } else {
+            tags.push(tagName)
+          }
+        }
+      },
+      JSXClosingElement (astPath) {
+        const tagName = astPath.get('name').node.name
+        if (REPLACE_COMPONENT[tagName]) {
+          astPath
+            .get('name')
+            .replaceWith(t.JSXIdentifier(REPLACE_COMPONENT[tagName]))
         }
       },
     })
     updateComponentsRef(tags, pathParse, distPath, compilation, compiler)
-    compilation.modules[distPath] = generator(ast).code.replace(
-      /<\/?CONTAINER>;?/g,
-      ''
-    )
-    resolve()
+      .then(() => {
+        compilation.modules[distPath] = generator(ast).code.replace(
+          /<\/?CONTAINER>;?/g,
+          ''
+        )
+        resolve()
+      })
+      .catch(reject)
   } catch (e) {
     reject(e)
   }
@@ -289,7 +346,7 @@ const transformJs = function (
           }
           // 替换require('')为global.__wemix_require(compiler.vendors[importDistPath])
           const callee = item.astPath.get('callee')
-          if (/\/npm\//.test(distPath)) {
+          if (/\/npm\//.test(distPath) && !/npm\/@wemix\/wmcomponents\//.test(distPath)) {
             callee.replaceWith(t.identifier('__wemix_require'))
           } else {
             callee.replaceWith(t.identifier('global.__wemix_require'))

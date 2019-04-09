@@ -2,21 +2,24 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-04 18:01:42
+ * @LastEditTime: 2019-04-09 09:47:29
  */
 
 import app from './app'
 import page from './page'
-import component from './component'
 import Adapter from './wechat'
-import util from './util'
 const adapter = new Adapter()
 class Wemix {
+  constructor () {
+    this.app = app
+    this.page = page
+    this.component = adapter.getComponent()
+  }
   $createApp (AppClass) {
     const [config, _this] = [{}, this]
     config['onLaunch'] = function (...args) {
       this.app = new AppClass()
-      _this.$init(_this, AppClass)
+      this.app.$init(_this, AppClass)
     }
     Object.getOwnPropertyNames(AppClass.prototype || []).forEach(v => {
       if (
@@ -36,10 +39,10 @@ class Wemix {
   $createPage (PageClass, pagePath) {
     const [config, _this] = [{}, this]
     _this.config.pages[`/${pagePath}`] = PageClass.config
+    config['data'] = _this.data || {}
     config['onLoad'] = function (...args) {
       this.page = new PageClass()
       this.page.$init(_this, this, pagePath, ...args)
-      this.page.setData(util.extend(PageClass.data || {}, true))
       return this.page['onLoad'] && this.page['onLoad'].apply(this.page, args)
     }
     config['onShow'] = function (...args) {
@@ -100,8 +103,8 @@ class Wemix {
     })
     return config
   }
-  $createComponent () {
-    return adapter.$createComponent()
+  $createComponent (ComponentClass, pagePath) {
+    return adapter.$createComponent(ComponentClass)
   }
   getApp () {
     return getApp().app
@@ -112,16 +115,20 @@ class Wemix {
       return page.page
     })
   }
-  unparams (str) {
+  parse (str, decode = true) {
     let params = {}
     str = str.split('&')
     for (let i = 0; i < str.length; i++) {
       let item = str[i].split('=')
-      params[item[0]] = item[1]
+      if (decode) {
+        params[item[0]] = decodeURIComponent(item[1])
+      } else {
+        params[item[0]] = item[1]
+      }
     }
     return params
   }
-  params (obj, encode = true) {
+  stringify (obj, encode = true) {
     let str = []
     for (let k in obj) {
       if (typeof obj[k] !== 'undefined') {
@@ -134,13 +141,43 @@ class Wemix {
     }
     return str.join('&')
   }
-  parseSearch (query) {
-    let search = this.params(query, false)
-    return search ? '?' + search : search
+  isString (str) {
+    return toString.call(str) === '[object Strinig]'
+  }
+  isArray (arr) {
+    return toString.call(arr) === '[object Array]'
+  }
+  isBoolean (bool) {
+    return toString.call(bool) === '[object Boolean]'
+  }
+  isUndefined (bool) {
+    return toString.call(bool) === '[object Undefined]'
+  }
+  isNull (bool) {
+    return toString.call(bool) === '[object Null]'
+  }
+  isNumber (num) {
+    return toString.call(num) === '[object Number]'
+  }
+  isObject (obj) {
+    return toString.call(obj) === '[object Object]'
+  }
+  isEmptyObject (obj) {
+    if (!this.isObject(obj)) {
+      return false
+    }
+    for (const n in obj) {
+      if (obj.hasOwnProperty(n) && obj[n]) {
+        return false
+      }
+    }
+    return true
+  }
+  isFunction (arg) {
+    return toString.call(arg) === '[object Function]'
+  }
+  isSymbol (sym) {
+    return toString.call(sym) === '[object Symbol]'
   }
 }
-const wemix = new Wemix()
-wemix.app = app
-wemix.page = page
-wemix.component = component
-export default wemix
+export default new Wemix()
