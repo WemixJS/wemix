@@ -58,6 +58,7 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
 }
 
 const customHack = function (data, oriPath, compiler, type, pathParse) {
+  data = data.replace(/process\.env\.NODE_ENV/g, `"${compiler.options.env}"`)
   if (
     /node_modules/.test(oriPath) &&
     !/node_modules\/@wemix\/wmcomponents/.test(oriPath)
@@ -251,10 +252,10 @@ const transformHtml = function (
           }
           if (
             !replaced &&
-            attr.indexOf('bindon') === 0 &&
-            _this.platform.name === EXPORT_SWAN
+            attr.indexOf('bind') === 0 &&
+            _this.platform.name === EXPORT_ALIPAY
           ) {
-            name.replaceWith(t.jsxIdentifier(attr.replace('bindon', 'on')))
+            name.replaceWith(t.jsxIdentifier(attr.replace('bind', 'on')))
           }
         }
       },

@@ -2,7 +2,7 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-03-25 17:10:36
+ * @LastEditTime: 2019-04-09 15:31:09
  */
 
 import fs from 'fs-extra'
@@ -10,6 +10,7 @@ import npath from 'path'
 import * as util from '../utils'
 
 const DEFAULT_OPTIONS = {
+  env: { type: String, default: 'production' },
   entry: { type: Array, default: ['src/app.js', 'src/assets'] },
   export: { type: String, default: 'wechat' },
   watch: { type: Boolean, default: false },
@@ -135,6 +136,12 @@ export const convert = function (args) {
     throw new Error(
       `No export type found. Add --export <wechat|alipay|tt|swan>`
     ) // eslint-disable-line
+  }
+  if (
+    !config.env ||
+    (config.env !== 'production' && config.env !== 'development')
+  ) {
+    throw new Error(`No env type found. Add --env <production|development>`) // eslint-disable-line
   }
 
   config.context = process.cwd()

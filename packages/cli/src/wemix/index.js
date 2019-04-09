@@ -2,7 +2,7 @@
  * @Description: 入口文件
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:36:23
- * @LastEditTime: 2019-03-25 10:24:56
+ * @LastEditTime: 2019-04-09 15:29:04
  */
 
 import program from 'commander'
@@ -50,9 +50,14 @@ program
   .description('Compile')
   .action(build)
   .option(
-    '-e, --export <export>',
+    '-ex, --export <export>',
     'Choose a type [wechat|alipay|tt|swan]',
     /^(wechat|alipay|tt|swan)$/i
+  )
+  .option(
+    '-e, --env <env>',
+    'Choose a env [production|development]',
+    /^(production|development)$/i
   )
   .option('-c, --config <config>', 'Path to the config file')
   .option('-i, --entry <entry>', 'origin code dir or files')
