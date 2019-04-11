@@ -2,7 +2,7 @@
  * @Description: alipayAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-03 17:11:16
+ * @LastEditTime: 2019-04-11 14:55:09
  */
 import npath from 'path'
 import { parse } from '@babel/parser'
@@ -23,9 +23,6 @@ export default {
   appConfig: ALIPAY_APP_CONFIG,
   pageConfig: ALIPAY_PAGE_CONFIG,
   tabName: 'items',
-  getEntryConfigPath (compiler) {
-    return `${npath.join(compiler.options.context, 'alipay.config.json')}`
-  },
   processProps (propsNode, props, compiler) {
     const newProps = {}
     for (const key in props) {

@@ -2,7 +2,7 @@
  * @Description: Vendor Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-04-04 18:05:01
+ * @LastEditTime: 2019-04-11 16:29:34
  */
 
 const VENDOR_INJECTION = [
@@ -60,6 +60,25 @@ export default class OutputFilePlugin {
       code += '/***** module ' + compiler.vendors[key] + ' end *****/\n\n\n'
       index++
     }
+    let methodName = ''
+    switch (compiler.options.export) {
+      case 'wechat':
+        methodName = 'wx'
+        break
+      case 'alipay':
+        methodName = 'my'
+        break
+      case 'swan':
+        methodName = 'swan'
+        break
+      case 'tt':
+        methodName = 'tt'
+        break
+    }
+    VENDOR_INJECTION[0] = VENDOR_INJECTION[0].replace(
+      'global.',
+      `${methodName}.`
+    )
     let template = VENDOR_INJECTION.concat([])
     template[1] = code
     return template.join('')

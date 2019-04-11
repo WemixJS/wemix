@@ -2,12 +2,13 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-04-11 10:32:27
+ * @LastEditTime: 2019-04-11 16:58:43
  */
 
 import fs from 'fs-extra'
 import npath from 'path'
 import Adapter from './adapter'
+import { EXPORT_ALIPAY } from './constants'
 
 export default class TransformPlugin {
   /**
@@ -37,16 +38,7 @@ export default class TransformPlugin {
           }
           break
         default:
-          if (oriPath === this.configPath && compiler.distConfig) {
-            compiler.adapter.mergeProjectConfig(
-              oriPath,
-              compiler,
-              resolve,
-              reject
-            )
-          } else {
-            resolve({ data: rdata })
-          }
+          resolve({ data: rdata })
       }
     })
   }
@@ -182,11 +174,15 @@ export default class TransformPlugin {
     compilation.waitCompile = {}
     const promiseCompile = []
     for (const oriPath in waitCompile) {
-      compiler.logger.info(`Compile:${oriPath}`)
+      const pathParse = npath.parse(oriPath)
       // 获取目标文件路径
       let distPath
-      if (oriPath === this.configPath) {
-        distPath = this.distConfigPath
+      if (/\/.wemixconfig\//.test(oriPath)) {
+        if (compiler.options.export === EXPORT_ALIPAY) {
+          distPath = npath.join(compiler.options.output, '.tea', pathParse.base)
+        } else {
+          distPath = npath.join(compiler.options.output, pathParse.base)
+        }
       } else {
         distPath = compiler.adapter.getOutputPath(oriPath, compiler)
       }
@@ -195,8 +191,8 @@ export default class TransformPlugin {
         compilation.modifiedFileMTime(oriPath) &&
         !compilation.modules[distPath]
       ) {
+        compiler.logger.info(`Compile:${oriPath}`)
         const loader = compiler.getLoader(oriPath)
-        const pathParse = npath.parse(oriPath)
         if (/\.(js|less|sass|scss|acss|styl)$/.test(pathParse.ext) && !loader) {
           compiler.logger.error(`${pathParse.ext} loader not found!`)
           process.exit(1)
@@ -213,9 +209,8 @@ export default class TransformPlugin {
         )
       }
     }
-    if (promiseCompile.length === 0) {
-      callback()
-    } else {
+
+    if (promiseCompile.length > 0) {
       Promise.all(promiseCompile)
         .then(() => {
           if (Object.keys(compilation.waitCompile).length) {
@@ -228,21 +223,13 @@ export default class TransformPlugin {
         .catch(err => {
           compiler.logger.error(err.stack || err)
         })
+    } else {
+      callback()
     }
   }
   apply (compiler) {
-    compiler.hooks.beforeRun.tapAsync('ProjectConfigPlugin', callback => {
+    compiler.hooks.beforeRun.tapAsync('ProjectAdapterPlugin', callback => {
       compiler.adapter = new Adapter(compiler)
-      this.configPath = compiler.adapter.getEntryConfigPath(compiler)
-      this.distConfigPath = compiler.adapter.getOutputConfigPath(compiler)
-      try {
-        if (fs.existsSync(this.distConfigPath)) {
-          compiler.distConfig = fs.readFileSync(this.distConfigPath, 'utf8')
-        }
-      } catch (err) {
-        compiler.logger.error(err.stack || err)
-        process.exit(1)
-      }
       callback()
     })
     compiler.hooks.compile.tapAsync(

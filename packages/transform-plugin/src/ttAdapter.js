@@ -2,7 +2,7 @@
  * @Description: ttAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-03 17:28:39
+ * @LastEditTime: 2019-04-11 14:55:27
  */
 import npath from 'path'
 import {
@@ -20,9 +20,6 @@ export default {
   appConfig: TT_APP_CONFIG,
   pageConfig: TT_PAGE_CONFIG,
   tabName: 'list',
-  getEntryConfigPath (compiler) {
-    return `${npath.join(compiler.options.context, 'tt.config.json')}`
-  },
   processProps (propsNode, props, compiler) {
     for (const key in props) {
       if (toString.call(props[key]) === '[object Object]') {

@@ -2,7 +2,7 @@
  * @Description: Compilation
  * @LastEditors: sanshao
  * @Date: 2019-02-20 19:00:43
- * @LastEditTime: 2019-04-02 20:16:40
+ * @LastEditTime: 2019-04-11 14:54:26
  */
 import npath from 'path'
 import fs from 'fs'
@@ -12,10 +12,6 @@ export default class Compilation {
   constructor (compiler, modifiedFiles) {
     // 将修改的文件或者entry的初始文件存入waitCompile(待编译)池中，用于后续编译使用
     if (!modifiedFiles || modifiedFiles.length === 0) {
-      const configPath = `${npath.join(
-        compiler.options.context,
-        'wechat.config.json'
-      )}`
       modifiedFiles = []
       compiler.options.entry.forEach(item => {
         let stat = fs.statSync(item)
@@ -28,7 +24,6 @@ export default class Compilation {
           modifiedFiles = modifiedFiles.concat(files)
         }
       })
-      modifiedFiles.push(configPath)
     }
     this.waitCompile = {}
     modifiedFiles.forEach(item => {
