@@ -133,17 +133,26 @@ export default class Compiler {
     const subDirs = getDirectories(baseDir)
     allDirs = [baseDir].concat(subDirs)
     this.wp.watch([], allDirs, Date.now())
+    let fileTimes = this.wp.getTimes()
     this.wp.on('change', (filePath, mtime) => {
+      const currentFileTimes = this.wp.getTimes()
       if (mtime) {
-        if (!this.running) {
-          this.compile([filePath], onCompiled)
-        } else {
-          this.watchFiles.push(filePath)
+        if (
+          !fileTimes[filePath] ||
+          (fileTimes[filePath] &&
+            currentFileTimes[filePath] - fileTimes[filePath] > 100)
+        ) {
+          if (!this.running) {
+            this.compile([filePath], onCompiled)
+          } else {
+            this.watchFiles.push(filePath)
+          }
         }
       } else {
         const distPath = filePath.replace(this.options.dir, this.options.output)
         fs.remove(distPath)
       }
+      fileTimes = currentFileTimes
     })
   }
   compile (modifiedFiles, callback) {
