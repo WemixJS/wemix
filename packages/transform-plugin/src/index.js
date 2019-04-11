@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-04-04 09:55:21
+ * @LastEditTime: 2019-04-11 10:32:27
  */
 
 import fs from 'fs-extra'
@@ -182,6 +182,7 @@ export default class TransformPlugin {
     compilation.waitCompile = {}
     const promiseCompile = []
     for (const oriPath in waitCompile) {
+      compiler.logger.info(`Compile:${oriPath}`)
       // 获取目标文件路径
       let distPath
       if (oriPath === this.configPath) {

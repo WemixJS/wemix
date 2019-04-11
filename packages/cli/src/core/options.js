@@ -2,7 +2,7 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-04-09 15:31:09
+ * @LastEditTime: 2019-04-11 10:25:39
  */
 
 import fs from 'fs-extra'
