@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-04-11 11:46:25
+ * @LastEditTime: 2019-04-11 17:00:44
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -135,17 +135,26 @@ export default class Compiler {
     const subDirs = getDirectories(baseDir)
     allDirs = [baseDir].concat(subDirs)
     this.wp.watch([], allDirs, Date.now())
+    let fileTimes = this.wp.getTimes()
     this.wp.on('change', (filePath, mtime) => {
+      const currentFileTimes = this.wp.getTimes()
       if (mtime) {
-        if (!this.compiling) {
-          this.compile([filePath], onCompiled)
-        } else {
-          this.watchFiles.push(filePath)
+        if (
+          !fileTimes[filePath] ||
+          (fileTimes[filePath] &&
+            currentFileTimes[filePath] - fileTimes[filePath] > 100)
+        ) {
+          if (!this.compiling) {
+            this.compile([filePath], onCompiled)
+          } else {
+            this.watchFiles.push(filePath)
+          }
         }
       } else {
         const distPath = filePath.replace(this.options.dir, this.options.output)
         fs.remove(distPath)
       }
+      fileTimes = currentFileTimes
     })
   }
   compile (modifiedFiles, callback) {

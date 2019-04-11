@@ -75,13 +75,15 @@ export const getDirectories = function (dir = process.cwd(), prefix = '') {
     let filepath = dir + npath.sep + item
     let stat = fs.statSync(filepath)
     if (stat.isDirectory()) {
-      rst.push(filepath)
-      rst = rst.concat(
-        getDirectories(
-          npath.normalize(dir + npath.sep + item),
-          npath.normalize(prefix + item + npath.sep)
-        )
+      const subDirs = getDirectories(
+        npath.normalize(dir + npath.sep + item),
+        npath.normalize(prefix + item + npath.sep)
       )
+      if (subDirs.length) {
+        rst = rst.concat(subDirs)
+      } else {
+        rst.push(filepath)
+      }
     }
   })
   return rst
