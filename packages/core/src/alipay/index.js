@@ -2,33 +2,56 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 14:43:16
+ * @LastEditTime: 2019-04-09 20:08:00
  */
 
-import { diffData, mergeData } from '../util'
-
-export default class Alipay {
-  $createComponent (ComponentClass) {
-    const [config, _this] = [{ methods: {} }, this]
-    config['data'] = _this.data || {}
-    config['props'] = ComponentClass.properties
+import { diffData, mergeData, filterData } from '../util'
+import {
+  setComponent,
+  deleteComponent,
+  getComponent,
+  getAllComponents,
+} from '../cache'
+export default class Wechat {
+  $createComponent (ComponentClass, wemix) {
+    const config = {
+      methods: {},
+    }
+    config['props'] = Object.assign(
+      { wemixCopyId: { type: String, value: '' } },
+      { wemixCopyClass: { type: String, value: '' } },
+      ComponentClass.properties || {}
+    )
     config['onInit'] = function () {
       this.component = new ComponentClass()
-      this.component.$init(_this, this)
-      this.props.onSelectComponent &&
-        this.props.onRef({ detail: this.component })
+      this.propsKeys = Object.keys(config['props'])
+      this.component.$init(wemix, this)
     }
     config['didMount'] = function (...args) {
+      this.component.setData(this.component.data)
+      this.component.__webviewId__ = this.__wxWebviewId__
+      this.component.__exparserNodeId__ = this.__wxExparserNodeId__
+      if (
+        this.component.props.wemixCopyId ||
+        this.component.props.wemixCopyClass
+      ) {
+        setComponent(
+          this.component.props.wemixCopyId,
+          this.component.props.wemixCopyClass,
+          this.component
+        )
+      }
       return (
         this.component['onLoad'] &&
         this.component['onLoad'].apply(this.component, args)
       )
     }
     config['didUnmount'] = function (...args) {
-      return (
+      const unload =
         this.component['onUnload'] &&
         this.component['onUnload'].apply(this.component, args)
-      )
+      deleteComponent(this.component.__webviewId__, this.__exparserNodeId__)
+      return unload
     }
     Object.getOwnPropertyNames(ComponentClass.prototype || []).forEach(v => {
       if (
@@ -79,17 +102,28 @@ export default class Alipay {
   getComponent () {
     return class {
       $init (wemix, $wxcomponent) {
-        // props
-        // this.data = Object.assign(this.data || {}, $wxcomponent.data)
+        this.data = this.data || {}
         this.setData = (data, func) => {
           if (!wemix.isObject(data)) {
             throw new Error('Data should be an ["object Object"]')
           }
-          const differData = {}
-          diffData(wemix, differData, $wxcomponent.data, data, '')
-          mergeData(wemix, differData, this.data)
-          $wxcomponent.setData(differData, func)
+          if (!wemix.isEmptyObject(data)) {
+            const differData = {}
+            diffData(wemix, differData, $wxcomponent.data, data, '')
+            filterData(differData, $wxcomponent.propsKeys)
+            mergeData(wemix, differData, this.data)
+            $wxcomponent.setData(differData, func)
+          }
         }
+        this.selectComponent = function (selector) {
+          if (selector) {
+            return getComponent(this.__webviewId__, selector)
+          }
+        }
+        this.selectAllComponents = function (selector) {
+          return getAllComponents(this.__webviewId__, selector)
+        }
+        this.props = $wxcomponent.props
         this.triggerEvent = (name, details) => {
           $wxcomponent.props[`on${name}`]({ detail: { details } })
         }

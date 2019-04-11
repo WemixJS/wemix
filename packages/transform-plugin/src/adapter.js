@@ -257,6 +257,16 @@ const transformHtml = function (
           ) {
             name.replaceWith(t.jsxIdentifier(attr.replace('bind', 'on')))
           }
+          if (attr === 'id') {
+            astPath.insertAfter(
+              t.jsxAttribute(t.jsxIdentifier('wemixCopyId'), value.node)
+            )
+          }
+          if (attr === 'class') {
+            astPath.insertAfter(
+              t.jsxAttribute(t.jsxIdentifier('wemixCopyClass'), value.node)
+            )
+          }
         }
       },
       JSXOpeningElement (astPath) {

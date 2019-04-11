@@ -2,7 +2,7 @@
  * @Description: extends App
  * @LastEditors: sanshao
  * @Date: 2019-04-01 16:12:47
- * @LastEditTime: 2019-04-05 16:18:33
+ * @LastEditTime: 2019-04-09 16:11:42
  */
 
 export default class {
@@ -10,7 +10,6 @@ export default class {
     wemix.config = {
       app: AppClass.config,
       pages: {},
-      components: {},
     }
   }
 }

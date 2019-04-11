@@ -2,33 +2,56 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 14:36:15
+ * @LastEditTime: 2019-04-09 20:07:32
  */
 
 import { diffData, mergeData, filterData } from '../util'
+import {
+  setComponent,
+  deleteComponent,
+  getComponent,
+  getAllComponents,
+} from '../cache'
 export default class Wechat {
   $createComponent (ComponentClass, wemix) {
     const config = {
       methods: {},
     }
-    config['properties'] = ComponentClass.properties
+    config['properties'] = Object.assign(
+      { wemixCopyId: { type: String, value: '' } },
+      { wemixCopyClass: { type: String, value: '' } },
+      ComponentClass.properties || {}
+    )
     config['created'] = function () {
       this.component = new ComponentClass()
-      this.propsKeys = Object.keys(ComponentClass.properties || {})
+      this.propsKeys = Object.keys(config['properties'])
       this.component.$init(wemix, this)
     }
     config['attached'] = function (...args) {
       this.component.setData(this.component.data)
+      this.component.__webviewId__ = this.__wxWebviewId__
+      this.component.__exparserNodeId__ = this.__wxExparserNodeId__
+      if (
+        this.component.props.wemixCopyId ||
+        this.component.props.wemixCopyClass
+      ) {
+        setComponent(
+          this.component.props.wemixCopyId,
+          this.component.props.wemixCopyClass,
+          this.component
+        )
+      }
       return (
         this.component['onLoad'] &&
         this.component['onLoad'].apply(this.component, args)
       )
     }
     config['detached'] = function (...args) {
-      return (
+      const unload =
         this.component['onUnload'] &&
         this.component['onUnload'].apply(this.component, args)
-      )
+      deleteComponent(this.component.__webviewId__, this.__exparserNodeId__)
+      return unload
     }
     Object.getOwnPropertyNames(ComponentClass.prototype || []).forEach(v => {
       if (
@@ -91,6 +114,14 @@ export default class Wechat {
             mergeData(wemix, differData, this.data)
             $wxcomponent.setData(differData, func)
           }
+        }
+        this.selectComponent = function (selector) {
+          if (selector) {
+            return getComponent(this.__webviewId__, selector)
+          }
+        }
+        this.selectAllComponents = function (selector) {
+          return getAllComponents(this.__webviewId__, selector)
         }
         const defineObj = {}
         $wxcomponent.propsKeys.forEach(key => {
