@@ -19,7 +19,7 @@ export default class ExecuteLoaderPlugin {
           const config = Object.assign({}, loader)
           delete config.use
           config.options = loader.use[index++].options
-          fn(data, config, originPath, next)
+          fn(data, config, originPath, next, compiler)
         })
         .catch(err => {
           done(err)

@@ -9,6 +9,7 @@ import less from 'less'
 import chalk from 'chalk'
 import https from 'https'
 import loaderUtils from 'loader-utils'
+import npath from 'path'
 
 const accMul = (arg1, arg2) => {
   let m = 0
@@ -118,11 +119,55 @@ const _promise = data => {
 }
 
 // 处理import
-const _handleImport = (data, imports) => {
+let re = []
+const _handleImport = (data, imports, path, loader, compiler) => {
+  let [base, importPath, importSrcPath] = [[], [], '']
+  if (loader.imports && loader.imports.length > 0) {
+    for (let i = 0; i < loader.imports.length; i++) {
+      const relative = npath.relative(npath.dirname(path), compiler.options.dir)
+      if (relative) {
+        importSrcPath = relative + '/' + npath.basename(loader.imports[i])
+      } else {
+        importSrcPath = './' + npath.basename(loader.imports[i])
+      }
+      re.push(new RegExp(npath.basename(loader.imports[i])))
+      importPath.push('@import ' + `"${importSrcPath}";` + '\n')
+
+      base.push(npath.basename(loader.imports[i]))
+    }
+    re.forEach(element => {
+      if (!element.test(path)) {
+        data = importPath.join('\n') + data
+      }
+    })
+  }
   if (~data.indexOf('@import')) {
-    data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (word) {
+    data = data.replace(/@import\s*(["'])(.+?)\1[;|\n]/g, function (
+      word,
+      word1,
+      word2
+    ) {
+      if (!/;/.test(word)) {
+        word = word.replace('\n', function () {
+          return ';\n'
+        })
+      }
       imports.push(word)
-      return ''
+      let outWord
+      if (/less/.test(word2)) {
+        if (/^\//.test(word2)) {
+          outWord = '@import ' + `"${compiler.options.dir + word2}";` + '\n'
+        } else {
+          outWord =
+            '@import ' +
+            `"${npath.resolve(npath.parse(path).dir, word2)}";` +
+            '\n'
+        }
+        return outWord
+      } else {
+        console.log(chalk.red('Only allow references to less files'))
+        return ''
+      }
     })
     return data
   } else {
@@ -130,13 +175,28 @@ const _handleImport = (data, imports) => {
   }
 }
 
-export default function (data, loader, path, next) {
+const _filterImport = data => {
+  data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
+    for (let i = 0; i < re.length; i++) {
+      if (re[i].test(words)) {
+        return ''
+      } else {
+        return words
+      }
+    }
+    return words
+  })
+  return data
+}
+
+export default function (data, loader, path, next, compiler) {
   if (!data) {
     return next(null, data)
   }
   _promise(data).then(data => {
     const imports = []
-    data = _handleImport(data, imports)
+    data = _handleImport(data, imports, path, loader, compiler)
+
     const loaderOptions =
       (loader.options && loaderUtils.getOptions({ query: loader.options })) ||
       {}
@@ -154,7 +214,7 @@ export default function (data, loader, path, next) {
       .then(output => {
         output.css =
           imports.join('\n') + (imports.length ? '\n' + output.css : output.css)
-        next(null, output.css)
+        next(null, _filterImport(output.css))
       })
       .catch(err => {
         next(err)

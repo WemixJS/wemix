@@ -86,12 +86,10 @@ export default function (data, loader, path, next) {
       if (typeof options.stringifier === 'string') {
         options.stringifier = require(options.stringifier)
       }
-
       postcss(plugins)
         .process(data, options)
         .then(result => {
           let { css } = result
-
           next(null, css)
         })
         .catch(err => {

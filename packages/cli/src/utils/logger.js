@@ -30,7 +30,7 @@ const myFormat = printf(info => {
   keys.forEach(item => {
     if (item !== 'level' && item !== 'label' && item !== 'timestamp') {
       messages.push(
-        JSON.stringify(info[item])
+        JSON.stringify(info[item] || '')
           .replace(/\\n\s*/g, '\n')
           .replace(/^['|"](.+?)['|"]$/, function (m, b) {
             return b
