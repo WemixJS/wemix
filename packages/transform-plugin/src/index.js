@@ -249,6 +249,7 @@ export default class TransformPlugin {
       'TransformPlugin',
       (compilation, callback) => {
         const waitCompile = Object.assign(compilation.waitCompile)
+
         this.loopCompile(waitCompile, compiler, compilation, callback)
       }
     )
