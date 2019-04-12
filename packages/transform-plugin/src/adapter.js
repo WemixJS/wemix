@@ -65,7 +65,7 @@ const customHack = function (data, oriPath, compiler, type, pathParse) {
   ) {
     data = this.platform.npmCodeHack(data, oriPath)
   } else {
-    if (/(getApp|getCurrentPages)\(\)/.test(data)) {
+    if (/[^.](getApp|getCurrentPages)\(\)/.test(data)) {
       compiler.logger.warn(
         oriPath + ': Use wemix.getApp() or wemix.getCurrentPages()'
       )

@@ -2,13 +2,17 @@
  * @Description: extends Page
  * @LastEditors: sanshao
  * @Date: 2019-04-05 20:45:45
- * @LastEditTime: 2019-04-12 17:37:21
+ * @LastEditTime: 2019-04-12 19:09:05
  */
 import { diffData, mergeData } from './util'
 import { getComponent, getAllComponents } from './cache'
 export default class {
   $init (wemix, $wxpage, pagePath, ...args) {
-    this.__webviewId__ = $wxpage.__wxWebviewId__ || $wxpage.$viewId
+    this.__webviewId__ =
+      $wxpage.__wxWebviewId__ ||
+      $wxpage.$viewId ||
+      $wxpage.__webviewId__ ||
+      +new Date()
     this.data = this.data || {}
     this.options = args[0]
     this.route = `/${pagePath}`
