@@ -5,6 +5,7 @@ import {
   WECHAT_STYLE_EXT,
   WECHAT_APP_CONFIG,
   WECHAT_PAGE_CONFIG,
+  GLOBAL_PROPS,
 } from './constants'
 
 export default {
@@ -26,6 +27,15 @@ export default {
   npmCodeHack (content, filePath) {
     const basename = npath.basename(filePath)
     switch (basename) {
+      case 'lodash.js':
+      case '_global.js':
+      case 'global.js':
+      case 'lodash.min.js':
+        content = content.replace(
+          /Function\(['"]return this['"]\)\(\)/,
+          GLOBAL_PROPS
+        )
+        break
       case '_html.js':
         content = 'module.exports = false;'
         break

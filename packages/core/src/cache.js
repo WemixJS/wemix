@@ -11,60 +11,66 @@ export const setComponent = function (id, cls, ins) {
 }
 
 export const getComponent = function (webviewId, selector) {
-  if (selector[0] === '.' || selector[0] === '#') {
-    for (let i = 0; i < componentIns[webviewId].length; i++) {
-      if (
-        selector[0] === '#' &&
-        componentIns[webviewId][i].id === selector.substr(1)
-      ) {
-        return componentIns[webviewId][i].ins
-      }
-      const preReg = new RegExp(`^${selector.substr(1)} `)
-      const curReg = new RegExp(` ${selector.substr(1)} `)
-      const nextReg = new RegExp(` ${selector.substr(1)}$`)
-      if (
-        selector[0] === '.' &&
-        (preReg.test(componentIns[webviewId][i].class) ||
-          curReg.test(componentIns[webviewId][i].class) ||
-          nextReg.test(componentIns[webviewId][i].class))
-      ) {
-        return componentIns[webviewId][i].ins
-      }
-    }
-  } else {
-    console.warn('Only support #id or .class')
-  }
-}
-
-export const getAllComponents = function (webviewId, selector) {
-  if (!selector) {
-    return componentIns[webviewId].filter(val => {
-      return val
-    })
-  }
-  const components = []
-  if (selector[0] === '.' || selector[0] === '#') {
-    for (let i = 0; i < componentIns[webviewId].length; i++) {
-      if (selector[0] === '#') {
-        if (componentIns[webviewId][i].id === selector.substr(1)) {
-          components.push(componentIns[webviewId][i].ins)
+  if (toString.call(componentIns[webviewId]) === '[object Array]') {
+    if (selector[0] === '.' || selector[0] === '#') {
+      for (let i = 0; i < componentIns[webviewId].length; i++) {
+        if (
+          selector[0] === '#' &&
+          componentIns[webviewId][i].id === selector.substr(1)
+        ) {
+          return componentIns[webviewId][i].ins
         }
-      }
-      if (selector[0] === '.') {
         const preReg = new RegExp(`^${selector.substr(1)} `)
         const curReg = new RegExp(` ${selector.substr(1)} `)
         const nextReg = new RegExp(` ${selector.substr(1)}$`)
         if (
-          preReg.test(componentIns[webviewId][i].class) ||
-          curReg.test(componentIns[webviewId][i].class) ||
-          nextReg.test(componentIns[webviewId][i].class)
+          selector[0] === '.' &&
+          (preReg.test(componentIns[webviewId][i].class) ||
+            curReg.test(componentIns[webviewId][i].class) ||
+            nextReg.test(componentIns[webviewId][i].class))
         ) {
-          components.push(componentIns[webviewId][i].ins)
+          return componentIns[webviewId][i].ins
+        }
+      }
+    } else {
+      console.warn('Only support #id or .class')
+    }
+  }
+}
+
+export const getAllComponents = function (webviewId, selector) {
+  if (toString.call(componentIns[webviewId]) === '[object Array]') {
+    if (!selector) {
+      return componentIns[webviewId].filter(val => {
+        return val
+      })
+    }
+    const components = []
+    if (selector[0] === '.' || selector[0] === '#') {
+      for (let i = 0; i < componentIns[webviewId].length; i++) {
+        if (selector[0] === '#') {
+          if (componentIns[webviewId][i].id === selector.substr(1)) {
+            components.push(componentIns[webviewId][i].ins)
+          }
+        }
+        if (selector[0] === '.') {
+          const preReg = new RegExp(`^${selector.substr(1)} `)
+          const curReg = new RegExp(` ${selector.substr(1)} `)
+          const nextReg = new RegExp(` ${selector.substr(1)}$`)
+          if (
+            preReg.test(componentIns[webviewId][i].class) ||
+            curReg.test(componentIns[webviewId][i].class) ||
+            nextReg.test(componentIns[webviewId][i].class)
+          ) {
+            components.push(componentIns[webviewId][i].ins)
+          }
         }
       }
     }
+    return components
+  } else {
+    return []
   }
-  return components
 }
 
 export const deleteComponent = function (webviewId, nodeId) {

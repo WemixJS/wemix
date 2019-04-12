@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 17:30:16
+ * @LastEditTime: 2019-04-12 17:41:59
  */
 
 import app from './app'
@@ -15,9 +15,14 @@ class Wemix {
     this.app = app
     this.page = page
     this.component = adapter.getComponent()
+    this.config = {
+      app: undefined,
+      pages: {},
+    }
   }
   $createApp (AppClass) {
     const [config, _this] = [{}, this]
+    this.config.app = AppClass.config
     config['onLaunch'] = function (...args) {
       this.app = new AppClass()
       this.app.$init(_this, AppClass)

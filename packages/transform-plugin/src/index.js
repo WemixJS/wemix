@@ -2,13 +2,12 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-04-11 16:58:43
+ * @LastEditTime: 2019-04-11 20:15:39
  */
 
 import fs from 'fs-extra'
 import npath from 'path'
 import Adapter from './adapter'
-import { EXPORT_ALIPAY } from './constants'
 
 export default class TransformPlugin {
   /**
@@ -177,12 +176,15 @@ export default class TransformPlugin {
       const pathParse = npath.parse(oriPath)
       // 获取目标文件路径
       let distPath
-      if (/\/.wemixconfig\//.test(oriPath)) {
-        if (compiler.options.export === EXPORT_ALIPAY) {
-          distPath = npath.join(compiler.options.output, '.tea', pathParse.base)
-        } else {
-          distPath = npath.join(compiler.options.output, pathParse.base)
-        }
+      if (/\/wemixconfig\//.test(oriPath)) {
+        distPath = oriPath.replace(
+          npath.join(
+            process.cwd(),
+            'wemixconfig',
+            `${compiler.options.export}`
+          ),
+          compiler.options.output
+        )
       } else {
         distPath = compiler.adapter.getOutputPath(oriPath, compiler)
       }

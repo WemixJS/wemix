@@ -2,7 +2,7 @@
  * @Description: alipayAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-11 14:55:09
+ * @LastEditTime: 2019-04-12 16:41:55
  */
 import npath from 'path'
 import { parse } from '@babel/parser'
@@ -14,6 +14,7 @@ import {
   ALIPAY_STYLE_EXT,
   ALIPAY_APP_CONFIG,
   ALIPAY_PAGE_CONFIG,
+  GLOBAL_PROPS,
 } from './constants'
 
 export default {
@@ -57,8 +58,12 @@ export default {
     switch (basename) {
       case 'lodash.js':
       case '_global.js':
+      case 'global.js':
       case 'lodash.min.js':
-        content = content.replace(/Function\(['"]return this['"]\)\(\)/, 'this')
+        content = content.replace(
+          /Function\(['"]return this['"]\)\(\)/,
+          GLOBAL_PROPS
+        )
         break
       case '_html.js':
         content = 'module.exports = false;'

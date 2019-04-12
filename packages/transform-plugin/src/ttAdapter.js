@@ -2,7 +2,7 @@
  * @Description: ttAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-11 14:55:27
+ * @LastEditTime: 2019-04-12 16:42:04
  */
 import npath from 'path'
 import {
@@ -11,6 +11,7 @@ import {
   TT_STYLE_EXT,
   TT_APP_CONFIG,
   TT_PAGE_CONFIG,
+  GLOBAL_PROPS,
 } from './constants'
 
 export default {
@@ -32,6 +33,15 @@ export default {
   npmCodeHack (content, filePath) {
     const basename = npath.basename(filePath)
     switch (basename) {
+      case 'lodash.js':
+      case '_global.js':
+      case 'global.js':
+      case 'lodash.min.js':
+        content = content.replace(
+          /Function\(['"]return this['"]\)\(\)/,
+          GLOBAL_PROPS
+        )
+        break
       case '_html.js':
         content = 'module.exports = false;'
         break

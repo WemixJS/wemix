@@ -16,6 +16,7 @@
   "homepage": "https://github.com/WemixJS/wemix#readme",
   "dependencies": {
     "@babel/runtime": "^7.4.3",
+    "core-js": "^2.6.5",
     "loader-utils": "^1.2.3",
     "node-sass": "^4.11.0",
     "semver": "^6.0.0"

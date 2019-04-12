@@ -439,23 +439,24 @@ const transformStyle = function (
 }
 
 const adapterCorePkg = function (compiler, data, resolve, reject) {
-  const ast = parse(data, { sourceType: 'module' })
+  const ast = parse(data)
   traverse(ast, {
-    ImportDeclaration (astPath) {
-      const source = astPath.get('source')
-      if (
-        source.isStringLiteral({ value: './wechat' }) &&
-        compiler.options.export !== 'wechat'
-      ) {
-        const replaceImport = t.importDeclaration(
-          astPath.node.specifiers,
-          t.stringLiteral(`./${compiler.options.export}`)
-        )
-        astPath.replaceWith(replaceImport)
+    CallExpression (astPath) {
+      const callee = astPath.get('callee')
+      if (callee.isIdentifier({ name: 'require' })) {
+        const args = astPath.get('arguments')[0]
+        const requirePath = args.node.value
+        if (
+          requirePath === './wechat' &&
+          compiler.options.export !== 'wechat'
+        ) {
+          args.replaceWith(t.stringLiteral(`./${compiler.options.export}`))
+        }
       }
     },
   })
-  resolve({ data: generator(ast).code })
+  data = generator(ast).code
+  resolve({ data: data })
 }
 const splitJsonConfig = function (
   configNode,

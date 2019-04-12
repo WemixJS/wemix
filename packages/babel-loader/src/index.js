@@ -2,7 +2,7 @@
  * @Description: babel-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-03-27 10:17:45
+ * @LastEditTime: 2019-04-12 11:49:31
  */
 
 import { transformSync, loadPartialConfig } from '@babel/core'
@@ -49,10 +49,12 @@ function _dealPath (path) {
   return npath.resolve(process.cwd(), path)
 }
 
-export default function (data, loader, path, next) {
+export default function (data, loader, path, next, compiler) {
   if (!data) {
     return next(null, data)
   }
+  const initExitInclude = !!loader.include
+  const initExitExclude = !!loader.exclude
   const includeType = _type(loader.include)
   const excludeType = _type(loader.exclude)
   let [result, include, exclude, exitInclude, exitExclude] = [
@@ -76,44 +78,69 @@ export default function (data, loader, path, next) {
 
   for (let i = 0; i < include.length; i++) {
     if (_type(include[i]) === '[object RegExp]') {
-      if (loader.include.test(path)) {
+      if (include[i].test(path)) {
         exitInclude = true
         break
       }
     } else {
-      if (~_dealPath(include[i]).indexOf(path)) {
+      if (~path.indexOf(_dealPath(include[i]))) {
         exitInclude = true
         break
       }
-    }
-  }
-
-  if (exitInclude) {
-    result = _compile(data, loader, path, next)
-    if (result) {
-      return next(null, result.code)
     }
   }
 
   for (let i = 0; i < exclude.length; i++) {
     if (_type(exclude[i]) === '[object RegExp]') {
-      if (loader.exclude.test(path)) {
+      if (exclude[i].test(path)) {
         exitExclude = true
         break
       }
     } else {
-      if (~_dealPath(exclude[i]).indexOf(path)) {
+      if (~path.indexOf(_dealPath(include[i]))) {
         exitExclude = true
         break
       }
     }
   }
 
-  if (!exitExclude && !exitInclude) {
-    result = _compile(data, loader, path, next)
-    if (result) {
-      return next(null, result.code)
+  if (initExitInclude && !initExitExclude) {
+    if (exitInclude) {
+      result = _compile(data, loader, path, next)
+      if (result) {
+        return next(null, result.code)
+      } else {
+        compiler.logger.warn('babel-loader error:', path)
+        return next(null, data)
+      }
+    } else {
+      return next(null, data)
     }
   }
-  next(null, data)
+  if (initExitInclude && initExitExclude) {
+    if (exitInclude && !exitExclude) {
+      result = _compile(data, loader, path, next)
+      if (result) {
+        return next(null, result.code)
+      } else {
+        compiler.logger.warn('babel-loader error:', path)
+        return next(null, data)
+      }
+    } else {
+      return next(null, data)
+    }
+  }
+  if (!initExitInclude && initExitExclude) {
+    if (!exitExclude) {
+      result = _compile(data, loader, path, next)
+      if (result) {
+        return next(null, result.code)
+      } else {
+        compiler.logger.warn('babel-loader error:', path)
+        return next(null, data)
+      }
+    } else {
+      return next(null, data)
+    }
+  }
 }

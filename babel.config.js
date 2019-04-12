@@ -16,7 +16,8 @@ module.exports = function (api) {
             'Android >= 4.1',
           ],
         },
-        useBuiltIns: false,
+        useBuiltIns: 'usage',
+        corejs: 2,
         modules: 'commonjs',
       },
     ],
@@ -27,7 +28,7 @@ module.exports = function (api) {
       {
         absoluteRuntime: false,
         corejs: false,
-        helpers: false,
+        helpers: true,
         regenerator: true,
         useESModules: false,
       },

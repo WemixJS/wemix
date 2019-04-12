@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 20:08:00
+ * @LastEditTime: 2019-04-12 17:37:44
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -22,15 +22,13 @@ export default class Wechat {
       { wemixCopyClass: { type: String, value: '' } },
       ComponentClass.properties || {}
     )
-    config['onInit'] = function () {
+    config['didMount'] = function (...args) {
       this.component = new ComponentClass()
       this.propsKeys = Object.keys(config['props'])
       this.component.$init(wemix, this)
-    }
-    config['didMount'] = function (...args) {
       this.component.setData(this.component.data)
-      this.component.__webviewId__ = this.__wxWebviewId__
-      this.component.__exparserNodeId__ = this.__wxExparserNodeId__
+      this.component.__webviewId__ = this.$page.$viewId
+      this.component.__exparserNodeId__ = this.$id
       if (
         this.component.props.wemixCopyId ||
         this.component.props.wemixCopyClass

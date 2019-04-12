@@ -15,6 +15,7 @@
   },
   "homepage": "https://github.com/WemixJS/wemix#readme",
   "dependencies": {
-    "@babel/runtime": "^7.4.3"
+    "@babel/runtime": "^7.4.3",
+    "core-js": "^2.6.5"
   }
 }

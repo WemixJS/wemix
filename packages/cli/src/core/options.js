@@ -2,7 +2,7 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-04-11 15:42:45
+ * @LastEditTime: 2019-04-11 17:34:39
  */
 
 import fs from 'fs-extra'
@@ -149,7 +149,7 @@ export const convert = function (args) {
     config.entry = [config.entry]
   }
   config.entry = [
-    npath.join(process.cwd(), '.wemixconfig', config.export),
+    npath.join(process.cwd(), 'wemixconfig', config.export),
   ].concat(config.entry)
   config.entry = config.entry.map(item => {
     if (/app\.js/.test(item)) {
