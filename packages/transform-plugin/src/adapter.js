@@ -70,7 +70,7 @@ const customHack = function (data, oriPath, compiler, type, pathParse) {
         oriPath + ': Use wemix.getApp() or wemix.getCurrentPages()'
       )
     }
-    if (/(wx|my|tt|swan)\./.test(data)) {
+    if (/(wx|my|tt|swan)\.[^(__wemix_require)]/.test(data)) {
       compiler.logger.warn(oriPath + ': wx|my|tt|swan replaceWith wemix')
     }
   }
@@ -95,18 +95,6 @@ const getOutputPath = function (oriPath, compiler) {
     )
     .replace('.html', this.platform.htmlExt)
     .replace(/\.(css|less|sass|scss|acss|styl)/, this.platform.cssExt)
-}
-
-const mergeProjectConfig = function (oriPath, compiler, resolve, reject) {
-  try {
-    let data = fs.readFileSync(oriPath, 'utf8') || ''
-    data = (data && JSON.parse(data)) || {}
-    const distConfig = JSON.parse(compiler.distConfig)
-    data = JSON.stringify(Object.assign(distConfig, data))
-    resolve({ data: data })
-  } catch (err) {
-    reject(err)
-  }
 }
 
 const updateComponentsRef = function (
@@ -367,7 +355,22 @@ const transformJs = function (
           ) {
             callee.replaceWith(t.identifier('__wemix_require'))
           } else {
-            callee.replaceWith(t.identifier('global.__wemix_require'))
+            let methodName = ''
+            switch (compiler.options.export) {
+              case 'wechat':
+                methodName = 'wx'
+                break
+              case 'alipay':
+                methodName = 'my'
+                break
+              case 'swan':
+                methodName = 'swan'
+                break
+              case 'tt':
+                methodName = 'tt'
+                break
+            }
+            callee.replaceWith(t.identifier(`${methodName}.__wemix_require`))
           }
           const importReplace = item.astPath.get('arguments')[0]
           importReplace.replaceWith(
@@ -481,10 +484,10 @@ const splitJsonConfig = function (
           const tabBar = {}
           for (const skey in this.platform.appConfig[key]) {
             if (skey === this.platform.tabName) {
-              const list = config[key][skey].map(item => {
+              const list = config[key]['list'].map(item => {
                 const tab = Object.assign(
                   {},
-                  this.platform.appConfig[key][skey]
+                  this.platform.appConfig[key]['list']
                 )
                 for (const tkey in tab) {
                   tab[tkey] = item[tab[tkey]]
@@ -715,17 +718,8 @@ export default class Adapter {
   adapterCorePkg (...args) {
     adapterCorePkg.call(this, ...args)
   }
-  getEntryConfigPath (compiler) {
-    return this.platform.getEntryConfigPath(compiler)
-  }
-  getOutputConfigPath (compiler) {
-    return `${npath.join(compiler.options.output, 'project.config.json')}`
-  }
   getOutputPath (...args) {
     return getOutputPath.call(this, ...args)
-  }
-  mergeProjectConfig (...args) {
-    mergeProjectConfig.call(this, ...args)
   }
   transformHtml (...args) {
     transformHtml.call(this, ...args)

@@ -2,7 +2,7 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-04-11 10:25:39
+ * @LastEditTime: 2019-04-11 15:42:45
  */
 
 import fs from 'fs-extra'
@@ -148,6 +148,9 @@ export const convert = function (args) {
   if (toString.call(config.entry) !== '[object Array]') {
     config.entry = [config.entry]
   }
+  config.entry = [
+    npath.join(process.cwd(), '.wemixconfig', config.export),
+  ].concat(config.entry)
   config.entry = config.entry.map(item => {
     if (/app\.js/.test(item)) {
       config.dir = npath.resolve(config.context, item.replace('/app.js', ''))

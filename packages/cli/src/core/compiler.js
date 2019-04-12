@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-04-04 14:05:46
+ * @LastEditTime: 2019-04-11 17:00:44
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -42,6 +42,7 @@ export default class Compiler {
     this.logger = logger
     this.cache = {}
     this.running = false
+    this.compiling = false
     this.distConfig = null
     this.resolverFactory = new ResolverFactory()
     this.wp = new Watchpack({
@@ -60,7 +61,7 @@ export default class Compiler {
     return loader
   }
   finalCallback (err, callback) {
-    this.running = false
+    this.compiling = false
 
     if (err) {
       this.hooks.failed.callAsync(err)
@@ -74,6 +75,7 @@ export default class Compiler {
         'You ran Wemix twice. Each instance only supports a single concurrent compilation at a time.'
       )
     }
+    this.running = true
 
     const onCompiled = (err, compilation) => {
       if (err) return this.finalCallback(err, callback)
@@ -84,19 +86,18 @@ export default class Compiler {
           if (this.options.watch) {
             this.logger.info('Wemix is watching the files…')
           }
-          this.running = false
+          this.compiling = false
           return this.finalCallback(null, callback)
         })
       })
     }
 
-    this.running = true
     this.hooks.beforeRun.callAsync(err => {
       if (err) return this.finalCallback(err, callback)
 
       this.hooks.run.callAsync(err => {
         if (err) return this.finalCallback(err)
-        this.compile(null, onCompiled, true)
+        this.compile(null, onCompiled)
       })
     })
   }
@@ -108,10 +109,11 @@ export default class Compiler {
         this.hooks.done.callAsync(err => {
           if (err) return this.finalCallback(err, callback)
           this.logger.info('Wemix is watching the files…')
-          this.running = false
-          if (this.watchFiles.length) {
-            this.compile([].concat(this.watchFiles), onCompiled)
-            this.watchFiles = []
+          const fileLength = this.watchFiles.length
+          if (fileLength > 0) {
+            this.compile(this.watchFiles.splice(0, fileLength), onCompiled)
+          } else {
+            this.compiling = false
           }
           return this.finalCallback(null, callback)
         })
@@ -133,20 +135,30 @@ export default class Compiler {
     const subDirs = getDirectories(baseDir)
     allDirs = [baseDir].concat(subDirs)
     this.wp.watch([], allDirs, Date.now())
+    let fileTimes = this.wp.getTimes()
     this.wp.on('change', (filePath, mtime) => {
+      const currentFileTimes = this.wp.getTimes()
       if (mtime) {
-        if (!this.running) {
-          this.compile([filePath], onCompiled)
-        } else {
-          this.watchFiles.push(filePath)
+        if (
+          !fileTimes[filePath] ||
+          (fileTimes[filePath] &&
+            currentFileTimes[filePath] - fileTimes[filePath] > 100)
+        ) {
+          if (!this.compiling) {
+            this.compile([filePath], onCompiled)
+          } else {
+            this.watchFiles.push(filePath)
+          }
         }
       } else {
         const distPath = filePath.replace(this.options.dir, this.options.output)
         fs.remove(distPath)
       }
+      fileTimes = currentFileTimes
     })
   }
   compile (modifiedFiles, callback) {
+    this.compiling = true
     const compilation = new Compilation(this, modifiedFiles)
     this.hooks.beforeCompile.callAsync(compilation, err => {
       if (err) return callback(err, compilation)

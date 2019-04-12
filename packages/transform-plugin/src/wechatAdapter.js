@@ -14,9 +14,6 @@ export default {
   appConfig: WECHAT_APP_CONFIG,
   pageConfig: WECHAT_PAGE_CONFIG,
   tabName: 'list',
-  getEntryConfigPath (compiler) {
-    return `${npath.join(compiler.options.context, 'wechat.config.json')}`
-  },
   processProps (propsNode, props, compiler) {
     for (const key in props) {
       if (toString.call(props[key]) === '[object Object]') {

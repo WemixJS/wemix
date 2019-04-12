@@ -2,7 +2,7 @@
  * @Description: swanAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-03 17:28:43
+ * @LastEditTime: 2019-04-11 14:55:19
  */
 import npath from 'path'
 import {
@@ -20,9 +20,6 @@ export default {
   appConfig: SWAN_APP_CONFIG,
   pageConfig: SWAN_PAGE_CONFIG,
   tabName: 'list',
-  getEntryConfigPath (compiler) {
-    return `${npath.join(compiler.options.context, 'swan.config.json')}`
-  },
   processProps (propsNode, props, compiler) {
     for (const key in props) {
       if (toString.call(props[key]) === '[object Object]') {
