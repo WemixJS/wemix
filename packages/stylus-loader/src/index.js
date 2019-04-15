@@ -119,6 +119,11 @@ const _promise = data => {
 // 处理import
 let re = []
 const _handleImport = (data, imports, path, loader, compiler) => {
+  if (~data.indexOf('@import')) {
+    data.replace(/@import\s*(["'])(.+?)\1[;|\n]/g, function (word) {
+      imports.push(word)
+    })
+  }
   let [base, importPath, importSrcPath] = [[], [], '']
   if (loader.imports && loader.imports.length > 0) {
     for (let i = 0; i < loader.imports.length; i++) {
@@ -150,7 +155,6 @@ const _handleImport = (data, imports, path, loader, compiler) => {
           return ';\n'
         })
       }
-      imports.push(word)
       let outWord
       if (/styl/.test(word2)) {
         if (/^\//.test(word2)) {
@@ -167,6 +171,17 @@ const _handleImport = (data, imports, path, loader, compiler) => {
         return ''
       }
     })
+    let [arr, hash] = [[], []]
+    data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
+      arr.push(words)
+      return ''
+    })
+    for (var i = 0; i < arr.length; i++) {
+      if (hash.indexOf(arr[i]) === -1) {
+        hash.push(arr[i])
+      }
+    }
+    data = hash.join('\n') + data
     return data
   } else {
     return data
@@ -174,21 +189,23 @@ const _handleImport = (data, imports, path, loader, compiler) => {
 }
 
 const _filterImport = data => {
-  data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
-    for (let i = 0; i < re.length; i++) {
-      if (re[i].test(words)) {
-        return ''
-      } else {
-        return words
-      }
-    }
-    return words
-  })
-  return data
+  if (~data.indexOf('@import')) {
+    data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
+      return ''
+    })
+  } else {
+    return data
+  }
 }
+
 export default function (data, loader, path, next, compiler) {
   if (data) {
+    let ipath = []
+    data.replace(/@import\s*(["'])(.+?)\1[;|\n]/g, function (word) {
+      ipath.push(word)
+    })
     data = `.delete_flag{color:red;}` + data
+
     _promise(data).then(data => {
       const imports = []
       data = _handleImport(data, imports, path, loader, compiler)
@@ -199,8 +216,9 @@ export default function (data, loader, path, next, compiler) {
           next(err)
         }
         css = css.replace(/[\s\S]*?\.delete_flag\s\{[\s\S]*?\}/, '')
-        css = imports.join('\n') + (imports.length ? '\n' + css : css)
-        next(null, _filterImport(css))
+        css = _filterImport(css)
+        css = imports.join('\n') + (imports.length ? ';\n' + css : css)
+        next(null, css)
       })
     })
   } else {
