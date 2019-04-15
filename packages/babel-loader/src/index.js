@@ -2,7 +2,7 @@
  * @Description: babel-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-04-12 11:49:31
+ * @LastEditTime: 2019-04-15 14:56:53
  */
 
 import { transformSync, loadPartialConfig } from '@babel/core'
@@ -140,6 +140,15 @@ export default function (data, loader, path, next, compiler) {
         return next(null, data)
       }
     } else {
+      return next(null, data)
+    }
+  }
+  if (!initExitInclude && !initExitExclude) {
+    result = _compile(data, loader, path, next)
+    if (result) {
+      return next(null, result.code)
+    } else {
+      compiler.logger.warn('babel-loader error:', path)
       return next(null, data)
     }
   }

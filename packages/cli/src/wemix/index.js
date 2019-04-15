@@ -2,7 +2,7 @@
  * @Description: 入口文件
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:36:23
- * @LastEditTime: 2019-04-09 15:29:04
+ * @LastEditTime: 2019-04-15 16:34:10
  */
 
 import program from 'commander'
@@ -24,24 +24,17 @@ program
     '-t, --template <template>',
     'Choose a template [empty|custom]',
     /^(empty|custom)$/i,
-    'custom'
-  )
-  .option(
-    '-e, --export <export>',
-    'Choose a type [wechat|alipay|tt|swan]',
-    /^(wechat|alipay|tt|swan)$/i
+    'empty'
   )
   .on('--help', () => {
     console.log()
     console.log('  Example:')
     console.log()
     console.log(chalk.gray('   # create a new project with a custom template'))
-    console.log(
-      '  $ wemix new <projectName> --template custom --export wechata'
-    )
+    console.log('  $ wemix new <projectName> --template custom')
     console.log()
     console.log(chalk.gray('   # create a new project with an empty template'))
-    console.log('  $ wemix new <projectName> --template empty --export wechat')
+    console.log('  $ wemix new <projectName> --template empty')
     console.log()
   })
 

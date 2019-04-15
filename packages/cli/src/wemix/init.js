@@ -2,7 +2,7 @@
  * @Description: 初始化项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:44:27
- * @LastEditTime: 2019-04-15 14:17:33
+ * @LastEditTime: 2019-04-15 16:44:01
  */
 
 import fs from 'fs-extra'
@@ -17,9 +17,10 @@ function install () {
   // 需要安装最新的wemix，因此不能提早写入package.json文件中
   const dependencies = [
     '@wemix/core',
-    '@wemix/wechat-plugin',
-    '@wemix/uglifyJs-plugin',
-    '@wemix/uglifyImg-plugin',
+    '@wemix/transform-plugin',
+    '@wemix/uglifyjs-plugin',
+    '@wemix/uglifyimg-plugin',
+    '@wemix/pretty-plugin',
     '@wemix/babel-loader',
     '@wemix/css-loader',
     '@wemix/postcss-loader',

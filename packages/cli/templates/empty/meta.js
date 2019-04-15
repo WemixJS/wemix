@@ -14,12 +14,6 @@ module.exports = {
       required: true,
       message: 'Project name',
     },
-    appid: {
-      type: 'string',
-      required: true,
-      message: 'AppId',
-      default: 'touristappid',
-    },
     description: {
       type: 'string',
       required: false,
@@ -40,6 +34,5 @@ module.exports = {
     '.eslintrc': 'lint',
     '.stylelintignore': 'lint',
     '.stylelintrc': 'lint',
-    '.vscode/setting.json': 'lint',
   },
 }

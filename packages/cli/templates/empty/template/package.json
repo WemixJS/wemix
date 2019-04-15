@@ -1,13 +1,14 @@
-
 {
   "name": "{{name}}",
   "version": "0.0.1",
-  "description": "{{description}}",
+  "description": "a wemix project",
   "scripts": {
     {{#lint}}
     "precommit": "lint-staged",
     {{/lint}}
-    "dev": "./node_modules/.bin/wemix build --config wemix.config.js --watch"
+    "local": "./node_modules/.bin/wemix build --config wemix.development.config.js --watch",
+    "dev": "./node_modules/.bin/wemix build --config wemix.development.config.js",
+    "prod": "./node_modules/.bin/wemix build--config wemix.production.config.js"
   },
   {{#lint}}
   "lint-staged": {
@@ -18,7 +19,10 @@
   "author": "{{author}}",
   "license": "MIT",
   "dependencies": {
-    "@babel/polyfill": "^7.2.5"
+    "@babel/runtime": "^7.4.3",
+    "@rematch/core": "^1.0.6",
+    "core-js": "^2.6.5",
+    "wemix": "^1.1.7"
   },
   "devDependencies": {
     {{#lint}}
@@ -35,6 +39,12 @@
     "husky": "^1.2.1",
     "lint-staged": "^8.1.0",
     {{/lint}}
-    "@babel/preset-env": "^7.2.3"
+    "@babel/core": "^7.4.3",
+    "@babel/plugin-transform-runtime": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "cssnano": "^4.1.10",
+    "imagemin-jpegtran": "^6.0.0",
+    "imagemin-pngquant": "^7.0.0",
+    "postcss-preset-env": "^6.6.0"
   }
 }

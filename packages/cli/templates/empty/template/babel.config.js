@@ -4,7 +4,7 @@ module.exports = function (api) {
     [
       '@babel/preset-env',
       {
-        debug: true,
+        debug: false,
         targets: {
           chrome: '35',
           ios: '8',
@@ -17,13 +17,25 @@ module.exports = function (api) {
           ],
         },
         useBuiltIns: 'usage',
+        corejs: { version: 2, proposals: true },
         modules: 'commonjs',
       },
     ],
   ]
   const plugins = [
+    [
+      '@babel/plugin-transform-runtime',
+      {
+        absoluteRuntime: false,
+        corejs: false,
+        helpers: true,
+        regenerator: true,
+        useESModules: false,
+      },
+    ],
   ]
   return {
+    sourceMap: true,
     presets,
     plugins,
   }

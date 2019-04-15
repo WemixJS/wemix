@@ -11,8 +11,8 @@
     "nodeModules": false
   },
   "compileType": "miniprogram",
-  "libVersion": "1.9.97",
-  "appid": "{{appid}}",
+  "libVersion": "1.6.3",
+  "appid": "",
   "projectname": "{{name}}",
   "isGameTourist": false
 }
