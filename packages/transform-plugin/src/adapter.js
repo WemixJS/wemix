@@ -11,7 +11,6 @@ import {
   EXPORT_SWAN,
   STANDARD_ATTRIBUTE_PREFIX,
   STANDARD_ATTRIBUTE,
-  REPLACE_COMPONENT,
 } from './constants'
 import wechat from './wechatAdapter'
 import alipay from './alipayAdapter'
@@ -97,86 +96,6 @@ const getOutputPath = function (oriPath, compiler) {
     .replace(/\.(css|less|sass|scss|acss|styl)/, this.platform.cssExt)
 }
 
-const updateComponentsRef = function (
-  tags,
-  pathParse,
-  distPath,
-  compilation,
-  compiler
-) {
-  const checkIfNeedUpdate = function (
-    jsonFilePath,
-    tags,
-    configObj,
-    resolve,
-    reject,
-    readFile
-  ) {
-    const components = []
-    const newTags = []
-    if (configObj.usingComponents) {
-      for (const com in configObj.usingComponents) {
-        components.push(com)
-      }
-    }
-    for (let i = 0; i < tags.length; i++) {
-      if (!~components.indexOf(tags[i]) && /^[A-Z]/.test(tags[i])) {
-        newTags.push(tags[i])
-      }
-    }
-    if (newTags.length) {
-      newTags.forEach(item => {
-        const comDir = npath.join(
-          process.cwd(),
-          `/node_modules/@wemix/wmcomponents/${
-            compiler.options.export
-          }/${item.toLowerCase()}/index.js`
-        )
-        compilation.waitCompile[comDir] = null
-        configObj.usingComponents[item] = `/npm/@wemix/wmcomponents/${
-          compiler.options.export
-        }/${item.toLowerCase()}/index`
-      })
-      try {
-        if (readFile) {
-          fs.writeJsonSync(jsonFilePath, configObj)
-        } else {
-          compilation.modules[jsonFilePath] = JSON.stringify(configObj)
-        }
-      } catch (error) {
-        compiler.logger.error('写入文件失败', jsonFilePath)
-      }
-    }
-    resolve()
-  }
-  return new Promise((resolve, reject) => {
-    const configFilePath = distPath.replace(npath.parse(distPath).ext, '.json')
-    const configFileStr = compilation.modules[configFilePath]
-    if (configFileStr) {
-      const configObj = JSON.parse(configFileStr)
-      checkIfNeedUpdate(configFilePath, tags, configObj, resolve, reject, false)
-    } else if (fs.existsSync(configFilePath)) {
-      fs.readJSON(configFilePath, (err, configObj) => {
-        if (!err) {
-          checkIfNeedUpdate(
-            configFilePath,
-            tags,
-            configObj,
-            resolve,
-            reject,
-            true
-          )
-        } else {
-          compiler.logger.error('读取文件失败', configFilePath)
-          resolve()
-        }
-      })
-    } else {
-      resolve()
-    }
-  })
-}
-
 const transformHtml = function (
   data,
   oriPath,
@@ -194,7 +113,6 @@ const transformHtml = function (
       plugins: ['jsx'],
     })
     const _this = this
-    let tags = []
     traverse(ast, {
       JSXAttribute (astPath) {
         const name = astPath.get('name')
@@ -257,36 +175,12 @@ const transformHtml = function (
           }
         }
       },
-      JSXOpeningElement (astPath) {
-        const tagName = astPath.get('name').node.name
-        if (!~tags.indexOf(tagName) && tagName !== 'CONTAINER') {
-          if (REPLACE_COMPONENT[tagName]) {
-            astPath
-              .get('name')
-              .replaceWith(t.JSXIdentifier(REPLACE_COMPONENT[tagName]))
-          } else {
-            tags.push(tagName)
-          }
-        }
-      },
-      JSXClosingElement (astPath) {
-        const tagName = astPath.get('name').node.name
-        if (REPLACE_COMPONENT[tagName]) {
-          astPath
-            .get('name')
-            .replaceWith(t.JSXIdentifier(REPLACE_COMPONENT[tagName]))
-        }
-      },
     })
-    updateComponentsRef(tags, pathParse, distPath, compilation, compiler)
-      .then(() => {
-        compilation.modules[distPath] = generator(ast).code.replace(
-          /<\/?CONTAINER>;?/g,
-          ''
-        )
-        resolve()
-      })
-      .catch(reject)
+    compilation.modules[distPath] = generator(ast).code.replace(
+      /<\/?CONTAINER>;?/g,
+      ''
+    )
+    resolve()
   } catch (e) {
     reject(e)
   }
