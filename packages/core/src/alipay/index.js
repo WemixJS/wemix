@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-12 17:37:44
+ * @LastEditTime: 2019-04-12 19:59:10
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -123,7 +123,7 @@ export default class Wechat {
         }
         this.props = $wxcomponent.props
         this.triggerEvent = (name, details) => {
-          $wxcomponent.props[`on${name}`]({ detail: { details } })
+          $wxcomponent.props[`on${name}`]({ detail: details })
         }
       }
     }
