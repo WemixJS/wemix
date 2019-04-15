@@ -2,7 +2,7 @@
  * @Description: less-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-04-15 11:03:38
+ * @LastEditTime: 2019-04-15 14:20:10
  */
 
 import less from 'less'
@@ -121,6 +121,11 @@ const _promise = data => {
 // 处理import
 let re = []
 const _handleImport = (data, imports, path, loader, compiler) => {
+  if (~data.indexOf('@import')) {
+    data.replace(/@import\s*(["'])(.+?)\1[;|\n]/g, function (word) {
+      imports.push(word)
+    })
+  }
   let [base, importPath, importSrcPath] = [[], [], '']
   if (loader.imports && loader.imports.length > 0) {
     for (let i = 0; i < loader.imports.length; i++) {
@@ -152,7 +157,6 @@ const _handleImport = (data, imports, path, loader, compiler) => {
           return ';\n'
         })
       }
-      imports.push(word)
       let outWord
       if (/less/.test(word2)) {
         if (/^\//.test(word2)) {
@@ -169,6 +173,17 @@ const _handleImport = (data, imports, path, loader, compiler) => {
         return ''
       }
     })
+    let [arr, hash] = [[], []]
+    data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
+      arr.push(words)
+      return ''
+    })
+    for (var i = 0; i < arr.length; i++) {
+      if (hash.indexOf(arr[i]) === -1) {
+        hash.push(arr[i])
+      }
+    }
+    data = hash.join('\n') + data
     return data
   } else {
     return data
@@ -176,28 +191,29 @@ const _handleImport = (data, imports, path, loader, compiler) => {
 }
 
 const _filterImport = data => {
-  data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
-    for (let i = 0; i < re.length; i++) {
-      if (re[i].test(words)) {
-        return ''
-      } else {
-        return words
-      }
-    }
-    return words
-  })
-  return data
+  if (~data.indexOf('@import')) {
+    data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
+      return ''
+    })
+  } else {
+    return data
+  }
 }
 
 export default function (data, loader, path, next, compiler) {
   if (!data) {
     return next(null, data)
   }
+  let ipath = []
+  data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
+    ipath.push(words)
+    return ''
+  })
+  data = ipath.join('\n') + data
   data = `.delete_flag{color:red;}` + data
   _promise(data).then(data => {
     const imports = []
     data = _handleImport(data, imports, path, loader, compiler)
-
     const loaderOptions =
       (loader.options && loaderUtils.getOptions({ query: loader.options })) ||
       {}
@@ -217,12 +233,10 @@ export default function (data, loader, path, next, compiler) {
           /[\s\S]*?\.delete_flag\s\{[\s\S]*?\}/,
           ''
         )
-        console.log(output.css)
-        console.log(imports)
+        output.css = _filterImport(output.css)
         output.css =
           imports.join('\n') + (imports.length ? '\n' + output.css : output.css)
-        console.log(output.css)
-        next(null, _filterImport(output.css))
+        next(null, output.css)
       })
       .catch(err => {
         next(err)
