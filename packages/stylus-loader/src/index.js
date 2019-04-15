@@ -188,6 +188,7 @@ const _filterImport = data => {
 }
 export default function (data, loader, path, next, compiler) {
   if (data) {
+    data = `.delete_flag{color:red;}` + data
     _promise(data).then(data => {
       const imports = []
       data = _handleImport(data, imports, path, loader, compiler)
@@ -197,6 +198,7 @@ export default function (data, loader, path, next, compiler) {
         if (err) {
           next(err)
         }
+        css = css.replace(/[\s\S]*?\.delete_flag\s\{[\s\S]*?\}/, '')
         css = imports.join('\n') + (imports.length ? '\n' + css : css)
         next(null, _filterImport(css))
       })

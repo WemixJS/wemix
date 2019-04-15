@@ -193,6 +193,7 @@ export default function (data, loader, path, next, compiler) {
   if (!data) {
     return next(null, data)
   }
+  data = `.delete_flag{color:red;}` + data
   _promise(data).then(data => {
     const imports = []
     data = _handleImport(data, imports, path, loader, compiler)
@@ -212,6 +213,10 @@ export default function (data, loader, path, next, compiler) {
     less
       .render(data, loaderOptions)
       .then(output => {
+        output.css = output.css.replace(
+          /[\s\S]*?\.delete_flag\s\{[\s\S]*?\}/,
+          ''
+        )
         output.css =
           imports.join('\n') + (imports.length ? '\n' + output.css : output.css)
         next(null, _filterImport(output.css))
