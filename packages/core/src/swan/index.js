@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 20:07:50
+ * @LastEditTime: 2019-04-12 19:24:27
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -28,9 +28,10 @@ export default class Swan {
       this.component.$init(wemix, this)
     }
     config['attached'] = function (...args) {
+      const pages = getCurrentPages()
       this.component.setData(this.component.data)
-      this.component.__webviewId__ = this.__wxWebviewId__
-      this.component.__exparserNodeId__ = this.__wxExparserNodeId__
+      this.component.__webviewId__ = pages[pages.length - 1].__webviewId__
+      this.component.__exparserNodeId__ = this.nodeId
       if (
         this.component.props.wemixCopyId ||
         this.component.props.wemixCopyClass

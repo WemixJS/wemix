@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-12 17:41:59
+ * @LastEditTime: 2019-04-12 19:24:58
  */
 
 import app from './app'
@@ -24,14 +24,24 @@ class Wemix {
     const [config, _this] = [{}, this]
     this.config.app = AppClass.config
     config['onLaunch'] = function (...args) {
-      this.app = new AppClass()
-      this.app.$init(_this, AppClass)
+      if (!this.app) {
+        this.app = new AppClass()
+        this.app.$init(_this, AppClass)
+      }
       this.app['onLaunch'] && this.app['onLaunch'].apply(this.app, args)
+    }
+    config['onShow'] = function (...args) {
+      if (!this.app) {
+        this.app = new AppClass()
+        this.app.$init(_this, AppClass)
+      }
+      this.app['onShow'] && this.app['onShow'].apply(this.app, args)
     }
     Object.getOwnPropertyNames(AppClass.prototype || []).forEach(v => {
       if (
         v !== 'constructor' &&
         v !== 'onLaunch' &&
+        v !== 'onShow' &&
         v !== 'onLog' &&
         v !== 'onPageShow' &&
         v !== 'onPageHide'
@@ -69,7 +79,7 @@ class Wemix {
       return hide
     }
     config['onUnload'] = function (...args) {
-      deleteAllComponents(this.page.__wxWebviewId__)
+      deleteAllComponents(this.page.__webviewId__)
       const tp = Date.now() - this.timestamp
       const app = getApp()
       const unload =
@@ -120,7 +130,7 @@ class Wemix {
     return getApp().app
   }
   getCurrentPages () {
-    const pages = getCurrentPages()
+    const pages = getCurrentPages() || []
     return pages.map(page => {
       return page.page
     })
