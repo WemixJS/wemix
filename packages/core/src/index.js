@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-15 10:56:12
+ * @LastEditTime: 2019-04-15 11:50:49
  */
 
 import app from './app'

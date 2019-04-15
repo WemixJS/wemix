@@ -2,7 +2,7 @@
  * @Description: less-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-03-27 10:10:29
+ * @LastEditTime: 2019-04-15 11:03:38
  */
 
 import less from 'less'
@@ -217,8 +217,11 @@ export default function (data, loader, path, next, compiler) {
           /[\s\S]*?\.delete_flag\s\{[\s\S]*?\}/,
           ''
         )
+        console.log(output.css)
+        console.log(imports)
         output.css =
           imports.join('\n') + (imports.length ? '\n' + output.css : output.css)
+        console.log(output.css)
         next(null, _filterImport(output.css))
       })
       .catch(err => {

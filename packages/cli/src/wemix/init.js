@@ -2,7 +2,7 @@
  * @Description: 初始化项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:44:27
- * @LastEditTime: 2019-02-28 18:12:40
+ * @LastEditTime: 2019-04-15 14:17:33
  */
 
 import fs from 'fs-extra'
@@ -69,7 +69,7 @@ function create (name, program) {
   logger.success('Create directory ' + name)
   logger.start('Init project')
   if (!program.template) {
-    program.template = 'custom'
+    program.template = 'empty'
   }
   const tempDir = npath.join(
     __dirname,
