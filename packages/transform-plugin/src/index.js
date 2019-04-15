@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-04-11 20:15:39
+ * @LastEditTime: 2019-04-15 10:53:01
  */
 
 import fs from 'fs-extra'
@@ -10,16 +10,10 @@ import npath from 'path'
 import Adapter from './adapter'
 
 export default class TransformPlugin {
-  /**
-   * @description: 拆分json配置文件
-   * @param {type}
-   * @return:
-   */
   beforeSingleCompile (oriPath, pathParse, distPath, compiler, compilation) {
     return new Promise((resolve, reject) => {
       let rdata = fs.readFileSync(oriPath, 'utf8') || ''
       switch (pathParse.ext) {
-        // 拆分json配置文件 如果是app page component则还得处理对应的样式文件及html文件
         case '.js':
           if (/@wemix\/core\/index\.js$/.test(oriPath)) {
             compiler.adapter.adapterCorePkg(compiler, rdata, resolve, reject)
@@ -109,11 +103,9 @@ export default class TransformPlugin {
   transform (loader, oriPath, pathParse, distPath, compiler, compilation) {
     return new Promise((resolve, reject) => {
       if (pathParse.ext === '.html' || loader) {
-        // js 处理config到json文件
-        // js app component page 找对应的html less
-        // js 处理引用
-        // less 处理引用
-        // html 处理替换成小程序支持的格式
+        // 拆分app page component 下的config 并创建换存到modules下面
+        // 将app page component 下对应的样式及html文件放入待编译池等待下次编译
+        // 根据compiler.options.export参数转换core包路径引导到不同的环境
         this.beforeSingleCompile(
           oriPath,
           pathParse,
@@ -139,6 +131,10 @@ export default class TransformPlugin {
                       oriPath,
                       (err, rdata) => {
                         if (err) return reject(err)
+                        // 将require路径放入待编译池中等待下次编译，并将require改成__wemix_require，用于合并包使用
+                        // 备份npm包为后面输出的时候合并npm文件做准备
+                        // 替换样式文件内@import文件后缀
+                        // 转译html文件使其成为不同平台下的支持的代码
                         this.afterSingleCompile(
                           rdata,
                           oriPath,

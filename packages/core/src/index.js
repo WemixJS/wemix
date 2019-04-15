@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-12 19:24:58
+ * @LastEditTime: 2019-04-15 10:56:12
  */
 
 import app from './app'
@@ -198,6 +198,31 @@ class Wemix {
   }
   isSymbol (sym) {
     return toString.call(sym) === '[object Symbol]'
+  }
+  compareVersion (baseVersion, currentVersion) {
+    baseVersion = baseVersion.split('.')
+    currentVersion = currentVersion.split('.')
+    let len = Math.max(baseVersion.length, currentVersion.length)
+
+    while (baseVersion.length < len) {
+      baseVersion.push('0')
+    }
+    while (currentVersion.length < len) {
+      currentVersion.push('0')
+    }
+
+    for (let i = 0; i < len; i++) {
+      let num1 = parseInt(baseVersion[i])
+      let num2 = parseInt(currentVersion[i])
+
+      if (num1 > num2) {
+        return 1
+      } else if (num1 < num2) {
+        return -1
+      }
+    }
+
+    return 0
   }
 }
 export default new Wemix()
