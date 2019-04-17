@@ -1,6 +1,5 @@
 const path = require('path')
 const TransformPlugin = require('@wemix/transform-plugin')
-console.log(TransformPlugin)
 
 module.exports = {
   entry: [
@@ -11,8 +10,6 @@ module.exports = {
     {
       test: /\.js$/,
       include: [
-        path.join(__dirname, 'node_modules/@rematch/core'),
-        path.join(__dirname, 'node_modules/@rematch/loading'),
         path.join(__dirname, 'src'),
       ],
       use: [
@@ -35,17 +32,6 @@ module.exports = {
           },
         },
         { loader: '@wemix/less-loader' },
-      ],
-    },
-    {
-      test: /\.css$/,
-      use: [
-        {
-          loader: '@wemix/postcss-loader',
-          options: {
-            configFile: path.resolve('postcss.config.js'),
-          },
-        },
       ],
     },
   ],

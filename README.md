@@ -13,7 +13,11 @@
 
 ## <font color=#34495e>使用前阅读</font>
 
-1. 基础库最低版本要求：微信端：1.6.3； 支付宝端：1.7.0； 百度端：1.10.13； 头条端： 无
+1. 基础库最低版本要求：微信端：2.3.0； 支付宝端：1.11.0； 百度端：2.0.3； 头条端： 无
+2. 为兼容多端 for 语句的 key 不要用{{}}包裹
+3. 为兼容多端资源引用路径请使用绝对路径
+4. 不要在 extends wemix.app 类内的函数中调用 wemix.getApp() 函数，使用 this 就可以拿到 app 实例
+5. 不要在 onLaunch 中调用 wemix.getCurrentPages() ，此时，page 还没有生成
 
 ## <font color=#34495e>项目创建</font>
 
@@ -29,43 +33,35 @@ npm install @wemix/cli -g
 cd xxx
 wemix new projectName -t empty
 cd projectName
-wemix build -w //开发
-wemix build -p --no-cache //线上
-wemix mkpage `path` //path不带/可以自动在pages目录内生成
-wemix mkcomponent `path` //path不带/可以自动在components目录内生成
-wemix mkbehavior `path` //path不带/可以自动在behaviors目录内生成
+wemix build --config wemix.development.config.js -w // 开发
+wemix build --config wemix.development.config.js // 线上
+wemix mkpage `path` // path不带/可以自动在pages目录内生成
+wemix mkcomponent `path` // path不带/可以自动在components目录内生成
 ```
 
 #### <font color=#34495e>目录结构</font>
 
 ```
-|-- dist                     微信开发者工具指定的目录
+|-- wechat                     微信开发者工具指定的目录
+|-- alipay                     支付宝开发者工具指定的目录
+|-- swan                       百度开发者工具指定的目录
+|-- tt                         头条开发者工具指定的目录
+|-- wemixconfig                小程序配置文件信息
 |-- node_modules
-|-- src                      开发目录
-|   |-- pages                页面文件夹(文件夹名不允许改动)
+|-- src                        开发目录
+|   |-- pages                  页面文件夹
 |   |   |-- index.js
 |   |   |-- index.html
 |   |   |-- index.less
-|   |-- components           页面依赖的组件文件夹(文件夹名不允许改动)
+|   |-- components             页面依赖的组件文件夹
 |   |   |-- index.js
 |   |   |-- index.html
 |   |   |-- index.less
-|   |-- behaviors            组件间代码共享的特性mixins(文件夹名不允许改动)
-|   |   |-- index.js
 |   |-- app.js
 |   |-- app.less
 |-- package-lock.json
 |-- package.json
 ```
-
-⚠️<font color=#FF5E45>注：命名为 pages,components,behaviors 的文件夹请勿更改</font>
-
-### <font color=#FF5E45>`重要`</font><font color=#34495e>微信开发者工具设置</font>
-
-1. 本地开发选择`dist`目录
-2. 详情-->项目设置-->取消勾选 ES6 转 ES5
-3. 详情-->项目设置-->取消勾选上传代码时样式自动补全
-4. 详情-->项目设置-->取消勾选上传代码时自动压缩
 
 ## <font color=#34495e>使用**wemix**的优点</font>
 
@@ -74,140 +70,246 @@ wemix mkbehavior `path` //path不带/可以自动在behaviors目录内生成
 1. App 实例增加 onPageShow 生命周期,监听页面变化。
 2. App 实例增加 onPageHide 生命周期,监听页面变化。
 3. App 实例增加 onLog 事件捕获器,监听点击事件。
-4. Page 实例增加 onRoute 生命周期避免 onShow 方法多次执行。
-5. 支持加载外部 NPM 包。
-6. 支持 less 编译。
-7. 针对 wx.request 并发问题进行优化。
-8. @iconfont: '//at.alicdn.com/t/xxx.css';可自动引入 iconfont
-9. page 和 component 实例添加 this.emit({listenCurrentRoute: false, listenerName: 'triggerListener'}, ...args)
+4. 支持加载外部 NPM 包。
+5. 支持 less 编译。
+6. 针对 wx.request 并发问题进行优化。
+7. @iconfont: '//at.alicdn.com/t/xxx.css';可自动引入 iconfont
 
-component 内样式无法直接使用 app.less 内的样式所以建议
-单独新建一个 iconfont.less 文件存放@iconfont: '//at.alicdn.com/t/xxx.css';其它文件引用该文件@import 'iconfont.less'
+单独新建一个 iconfont.less 文件存放@iconfont: '//at.alicdn.com/t/xxx.css';
+其它文件引用该文件@import 'iconfont.less' 或者通过配置信息的 imports 自动全局注入 iconfont.less
 
-listenCurrentRoute false 则会遍历路由栈内所有页面及组件
-listenCurrentRoute true 只会遍历当前路由的页面及组件
+## <font color=#34495e>实例</font>
 
-## <font color=#34495e>实战说明</font>
+### <font color=#34495e>App 实例</font>
 
-### <font color=#34495e>关于编译及插件</font>
+```js
+import wemix from "@wemix/core"
 
-- 当前仅支持 less 编译
-- babel 使用的 preset 为 babel-preset-env，配置为：
+export default class Main extends wemix.app {
+  constructor() {
+    super()
+  }
+  onLaunch(options) {}
+  onShow(options) {}
+  onHide() {}
+  onError(msg) {}
+  onPageShow() {}
+  onPageHide(tp) {}
+  onLog(type, e, data) {}
+}
 
-```
-{
-  "presets": [
-    ["env", {
-      "debug": false,
-      "targets": {
-        "chrome": "53",
-        "ios": "8",
-        "browsers": ["Chrome >= 53", "ChromeAndroid >= 53", "iOS >= 8"]
+Main.config = {
+  pages: [""],
+  debug: false,
+  subpackages: [],
+  window: {
+    navigationBarBackgroundColor: "",
+    navigationBarTextStyle: "",
+    navigationBarTitleText: "",
+    backgroundColor: "",
+    backgroundTextStyle: "",
+    enablePullDownRefresh: false,
+    onReachBottomDistance: 50
+  },
+  tabBar: {
+    color: "",
+    selectedColor: "",
+    backgroundColor: "",
+    list: [
+      {
+        pagePath: "",
+        text: "",
+        iconPath: "",
+        selectedIconPath: ""
       }
-    }]
-  ],
-  "plugins": [
-    [
-      "transform-runtime", {
-        "helpers": false,
-        "polyfill": true,
-        "regenerator": true,
-        "moduleName": "babel-runtime"
-      }
-    ],
-    ["transform-object-rest-spread"]
-  ]
+    ]
+  },
+  wechat: {
+    window: {}
+  },
+  alipay: {},
+  swan: {},
+  tt: {}
 }
 ```
 
-- 线上构建的时候指定以下插件进行压缩：
+### <font color=#34495e>Page 实例</font>
 
-```
-  uglify-js
-  imagemin
-  pretty-data
-  cssnano
-```
+```js
+import wemix from "@wemix/core"
 
-### <font color=#34495e>WEMIX 额外封装的一些事件</font>
+export default class Index extends wemix.page {
+  constructor() {
+    super()
+    this.data = {}
+  }
 
-1. wemix.bridge 封装了小程序的方法，以及添加了
+  onLoad(options) {}
+  onShow() {}
+  onHide() {}
+  onUnload() {}
+  onShareAppMessage() {}
+  onPageScroll() {}
+  onReachBottom() {}
+  onPullDownRefresh() {}
+}
 
-   wemix.bridge.compareVersion(v1, v2) 比较版本号
-
-   wemix.bridge.refresh() 刷新当前页面
-
-   wemix.bridge.add(a, b) 用来得到精确的加法结果
-
-   wemix.bridge.sub(a, b) 用来得到精确的减法结果
-
-   wemix.bridge.mul(a, b) 用来得到精确的乘法结果
-
-   wemix.bridge.div(a, b) 用来得到精确的除法结果
-
-2. wemix.route 保存了小程序的路由
-
-   wemix.route.current.page
-
-   wemix.route.current.search
-
-   wemix.route.previous.page 上一个路由栈信息
-
-   wemix.route.previous.search 上一个路由栈信息
-
-3. wemix.config 所有的 json 配置文件
-
-4. wemix.global 全局数据的缓存存储
-
-   wemix.global.sysInfo 默认存储了 getSystemInfoSync 的数据
-
-5. wemix.getStackRoutes() 获取当前路由栈的所有路由；禁止在 onLaunch 方法内使用
-
-   禁止使用 getApp()方法，使用 wemix.instance.app 代替
-
-   禁止使用 getCurrentPages()方法，使用 wemix.instance.pages[wemix.getStackRoutes()[index]]代替
-
-### <font color=#34495e>实例</font>
-
-##### <font color=#34495e>App 实例</font>
-
-```html
-import wemix from 'wemix' /** * 类名不要使用App字段 */ export default class Main
-extends wemix.app { onLaunch (options) { } onShow (options) { } onHide () { }
-onError (msg) { } onPageShow () { } onPageHide (tp) { } // 在点击事件(bindtap,
-catchtap bindsubmit等)元素中定义以data-wemixlog开头的属性
-data-wemixlog-click-area='a_b_c_d' // 接收data-wemixlog数据对象 data =
-{clickArea: 'a_b_c_d'} onLog (type, e, data) { } onPageNotFound () { } }
-Main.config = { pages: [ 'pages/index' ], window: { backgroundTextStyle:
-'light', navigationBarBackgroundColor: '#FFFFFF', navigationBarTitleText:
-'WEMIX', navigationBarTextStyle: 'black' } }
+Index.config = {
+  navigationBarBackgroundColor: "",
+  navigationBarTextStyle: "",
+  navigationBarTitleText: "",
+  backgroundColor: "",
+  backgroundTextStyle: "",
+  enablePullDownRefresh: false,
+  disableScroll: false,
+  onReachBottomDistance: 50,
+  usingComponents: {
+    "a-component": "/components/normal/a"
+  },
+  wechatComponents: {
+    "b-component": "/components/wechat/b"
+  },
+  alipayComponents: {
+    "b-component": "/components/alipay/b"
+  },
+  swanComponents: {
+    "b-component": "/components/swan/b"
+  },
+  ttComponents: {
+    "b-component": "/components/tt/b"
+  }
+}
 ```
 
-##### <font color=#34495e>Page 实例</font>
+### <font color=#34495e>Component 实例</font>
 
-```html
-import wemix from 'wemix' /** * 类名不要使用Page字段 */ export default class
-Index extends wemix.page { onLoad (options) { } onReady () { } onShow () { }
-onHide () { } onUnload () { } onPullDownRefresh () { } onReachBottom () { }
-onShareAppMessage () { } onPageScroll () { } onTabItemTap () { } } Index.data =
-{} Index.config = { navigationBarTitleText: 'WEMIX', usingComponents: {} }
+```js
+import wemix from "@wemix/core"
+
+export default class Index extends wemix.component {
+  constructor() {
+    super()
+    this.data = {}
+  }
+  onLoad() {}
+  onUnload() {}
+}
+
+Index.config = {
+  component: true,
+  usingComponents: {}
+}
+Index.properties = {
+  name: {
+    type: String,
+    value: ""
+  }
+}
 ```
 
-##### <font color=#34495e>Component 实例</font>
+### <font color=#34495e>打包配置文件</font>
 
-```html
-import wemix from 'wemix' /** * 类名不要使用Component字段 */ export default
-class Index extends wemix.component { onPageShow () { } onPageHide () { }
-created () { } attached () { } ready () { } moved () { } detached () { } }
-Index.config = { component: true, usingComponents: {} } Index.data = {}
-Index.properties = {} // behaviors的引入和原生小程序有区别,直接填路径即可 //
-引入方式为['/behaviors/a', '/behaviors/a/b',...] Index.behaviors = []
-Index.methods = {}
+```js
+const path = require("path")
+const TransformPlugin = require("@wemix/transform-plugin")
+
+module.exports = {
+  entry: [
+    path.join(__dirname, "src/app.js"),
+    path.join(__dirname, "src/assets")
+  ],
+  loaders: [
+    {
+      test: /\.js$/,
+      include: [path.join(__dirname, "src")],
+      use: [
+        {
+          loader: "@wemix/babel-loader",
+          options: {
+            configFile: path.resolve("babel.config.js")
+          }
+        }
+      ]
+    },
+    {
+      test: /\.less$/,
+      // 样式文件可以通过imports 注入进所有的样式页面，方便变量的使用
+      imports: [path.join(__dirname, "src/global.less")],
+      use: [
+        {
+          loader: "@wemix/postcss-loader",
+          options: {
+            configFile: path.resolve("postcss.config.js")
+          }
+        },
+        { loader: "@wemix/less-loader" }
+      ]
+    },
+    {
+      test: /\.css$/,
+      use: [
+        {
+          loader: "@wemix/postcss-loader",
+          options: {
+            configFile: path.resolve("postcss.config.js")
+          }
+        }
+      ]
+    }
+  ],
+  plugins: [new TransformPlugin()]
+}
 ```
 
-##### <font color=#34495e>Behaviors</font>
+## <font color=#34495e>wemix 属性</font>
 
-```html
-export default { behaviors: [], properties: {}, data: {}, attached () { },
-methods: {} }
-```
+1. wemix.global // 全局变量可以存在此处
+2. wemix.config // app 和 page 的 json 文件信息
+3. wemix.wx // 微信 api
+4. wemix.my // 支付宝 api
+5. wemix.swan // 百度 api
+6. wemix.tt // 头条 api
+7. wemix.getApp() // 获取 app 实例
+8. wemix.getCurrentPages() // 获取路由栈 pages 实例
+9. wemix.compareVersion() // 比较版本
+10. wemix.parse()
+11. wemix.stringify()
+12. wemix.isString()
+13. wemix.isArray()
+14. wemix.isBoolean()
+15. wemix.isUndefined()
+16. wemix.isNull()
+17. wemix.isNumber()
+18. wemix.isObject()
+19. wemix.isEmptyObject()
+20. wemix.isFunction()
+21. wemix.isSymbol()
+
+22. wemix.navigateTo()
+23. wemix.redirectTo()
+24. wemix.navigateBack()
+25. wemix.switchTab()
+26. wemix.reLaunch()
+27. wemix.showToast()
+28. wemix.showLoading()
+29. wemix.hideLoading()
+30. wemix.showModal()
+
+## <font color=#34495e>page 实例属性</font>
+
+1. this.data
+2. this.options
+3. this.route
+4. this.search
+5. this.setData()
+6. this.selectComponent()
+7. this.selectAllComponents()
+
+## <font color=#34495e>component 实例属性</font>
+
+1. this.data
+2. this.props
+3. this.setData()
+4. this.selectComponent()
+5. this.selectAllComponents()
+6. this.triggerEvent()

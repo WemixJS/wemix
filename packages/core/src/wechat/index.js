@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-09 20:07:32
+ * @LastEditTime: 2019-04-16 11:34:19
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -13,6 +13,9 @@ import {
   getAllComponents,
 } from '../cache'
 export default class Wechat {
+  constructor () {
+    this.nativeApi = wx
+  }
   $createComponent (ComponentClass, wemix) {
     const config = {
       methods: {},
@@ -140,5 +143,35 @@ export default class Wechat {
         }
       }
     }
+  }
+  showToast (content) {
+    this.nativeApi.showToast({
+      title: content,
+      icon: 'none',
+    })
+  }
+  showLoading (content) {
+    this.nativeApi.showLoading({
+      title: content || '加载中...',
+    })
+  }
+  showModal (params) {
+    this.nativeApi.showModal({
+      title: params.title || '',
+      content: params.content || '小电科技',
+      showCancel:
+        typeof params.showCancel === 'boolean' ? params.showCancel : false,
+      cancelText: params.cancelText || '取消',
+      cancelColor: params.cancelColor || '#000000',
+      confirmText: params.confirmText || '确定',
+      confirmColor: params.confirmColor || '#576B95',
+      success: res => {
+        if (res.confirm) {
+          params.success && params.success()
+        } else if (res.cancel) {
+          params.cancel && params.cancel()
+        }
+      },
+    })
   }
 }

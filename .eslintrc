@@ -25,6 +25,9 @@
     "global": true,
     "document": true,
     "fetch": true,
-    "wx": true
+    "wx": true,
+    "my": true,
+    "tt": true,
+    "swan": true
   }
 }

@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-15 11:50:49
+ * @LastEditTime: 2019-04-17 10:21:42
  */
 
 import app from './app'
@@ -13,8 +13,12 @@ const adapter = new Adapter()
 class Wemix {
   constructor () {
     this.app = app
-    this.page = page
     this.component = adapter.getComponent()
+    this.page = page
+    this.wx = wx || {}
+    this.my = my || {}
+    this.tt = tt || {}
+    this.swan = swan || {}
     this.config = {
       app: undefined,
       pages: {},
@@ -224,5 +228,44 @@ class Wemix {
 
     return 0
   }
+  navigateTo (url) {
+    adapter.nativeApi.navigateTo({
+      url: url,
+    })
+  }
+  redirectTo (url) {
+    adapter.nativeApi.redirectTo({
+      url: url,
+    })
+  }
+  navigateBack (delta = 1) {
+    adapter.nativeApi.navigateBack({
+      delta: delta,
+    })
+  }
+  switchTab (url) {
+    adapter.nativeApi.switchTab({
+      url: url,
+    })
+  }
+  reLaunch (url) {
+    adapter.nativeApi.reLaunch({
+      url: url,
+    })
+  }
+  showToast (content) {
+    adapter.showToast(content)
+  }
+  showLoading (content) {
+    adapter.showLoading(content)
+  }
+  hideLoading () {
+    adapter.nativeApi.hideLoading()
+  }
+  showModal (params) {
+    adapter.showModal(params)
+  }
+  getSystemInfoSync () {}
+  getSystemInfo () {}
 }
 export default new Wemix()
