@@ -197,7 +197,34 @@ export default class Swan {
     this.nativeApi.chooseImage(params)
   }
   // 数据存储
-  setStorageSync (params) {
-    this.nativeApi.setStorageSync(params.key, params.data)
+  setStorageSync (key, data) {
+    this.nativeApi.setStorageSync(key, data)
+  }
+  setStorage (params) {
+    this.nativeApi.setStorage(params)
+  }
+  removeStorageSync (key) {
+    this.nativeApi.removeStorageSync(key)
+  }
+  removeStorage (params) {
+    this.nativeApi.removeStorage(params)
+  }
+  getStorageSync (key) {
+    return this.nativeApi.getStorageSync({ key })
+  }
+  getStorage (params) {
+    this.nativeApi.getStorage(params)
+  }
+  getStorageInfoSync () {
+    return this.nativeApi.getStorageInfoSync()
+  }
+  getStorageInfo (params) {
+    this.nativeApi.getStorageInfo(params)
+  }
+  clearStorageSync () {
+    this.nativeApi.clearStorageSync()
+  }
+  clearStorage (params) {
+    this.nativeApi.clearStorage(params)
   }
 }
