@@ -174,4 +174,27 @@ export default class Wechat {
       },
     })
   }
+  // 图片
+  saveImageToPhotosAlbum (params) {
+    this.nativeApi.saveImageToPhotosAlbum(params)
+  }
+  previewImage (params) {
+    this.nativeApi.previewImage(params)
+  }
+  getImageInfo (params) {
+    this.nativeApi.getImageInfo(params)
+  }
+  compressImage (params) {
+    this.nativeApi.compressImage(params)
+  }
+  chooseMessageFile (params) {
+    this.nativeApi.chooseMessageFile(params)
+  }
+  chooseImage (params) {
+    this.nativeApi.chooseImage(params)
+  }
+  // 数据存储
+  setStorageSync (params) {
+    this.nativeApi.setStorageSync(params)
+  }
 }

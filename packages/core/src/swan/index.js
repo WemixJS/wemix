@@ -12,6 +12,8 @@ import {
   getComponent,
   getAllComponents,
 } from '../cache'
+
+const UNSUPPORTED_API = '百度小程序不支持'
 export default class Swan {
   constructor () {
     this.nativeApi = swan
@@ -174,5 +176,28 @@ export default class Swan {
         }
       },
     })
+  }
+  // 图片
+  saveImageToPhotosAlbum (params) {
+    this.nativeApi.saveImageToPhotosAlbum(params)
+  }
+  previewImage (params) {
+    this.nativeApi.previewImage(params)
+  }
+  getImageInfo (params) {
+    this.nativeApi.getImageInfo(params)
+  }
+  compressImage (params) {
+    console.warn(`${UNSUPPORTED_API} compressImage`)
+  }
+  chooseMessageFile (params) {
+    console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
+  }
+  chooseImage (params) {
+    this.nativeApi.chooseImage(params)
+  }
+  // 数据存储
+  setStorageSync (params) {
+    this.nativeApi.setStorageSync(params.key, params.data)
   }
 }

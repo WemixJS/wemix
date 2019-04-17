@@ -12,6 +12,8 @@ import {
   getComponent,
   getAllComponents,
 } from '../cache'
+
+const UNSUPPORTED_API = '头条小程序不支持'
 export default class Tt {
   constructor () {
     this.nativeApi = tt
@@ -171,5 +173,31 @@ export default class Tt {
         }
       },
     })
+  }
+  // 图片
+  saveImageToPhotosAlbum (params) {
+    this.nativeApi.saveImageToPhotosAlbum(params)
+  }
+  previewImage (params) {
+    this.nativeApi.previewImage(params)
+  }
+  getImageInfo (params) {
+    console.warn(`${UNSUPPORTED_API} getImageInfo`)
+  }
+  compressImage (params) {
+    console.warn(`${UNSUPPORTED_API} compressImage`)
+  }
+  chooseMessageFile (params) {
+    console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
+  }
+  chooseImage (params) {
+    this.nativeApi.chooseImage(params)
+    if (params.sizeType) {
+      console.warn(`${UNSUPPORTED_API} chooseImage sizeType`)
+    }
+  }
+  // 数据存储
+  setStorageSync (params) {
+    this.nativeApi.setStorageSync(params.key, params.data)
   }
 }

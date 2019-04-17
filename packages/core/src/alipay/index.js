@@ -12,6 +12,8 @@ import {
   getComponent,
   getAllComponents,
 } from '../cache'
+
+const UNSUPPORTED_API = '支付宝小程序不支持'
 export default class Alipay {
   constructor () {
     this.nativeApi = my
@@ -167,5 +169,31 @@ export default class Alipay {
         },
       })
     }
+  }
+  // 图片
+  saveImageToPhotosAlbum (params) {
+    params.url = params.filePath
+    this.nativeApi.saveImage(params)
+  }
+  previewImage (params) {
+    this.nativeApi.previewImage(params)
+  }
+  getImageInfo (params) {
+    this.nativeApi.getImageInfo(params)
+  }
+  compressImage (params) {
+    params.apFilePaths = [params.src]
+    params.compressLevel = params.quality
+    this.nativeApi.compressImage(params)
+  }
+  chooseMessageFile (params) {
+    console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
+  }
+  chooseImage (params) {
+    this.nativeApi.chooseImage(params)
+  }
+  // 数据存储
+  setStorageSync (params) {
+    this.nativeApi.setStorageSync(params)
   }
 }
