@@ -262,4 +262,4 @@ export const REPLACE_COMPONENT = {
 }
 
 export const GLOBAL_PROPS =
-  '{URL:URL,Array:Array,DataView:DataView,Date:Date,Error:Error,Float32Array:Float32Array,Float64Array:Float64Array,Function:Function,Int8Array:Int8Array,Int16Array:Int16Array,Int32Array:Int32Array,Map:Map,Math:Math,Object:Object,Promise:Promise,RegExp:RegExp,Set:Set,String:String,Symbol:Symbol,TypeError:TypeError,Uint8Array:Uint8Array,Uint8ClampedArray:Uint8ClampedArray,Uint16Array:Uint16Array,Uint32Array:Uint32Array,WeakMap:WeakMap,clearTimeout:clearTimeout,isFinite:isFinite,parseInt:parseInt,setTimeout:setTimeout}'
+  '{Boolean:Boolean,Object:Object,Number:Number,URL:URL,Array:Array,DataView:DataView,Date:Date,Error:Error,Float32Array:Float32Array,Float64Array:Float64Array,Function:Function,Int8Array:Int8Array,Int16Array:Int16Array,Int32Array:Int32Array,Map:Map,Math:Math,Object:Object,Promise:Promise,RegExp:RegExp,Set:Set,String:String,Symbol:Symbol,TypeError:TypeError,Uint8Array:Uint8Array,Uint8ClampedArray:Uint8ClampedArray,Uint16Array:Uint16Array,Uint32Array:Uint32Array,WeakMap:WeakMap,clearTimeout:clearTimeout,isFinite:isFinite,parseInt:parseInt,setTimeout:setTimeout}'

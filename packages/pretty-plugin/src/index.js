@@ -17,7 +17,6 @@ export default class PrettyPlugin {
           toString.call(value) === '[object String]'
         ) {
           const result = minify(value, {
-            removeEmptyElements: true,
             maxLineLength: 100,
             collapseWhitespace: true,
             keepClosingSlash: true,
