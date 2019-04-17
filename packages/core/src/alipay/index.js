@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-12 19:59:10
+ * @LastEditTime: 2019-04-16 11:41:44
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -12,7 +12,12 @@ import {
   getComponent,
   getAllComponents,
 } from '../cache'
-export default class Wechat {
+
+const UNSUPPORTED_API = '支付宝小程序不支持'
+export default class Alipay {
+  constructor () {
+    this.nativeApi = my
+  }
   $createComponent (ComponentClass, wemix) {
     const config = {
       methods: {},
@@ -127,5 +132,68 @@ export default class Wechat {
         }
       }
     }
+  }
+  showToast (content) {
+    this.nativeApi.showToast({
+      content: content,
+      type: 'none',
+    })
+  }
+  showLoading (content) {
+    this.nativeApi.showLoading({
+      content: content || '加载中...',
+    })
+  }
+  showModal (params) {
+    if (typeof params.showCancel === 'undefined' || !params.showCancel) {
+      this.nativeApi.alert({
+        title: params.title || '',
+        content: params.content || '小电科技',
+        buttonText: params.confirmText || '确定',
+        success: res => {
+          params.success && params.success()
+        },
+      })
+    } else {
+      this.nativeApi.confirm({
+        title: params.title || '',
+        content: params.content || '小电科技',
+        confirmButtonText: params.confirmText || '确定',
+        cancelButtonText: params.cancelText || '取消',
+        success: confirm => {
+          if (confirm) {
+            params.success && params.success()
+          } else {
+            params.cancel && params.cancel()
+          }
+        },
+      })
+    }
+  }
+  // 图片
+  saveImageToPhotosAlbum (params) {
+    params.url = params.filePath
+    this.nativeApi.saveImage(params)
+  }
+  previewImage (params) {
+    this.nativeApi.previewImage(params)
+  }
+  getImageInfo (params) {
+    this.nativeApi.getImageInfo(params)
+  }
+  compressImage (params) {
+    params.apFilePaths = [params.src]
+    params.compressLevel = params.quality
+    this.nativeApi.compressImage(params)
+  }
+  chooseMessageFile (params) {
+    console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
+  }
+  chooseImage (params) {
+    this.nativeApi.chooseImage(params)
+  }
+  // 数据存储
+  setStorageSync (params) {
+    this.nativeApi.setStorageSync(params)
   }
 }

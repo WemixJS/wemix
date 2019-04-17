@@ -107,7 +107,10 @@ const transformHtml = function (
   reject
 ) {
   try {
-    data = data.replace(/\s*<!--[\s\S]*?-->\s*/g, '')
+    data = data
+      .replace(/\s*<!--[\s\S]*?-->\s*/g, '')
+      .replace(/\{\{/g, '(#(')
+      .replace(/\}\}/g, ')#)')
     const ast = parse(`<CONTAINER>${data}</CONTAINER>`, {
       sourceType: 'module',
       plugins: ['jsx'],
@@ -176,10 +179,10 @@ const transformHtml = function (
         }
       },
     })
-    compilation.modules[distPath] = generator(ast).code.replace(
-      /<\/?CONTAINER>;?/g,
-      ''
-    )
+    compilation.modules[distPath] = generator(ast)
+      .code.replace(/<\/?CONTAINER>;?/g, '')
+      .replace(/\(#\(/g, '{{')
+      .replace(/\)#\)/g, '}}')
     resolve()
   } catch (e) {
     reject(e)

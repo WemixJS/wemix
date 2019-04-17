@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-12 19:24:56
+ * @LastEditTime: 2019-04-16 11:41:53
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -12,7 +12,12 @@ import {
   getComponent,
   getAllComponents,
 } from '../cache'
+
+const UNSUPPORTED_API = '头条小程序不支持'
 export default class Tt {
+  constructor () {
+    this.nativeApi = tt
+  }
   $createComponent (ComponentClass, wemix) {
     const config = {
       methods: {},
@@ -140,5 +145,59 @@ export default class Tt {
         }
       }
     }
+  }
+  showToast (content) {
+    this.nativeApi.showToast({
+      title: content,
+      icon: 'none',
+    })
+  }
+  showLoading (content) {
+    this.nativeApi.showLoading({
+      title: content || '加载中...',
+    })
+  }
+  showModal (params) {
+    this.nativeApi.showModal({
+      title: params.title || '',
+      content: params.content || '小电科技',
+      showCancel:
+        typeof params.showCancel === 'boolean' ? params.showCancel : false,
+      cancelText: params.cancelText || '取消',
+      confirmText: params.confirmText || '确定',
+      success: res => {
+        if (res.confirm) {
+          params.success && params.success()
+        } else if (res.cancel) {
+          params.cancel && params.cancel()
+        }
+      },
+    })
+  }
+  // 图片
+  saveImageToPhotosAlbum (params) {
+    this.nativeApi.saveImageToPhotosAlbum(params)
+  }
+  previewImage (params) {
+    this.nativeApi.previewImage(params)
+  }
+  getImageInfo (params) {
+    console.warn(`${UNSUPPORTED_API} getImageInfo`)
+  }
+  compressImage (params) {
+    console.warn(`${UNSUPPORTED_API} compressImage`)
+  }
+  chooseMessageFile (params) {
+    console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
+  }
+  chooseImage (params) {
+    this.nativeApi.chooseImage(params)
+    if (params.sizeType) {
+      console.warn(`${UNSUPPORTED_API} chooseImage sizeType`)
+    }
+  }
+  // 数据存储
+  setStorageSync (params) {
+    this.nativeApi.setStorageSync(params.key, params.data)
   }
 }
