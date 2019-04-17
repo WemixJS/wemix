@@ -175,19 +175,13 @@ export default class Tt {
     })
   }
   // 图片
-  saveImageToPhotosAlbum (params) {
-    this.nativeApi.saveImageToPhotosAlbum(params)
-  }
-  previewImage (params) {
-    this.nativeApi.previewImage(params)
-  }
-  getImageInfo (params) {
+  getImageInfo () {
     console.warn(`${UNSUPPORTED_API} getImageInfo`)
   }
-  compressImage (params) {
+  compressImage () {
     console.warn(`${UNSUPPORTED_API} compressImage`)
   }
-  chooseMessageFile (params) {
+  chooseMessageFile () {
     console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
   }
   chooseImage (params) {
@@ -196,35 +190,31 @@ export default class Tt {
       console.warn(`${UNSUPPORTED_API} chooseImage sizeType`)
     }
   }
-  // 数据存储
-  setStorageSync (key, data) {
-    this.nativeApi.setStorageSync(key, data)
+  // 转发
+  updateShareMenu () {
+    console.warn(`${UNSUPPORTED_API} updateShareMenu`)
   }
-  setStorage (params) {
-    this.nativeApi.setStorage(params)
+  getShareInfo () {
+    console.warn(`${UNSUPPORTED_API} getShareInfo`)
   }
-  removeStorageSync (key) {
-    this.nativeApi.removeStorageSync(key)
+  // 位置
+  chooseLocation () {
+    console.warn(`${UNSUPPORTED_API} chooseLocation`)
   }
-  removeStorage (params) {
-    this.nativeApi.removeStorage(params)
+  // 导航栏
+  showNavigationBarLoading () {
+    console.warn(`${UNSUPPORTED_API} showNavigationBarLoading`)
   }
-  getStorageSync (key) {
-    return this.nativeApi.getStorageSync({ key })
+  setNavigationBarColor () {
+    console.warn(`${UNSUPPORTED_API} setNavigationBarColor`)
   }
-  getStorage (params) {
-    this.nativeApi.getStorage(params)
+  hideNavigationBarLoading () {
+    console.warn(`${UNSUPPORTED_API} hideNavigationBarLoading`)
   }
-  getStorageInfoSync () {
-    return this.nativeApi.getStorageInfoSync()
+  setBackgroundTextStyle () {
+    console.warn(`${UNSUPPORTED_API} setBackgroundTextStyle`)
   }
-  getStorageInfo (params) {
-    this.nativeApi.getStorageInfo(params)
-  }
-  clearStorageSync () {
-    this.nativeApi.clearStorageSync()
-  }
-  clearStorage (params) {
-    this.nativeApi.clearStorage(params)
+  setBackgroundColor () {
+    console.warn(`${UNSUPPORTED_API} setBackgroundColor`)
   }
 }

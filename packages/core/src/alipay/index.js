@@ -175,12 +175,6 @@ export default class Alipay {
     params.url = params.filePath
     this.nativeApi.saveImage(params)
   }
-  previewImage (params) {
-    this.nativeApi.previewImage(params)
-  }
-  getImageInfo (params) {
-    this.nativeApi.getImageInfo(params)
-  }
   compressImage (params) {
     params.apFilePaths = [params.src]
     params.compressLevel = params.quality
@@ -189,38 +183,31 @@ export default class Alipay {
   chooseMessageFile (params) {
     console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
   }
-  chooseImage (params) {
-    this.nativeApi.chooseImage(params)
-  }
   // 数据存储
   setStorageSync (key, data) {
     this.nativeApi.setStorageSync({ key, data })
   }
-  setStorage (params) {
-    this.nativeApi.setStorage(params)
-  }
   removeStorageSync (key) {
     this.nativeApi.removeStorageSync({ key })
-  }
-  removeStorage (params) {
-    this.nativeApi.removeStorage(params)
   }
   getStorageSync (key) {
     return this.nativeApi.getStorageSync({ key })
   }
-  getStorage (params) {
-    this.nativeApi.getStorage(params)
+  // 转发
+  updateShareMenu () {
+    console.warn(`${UNSUPPORTED_API} updateShareMenu`)
   }
-  getStorageInfoSync () {
-    return this.nativeApi.getStorageInfoSync()
+  showShareMenu () {
+    console.warn(`${UNSUPPORTED_API} showShareMenu`)
   }
-  getStorageInfo (params) {
-    this.nativeApi.getStorageInfo(params)
+  getShareInfo () {
+    console.warn(`${UNSUPPORTED_API} getShareInfo`)
   }
-  clearStorageSync () {
-    this.nativeApi.clearStorageSync()
+  // 导航栏
+  setNavigationBarTitle (params) {
+    this.nativeApi.setNavigationBar(params)
   }
-  clearStorage (params) {
-    this.nativeApi.clearStorage(params)
+  setNavigationBarColor (params) {
+    this.nativeApi.setNavigationBar(params)
   }
 }

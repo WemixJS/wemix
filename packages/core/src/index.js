@@ -9,6 +9,7 @@ import app from './app'
 import page from './page'
 import Adapter from './wechat'
 import { deleteAllComponents } from './cache'
+import { NATIVE_API } from './constants'
 const adapter = new Adapter()
 class Wemix {
   constructor () {
@@ -268,4 +269,13 @@ class Wemix {
   getSystemInfoSync () {}
   getSystemInfo () {}
 }
-export default new Wemix()
+
+const wemix = new Wemix()
+NATIVE_API.forEach(key => {
+  if (adapter.hasOwnProperty(key)) {
+    wemix[key] = adapter[key]
+  } else {
+    wemix[key] = adapter.nativeApi[key]
+  }
+})
+export default wemix

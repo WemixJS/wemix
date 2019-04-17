@@ -178,53 +178,23 @@ export default class Swan {
     })
   }
   // 图片
-  saveImageToPhotosAlbum (params) {
-    this.nativeApi.saveImageToPhotosAlbum(params)
-  }
-  previewImage (params) {
-    this.nativeApi.previewImage(params)
-  }
-  getImageInfo (params) {
-    this.nativeApi.getImageInfo(params)
-  }
   compressImage (params) {
     console.warn(`${UNSUPPORTED_API} compressImage`)
   }
   chooseMessageFile (params) {
     console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
   }
-  chooseImage (params) {
-    this.nativeApi.chooseImage(params)
+  // 转发
+  hideShareMenu () {
+    console.warn(`${UNSUPPORTED_API} hideShareMenu`)
   }
-  // 数据存储
-  setStorageSync (key, data) {
-    this.nativeApi.setStorageSync(key, data)
+  updateShareMenu () {
+    console.warn(`${UNSUPPORTED_API} updateShareMenu`)
   }
-  setStorage (params) {
-    this.nativeApi.setStorage(params)
+  showShareMenu () {
+    console.warn(`${UNSUPPORTED_API} showShareMenu`)
   }
-  removeStorageSync (key) {
-    this.nativeApi.removeStorageSync(key)
-  }
-  removeStorage (params) {
-    this.nativeApi.removeStorage(params)
-  }
-  getStorageSync (key) {
-    return this.nativeApi.getStorageSync({ key })
-  }
-  getStorage (params) {
-    this.nativeApi.getStorage(params)
-  }
-  getStorageInfoSync () {
-    return this.nativeApi.getStorageInfoSync()
-  }
-  getStorageInfo (params) {
-    this.nativeApi.getStorageInfo(params)
-  }
-  clearStorageSync () {
-    this.nativeApi.clearStorageSync()
-  }
-  clearStorage (params) {
-    this.nativeApi.clearStorage(params)
+  getShareInfo () {
+    console.warn(`${UNSUPPORTED_API} getShareInfo`)
   }
 }
