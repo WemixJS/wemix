@@ -2,7 +2,7 @@
  * @Description: OutputFile Plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-20 18:41:47
- * @LastEditTime: 2019-04-04 18:04:10
+ * @LastEditTime: 2019-04-18 19:41:30
  */
 import fs from 'fs-extra'
 import npath from 'path'
@@ -44,19 +44,24 @@ export default class OutputFilePlugin {
     compiler.hooks.emit.tapAsync(
       'OutputFilePlugin',
       (compilation, callback) => {
-        if (compiler.removeDist) {
-          compiler.removeDist = false
-          compiler.logger.success('开始清空目录')
-          fs.emptyDir(compiler.options.output, err => {
-            if (err) {
-              compiler.logger.error(err.stack || err)
-              process.exit(1)
-            }
-            compiler.logger.success('清空目录成功')
+        const keys = Object.keys(compilation.modules)
+        if (keys.length > 0) {
+          if (compiler.removeDist) {
+            compiler.removeDist = false
+            compiler.logger.success('开始清空目录')
+            fs.emptyDir(compiler.options.output, err => {
+              if (err) {
+                compiler.logger.error(err.stack || err)
+                process.exit(1)
+              }
+              compiler.logger.success('清空目录成功')
+              this.startWrite(compiler, compilation, callback)
+            })
+          } else {
             this.startWrite(compiler, compilation, callback)
-          })
+          }
         } else {
-          this.startWrite(compiler, compilation, callback)
+          callback()
         }
       }
     )

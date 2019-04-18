@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-04-18 18:05:14
+ * @LastEditTime: 2019-04-18 19:38:21
  */
 
 import fs from 'fs-extra'
@@ -215,11 +215,13 @@ export default class TransformPlugin {
             const waitCompile = Object.assign(compilation.waitCompile)
             this.loopCompile(waitCompile, compiler, compilation, callback)
           } else {
+            compiler.logger.success('编译成功')
             callback()
           }
         })
         .catch(err => {
           compiler.logger.error(err.stack || err)
+          callback()
         })
     } else {
       callback()
@@ -234,7 +236,7 @@ export default class TransformPlugin {
       'TransformPlugin',
       (compilation, callback) => {
         const waitCompile = Object.assign(compilation.waitCompile)
-
+        compiler.logger.start('开始编译')
         this.loopCompile(waitCompile, compiler, compilation, callback)
       }
     )

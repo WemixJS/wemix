@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-18 18:06:58
+ * @LastEditTime: 2019-04-18 18:56:35
  */
 
 import app from './app'
@@ -17,10 +17,21 @@ class Wemix {
     this.app = app
     this.component = adapter.getComponent()
     this.page = page
-    this.wx = adapter.nativeApi
-    this.my = adapter.nativeApi
-    this.tt = adapter.nativeApi
-    this.swan = adapter.nativeApi
+    // env 会根据export参数动态注入对应的环境
+    this.env = ''
+    switch (this.env) {
+      case 'alipay':
+        this.my = adapter.nativeApi
+        break
+      case 'swan':
+        this.swan = adapter.nativeApi
+        break
+      case 'tt':
+        this.tt = adapter.nativeApi
+        break
+      default:
+        this.wx = adapter.nativeApi
+    }
     this.config = {
       app: undefined,
       pages: {},

@@ -344,6 +344,18 @@ const transformStyle = function (
 const adapterCorePkg = function (compiler, data, resolve, reject) {
   const ast = parse(data)
   traverse(ast, {
+    AssignmentExpression (astPath) {
+      const left = astPath.get('left')
+      const right = astPath.get('right')
+      const object = left.get('object')
+      const property = left.get('property')
+      if (
+        t.isThisExpression(object.node) &&
+        property.isIdentifier({ name: 'env' })
+      ) {
+        right.replaceWith(t.stringLiteral(compiler.options.export))
+      }
+    },
     CallExpression (astPath) {
       const callee = astPath.get('callee')
       if (callee.isIdentifier({ name: 'require' })) {
@@ -361,6 +373,7 @@ const adapterCorePkg = function (compiler, data, resolve, reject) {
   data = generator(ast).code
   resolve({ data: data })
 }
+
 const splitJsonConfig = function (
   configNode,
   config,

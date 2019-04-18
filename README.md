@@ -262,87 +262,88 @@ module.exports = {
 
 部分 api 需要做兼容处理，其他未列出的 api 暂时调用 wemix.wx wemix.my wemix.swan wemix.tt 调用
 
+0. wemix.env // wechat alipay swan tt
 1. wemix.global // 全局变量可以存在此处
-2. wemix.config // app 和 page 的 json 文件信息
-3. wemix.wx // 微信 api
-4. wemix.my // 支付宝 api
-5. wemix.swan // 百度 api
-6. wemix.tt // 头条 api
-7. wemix.getApp() // 获取 app 实例
-8. wemix.getCurrentPages() // 获取路由栈 pages 实例
-9. wemix.compareVersion() // 比较版本
-10. wemix.parse()
-11. wemix.stringify()
-12. wemix.isString()
-13. wemix.isArray()
-14. wemix.isBoolean()
-15. wemix.isUndefined()
-16. wemix.isNull()
-17. wemix.isNumber()
-18. wemix.isObject()
-19. wemix.isEmptyObject()
-20. wemix.isFunction()
-21. wemix.isSymbol()
+1. wemix.config // app 和 page 的 json 文件信息
+1. wemix.wx // 微信 api
+1. wemix.my // 支付宝 api
+1. wemix.swan // 百度 api
+1. wemix.tt // 头条 api
+1. wemix.getApp() // 获取 app 实例
+1. wemix.getCurrentPages() // 获取路由栈 pages 实例
+1. wemix.compareVersion() // 比较版本
+1. wemix.parse()
+1. wemix.stringify()
+1. wemix.isString()
+1. wemix.isArray()
+1. wemix.isBoolean()
+1. wemix.isUndefined()
+1. wemix.isNull()
+1. wemix.isNumber()
+1. wemix.isObject()
+1. wemix.isEmptyObject()
+1. wemix.isFunction()
+1. wemix.isSymbol()
 
-22. wemix.saveImageToPhotosAlbum
-23. wemix.previewImage
-24. wemix.getImageInfo
-25. wemix.compressImage
-26. wemix.chooseMessageFile
-27. wemix.chooseImage
-    // 数据存储
-28. wemix.setStorageSync
-29. wemix.setStorage
-30. wemix.removeStorageSync
-31. wemix.removeStorage
-32. wemix.getStorageSync
-33. wemix.getStorage
-34. wemix.getStorageInfoSync
-35. wemix.getStorageInfo
-36. wemix.clearStorageSync
-37. wemix.clearStorage
-    // 下拉刷新
-38. wemix.stopPullDownRefresh
-39. wemix.startPullDownRefresh
-    // 转发
-40. wemix.updateShareMenu
-41. wemix.showShareMenu
-42. wemix.hideShareMenu
-43. wemix.getShareInfo
-    // 位置
-44. wemix.openLocation
-45. wemix.getLocation
-46. wemix.chooseLocation
-    // 导航栏
-47. wemix.showNavigationBarLoading
-48. wemix.setNavigationBarTitle
-49. wemix.setNavigationBarColor
-50. wemix.hideNavigationBarLoading
-    // 背景
-51. wemix.setBackgroundTextStyle
-52. wemix.setBackgroundColor
-    // 收获地址
-53. wemix.chooseAddress
-    // 交互
-54. wemix.showToast
-55. wemix.showModal
-56. wemix.showLoading
-57. wemix.showActionSheet
-58. wemix.hideToast
-59. wemix.hideLoading
-    // 系统信息
-60. wemix.getSystemInfoSync
-61. wemix.getSystemInfo
-    // 路由
-62. wemix.navigateTo
-63. wemix.redirectTo
-64. wemix.navigateBack
-65. wemix.switchTab
-66. wemix.reLaunch
-    // 网络
-67. request
-    // 用户信息
-68. getUserInfo
+1. wemix.saveImageToPhotosAlbum
+1. wemix.previewImage
+1. wemix.getImageInfo
+1. wemix.compressImage
+1. wemix.chooseMessageFile
+1. wemix.chooseImage
+   // 数据存储
+1. wemix.setStorageSync
+1. wemix.setStorage
+1. wemix.removeStorageSync
+1. wemix.removeStorage
+1. wemix.getStorageSync
+1. wemix.getStorage
+1. wemix.getStorageInfoSync
+1. wemix.getStorageInfo
+1. wemix.clearStorageSync
+1. wemix.clearStorage
+   // 下拉刷新
+1. wemix.stopPullDownRefresh
+1. wemix.startPullDownRefresh
+   // 转发
+1. wemix.updateShareMenu
+1. wemix.showShareMenu
+1. wemix.hideShareMenu
+1. wemix.getShareInfo
+   // 位置
+1. wemix.openLocation
+1. wemix.getLocation
+1. wemix.chooseLocation
+   // 导航栏
+1. wemix.showNavigationBarLoading
+1. wemix.setNavigationBarTitle
+1. wemix.setNavigationBarColor
+1. wemix.hideNavigationBarLoading
+   // 背景
+1. wemix.setBackgroundTextStyle
+1. wemix.setBackgroundColor
+   // 收获地址
+1. wemix.chooseAddress
+   // 交互
+1. wemix.showToast
+1. wemix.showModal
+1. wemix.showLoading
+1. wemix.showActionSheet
+1. wemix.hideToast
+1. wemix.hideLoading
+   // 系统信息
+1. wemix.getSystemInfoSync
+1. wemix.getSystemInfo
+   // 路由
+1. wemix.navigateTo
+1. wemix.redirectTo
+1. wemix.navigateBack
+1. wemix.switchTab
+1. wemix.reLaunch
+   // 网络
+1. request
+   // 用户信息
+1. getUserInfo
 
 ## <font color=#34495e>page 实例属性</font>
 

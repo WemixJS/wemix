@@ -2,7 +2,7 @@
  * @Description: Compile
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:59:06
- * @LastEditTime: 2019-04-11 17:00:44
+ * @LastEditTime: 2019-04-18 19:37:13
  */
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable'
@@ -162,13 +162,11 @@ export default class Compiler {
     const compilation = new Compilation(this, modifiedFiles)
     this.hooks.beforeCompile.callAsync(compilation, err => {
       if (err) return callback(err, compilation)
-      this.logger.start('开始编译')
       this.hooks.compile.callAsync(compilation, err => {
         if (err) return callback(err, compilation)
 
         this.hooks.afterCompile.callAsync(compilation, err => {
           if (err) return callback(err, compilation)
-          this.logger.success('编译成功')
           return callback(null, compilation)
         })
       })
