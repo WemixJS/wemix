@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-18 11:52:17
+ * @LastEditTime: 2019-04-18 11:54:58
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -12,11 +12,16 @@ import {
   getComponent,
   getAllComponents,
 } from '../cache'
+import {
+  SWAN_UNSUPPORTED_API_WARNING,
+  SWAN_UNSUPPORTED_API,
+} from '../constants'
 
-const UNSUPPORTED_API = '百度小程序不支持'
 export default class Swan {
   constructor () {
     this.nativeApi = swan
+    this.unsupportedApi = SWAN_UNSUPPORTED_API
+    this.unsupportedApiWarning = SWAN_UNSUPPORTED_API_WARNING
   }
   $createComponent (ComponentClass, wemix) {
     const config = {
@@ -157,17 +162,6 @@ export default class Swan {
       fail: result.fail,
     }
   }
-  showToast (content) {
-    this.nativeApi.showToast({
-      title: content,
-      icon: 'none',
-    })
-  }
-  showLoading (content) {
-    this.nativeApi.showLoading({
-      title: content || '加载中...',
-    })
-  }
   showModal (params) {
     this.nativeApi.showModal({
       title: params.title || '',
@@ -186,25 +180,5 @@ export default class Swan {
         }
       },
     })
-  }
-  // 图片
-  compressImage (params) {
-    console.warn(`${UNSUPPORTED_API} compressImage`)
-  }
-  chooseMessageFile (params) {
-    console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
-  }
-  // 转发
-  hideShareMenu () {
-    console.warn(`${UNSUPPORTED_API} hideShareMenu`)
-  }
-  updateShareMenu () {
-    console.warn(`${UNSUPPORTED_API} updateShareMenu`)
-  }
-  showShareMenu () {
-    console.warn(`${UNSUPPORTED_API} showShareMenu`)
-  }
-  getShareInfo () {
-    console.warn(`${UNSUPPORTED_API} getShareInfo`)
   }
 }

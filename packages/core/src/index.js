@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-18 11:54:01
+ * @LastEditTime: 2019-04-18 11:56:17
  */
 
 import app from './app'
@@ -236,69 +236,34 @@ class Wemix {
 
     return 0
   }
-  navigateTo (url) {
-    adapter.nativeApi.navigateTo({
-      url: url,
-    })
-  }
-  redirectTo (url) {
-    adapter.nativeApi.redirectTo({
-      url: url,
-    })
-  }
-  navigateBack (delta = 1) {
-    adapter.nativeApi.navigateBack({
-      delta: delta,
-    })
-  }
-  switchTab (url) {
-    adapter.nativeApi.switchTab({
-      url: url,
-    })
-  }
-  reLaunch (url) {
-    adapter.nativeApi.reLaunch({
-      url: url,
-    })
-  }
-  showToast (content) {
-    adapter.showToast(content)
-  }
-  showLoading (content) {
-    adapter.showLoading(content)
-  }
-  hideLoading () {
-    adapter.nativeApi.hideLoading()
-  }
-  showModal (params) {
-    adapter.showModal(params)
-  }
-  getSystemInfoSync () {}
-  getSystemInfo () {}
 }
 
 const wemix = new Wemix()
 NATIVE_API.forEach(key => {
-  let method
-  if (adapter.hasOwnProperty(key)) {
-    method = adapter[key]
+  if (~adapter.unsupportedApi.indexOf(key)) {
+    console.warn(`${adapter.unsupportedApiWarning} ${key}`)
   } else {
-    method = adapter.nativeApi[key]
-  }
-  wemix[key] = function (params) {
-    if (wemix.isFunction(params.fail)) {
-      const fail = params.fail
-      params.fail = function (err) {
-        const res = {}
-        res.errMsg = err.errMsg || err.errorMessage
-        res.code = err.code || err.error || err.errCode
-        if (key === 'request') {
-          res.statusCode = err.statusCode || err.status
-        }
-        fail(res)
-      }
+    let method
+    if (adapter.hasOwnProperty(key)) {
+      method = adapter[key]
+    } else {
+      method = adapter.nativeApi[key]
     }
-    method(params)
+    wemix[key] = function (params) {
+      if (wemix.isFunction(params.fail)) {
+        const fail = params.fail
+        params.fail = function (err) {
+          const res = {}
+          res.errMsg = err.errMsg || err.errorMessage
+          res.code = err.code || err.error || err.errCode
+          if (key === 'request') {
+            res.statusCode = err.statusCode || err.status
+          }
+          fail(res)
+        }
+      }
+      method(params)
+    }
   }
 })
 export default wemix

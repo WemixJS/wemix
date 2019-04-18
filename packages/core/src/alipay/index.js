@@ -12,11 +12,13 @@ import {
   getComponent,
   getAllComponents,
 } from '../cache'
+import { ALI_UNSUPPORTED_API_WARNING, ALI_UNSUPPORTED_API } from '../constants'
 
-const UNSUPPORTED_API = '支付宝小程序不支持'
 export default class Alipay {
   constructor () {
     this.nativeApi = my
+    this.unsupportedApi = ALI_UNSUPPORTED_API
+    this.unsupportedApiWarning = ALI_UNSUPPORTED_API_WARNING
   }
   $createComponent (ComponentClass, wemix) {
     const config = {
@@ -145,16 +147,14 @@ export default class Alipay {
       }
     }
   }
-  showToast (content) {
-    this.nativeApi.showToast({
-      content: content,
-      type: 'none',
-    })
+  showToast (params) {
+    params.content = params.title
+    params.type = params.icon
+    this.nativeApi.showToast(params)
   }
-  showLoading (content) {
-    this.nativeApi.showLoading({
-      content: content || '加载中...',
-    })
+  showLoading (params) {
+    params.content = params.title
+    this.nativeApi.showLoading(params)
   }
   showModal (params) {
     if (typeof params.showCancel === 'undefined' || !params.showCancel) {
@@ -182,6 +182,10 @@ export default class Alipay {
       })
     }
   }
+  showActionSheet (params) {
+    params.items = params.itemList
+    this.nativeApi.showActionSheet(params)
+  }
   // 图片
   saveImageToPhotosAlbum (params) {
     params.url = params.filePath
@@ -192,9 +196,6 @@ export default class Alipay {
     params.compressLevel = params.quality
     this.nativeApi.compressImage(params)
   }
-  chooseMessageFile (params) {
-    console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
-  }
   // 数据存储
   setStorageSync (key, data) {
     this.nativeApi.setStorageSync({ key, data })
@@ -204,16 +205,6 @@ export default class Alipay {
   }
   getStorageSync (key) {
     return this.nativeApi.getStorageSync({ key })
-  }
-  // 转发
-  updateShareMenu () {
-    console.warn(`${UNSUPPORTED_API} updateShareMenu`)
-  }
-  showShareMenu () {
-    console.warn(`${UNSUPPORTED_API} showShareMenu`)
-  }
-  getShareInfo () {
-    console.warn(`${UNSUPPORTED_API} getShareInfo`)
   }
   // 导航栏
   setNavigationBarTitle (params) {

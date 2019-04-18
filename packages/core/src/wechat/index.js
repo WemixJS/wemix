@@ -15,6 +15,8 @@ import {
 export default class Wechat {
   constructor () {
     this.nativeApi = wx
+    this.unsupportedApi = []
+    this.unsupportedApiWarning = ''
   }
   $createComponent (ComponentClass, wemix) {
     const config = {
@@ -152,17 +154,6 @@ export default class Wechat {
       success: result.success,
       fail: result.fail,
     }
-  }
-  showToast (content) {
-    this.nativeApi.showToast({
-      title: content,
-      icon: 'none',
-    })
-  }
-  showLoading (content) {
-    this.nativeApi.showLoading({
-      title: content || '加载中...',
-    })
   }
   showModal (params) {
     this.nativeApi.showModal({
