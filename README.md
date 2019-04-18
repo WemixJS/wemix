@@ -339,6 +339,10 @@ module.exports = {
 64. wemix.navigateBack
 65. wemix.switchTab
 66. wemix.reLaunch
+    // 网络
+67. request
+    // 用户信息
+68. getUserInfo
 
 ## <font color=#34495e>page 实例属性</font>
 
