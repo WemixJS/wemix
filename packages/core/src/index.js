@@ -241,7 +241,9 @@ class Wemix {
 const wemix = new Wemix()
 NATIVE_API.forEach(key => {
   if (~adapter.unsupportedApi.indexOf(key)) {
-    console.warn(`${adapter.unsupportedApiWarning} ${key}`)
+    wemix[key] = function () {
+      console.warn(`${adapter.unsupportedApiWarning} ${key}`)
+    }
   } else {
     let method
     if (adapter.hasOwnProperty(key)) {
