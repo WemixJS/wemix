@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-17 15:52:20
+ * @LastEditTime: 2019-04-18 11:52:17
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -17,7 +17,6 @@ const UNSUPPORTED_API = '百度小程序不支持'
 export default class Swan {
   constructor () {
     this.nativeApi = swan
-    this.nativeName = 'swan'
   }
   $createComponent (ComponentClass, wemix) {
     const config = {

@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-17 15:46:56
+ * @LastEditTime: 2019-04-18 11:54:01
  */
 
 import app from './app'
@@ -16,10 +16,10 @@ class Wemix {
     this.app = app
     this.component = adapter.getComponent()
     this.page = page
-    this.wx = wx || {}
-    this.my = my || {}
-    this.tt = tt || {}
-    this.swan = swan || {}
+    this.wx = adapter.nativeApi
+    this.my = adapter.nativeApi
+    this.tt = adapter.nativeApi
+    this.swan = adapter.nativeApi
     this.config = {
       app: undefined,
       pages: {},
@@ -279,10 +279,26 @@ class Wemix {
 
 const wemix = new Wemix()
 NATIVE_API.forEach(key => {
+  let method
   if (adapter.hasOwnProperty(key)) {
-    wemix[key] = adapter[key]
+    method = adapter[key]
   } else {
-    wemix[key] = adapter.nativeApi[key]
+    method = adapter.nativeApi[key]
+  }
+  wemix[key] = function (params) {
+    if (wemix.isFunction(params.fail)) {
+      const fail = params.fail
+      params.fail = function (err) {
+        const res = {}
+        res.errMsg = err.errMsg || err.errorMessage
+        res.code = err.code || err.error || err.errCode
+        if (key === 'request') {
+          res.statusCode = err.statusCode || err.status
+        }
+        fail(res)
+      }
+    }
+    method(params)
   }
 })
 export default wemix
