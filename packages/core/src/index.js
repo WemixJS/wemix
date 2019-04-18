@@ -2,12 +2,12 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-18 11:56:17
+ * @LastEditTime: 2019-04-18 15:59:29
  */
 
 import app from './app'
 import page from './page'
-import Adapter from './wechat'
+import Adapter from './native'
 import { deleteAllComponents } from './cache'
 import { NATIVE_API } from './constants'
 const adapter = new Adapter()

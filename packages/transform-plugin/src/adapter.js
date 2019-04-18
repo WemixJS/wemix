@@ -338,17 +338,11 @@ const transformStyle = function (
 const adapterCorePkg = function (compiler, data, resolve, reject) {
   const ast = parse(data)
   traverse(ast, {
-    CallExpression (astPath) {
-      const callee = astPath.get('callee')
-      if (callee.isIdentifier({ name: 'require' })) {
-        const args = astPath.get('arguments')[0]
-        const requirePath = args.node.value
-        if (
-          requirePath === './wechat' &&
-          compiler.options.export !== 'wechat'
-        ) {
-          args.replaceWith(t.stringLiteral(`./${compiler.options.export}`))
-        }
+    VariableDeclarator (astPath) {
+      const id = astPath.get('id')
+      const init = astPath.get('init')
+      if (id.isIdentifier({ name: 'env' })) {
+        init.replaceWith(t.stringLiteral(compiler.options.export))
       }
     },
   })
