@@ -12,6 +12,8 @@ import {
   getComponent,
   getAllComponents,
 } from '../cache'
+
+const UNSUPPORTED_API = '头条小程序不支持'
 export default class Tt {
   constructor () {
     this.nativeApi = tt
@@ -181,5 +183,48 @@ export default class Tt {
         }
       },
     })
+  }
+  // 图片
+  getImageInfo () {
+    console.warn(`${UNSUPPORTED_API} getImageInfo`)
+  }
+  compressImage () {
+    console.warn(`${UNSUPPORTED_API} compressImage`)
+  }
+  chooseMessageFile () {
+    console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
+  }
+  chooseImage (params) {
+    this.nativeApi.chooseImage(params)
+    if (params.sizeType) {
+      console.warn(`${UNSUPPORTED_API} chooseImage sizeType`)
+    }
+  }
+  // 转发
+  updateShareMenu () {
+    console.warn(`${UNSUPPORTED_API} updateShareMenu`)
+  }
+  getShareInfo () {
+    console.warn(`${UNSUPPORTED_API} getShareInfo`)
+  }
+  // 位置
+  chooseLocation () {
+    console.warn(`${UNSUPPORTED_API} chooseLocation`)
+  }
+  // 导航栏
+  showNavigationBarLoading () {
+    console.warn(`${UNSUPPORTED_API} showNavigationBarLoading`)
+  }
+  setNavigationBarColor () {
+    console.warn(`${UNSUPPORTED_API} setNavigationBarColor`)
+  }
+  hideNavigationBarLoading () {
+    console.warn(`${UNSUPPORTED_API} hideNavigationBarLoading`)
+  }
+  setBackgroundTextStyle () {
+    console.warn(`${UNSUPPORTED_API} setBackgroundTextStyle`)
+  }
+  setBackgroundColor () {
+    console.warn(`${UNSUPPORTED_API} setBackgroundColor`)
   }
 }
