@@ -213,4 +213,16 @@ export default class Alipay {
   setNavigationBarColor (params) {
     this.nativeApi.setNavigationBar(params)
   }
+  // 网络
+  request (params) {
+    params.headers = params.header
+    this.nativeApi.setNavigationBar(params)
+  }
+  // 用户信息
+  getUserInfo (params) {
+    params.success = userInfo => {
+      params.success({ userInfo })
+    }
+    this.nativeApi.getAuthUserInfo(params)
+  }
 }

@@ -55,6 +55,12 @@ export const NATIVE_API = [
   'navigateBack',
   'switchTab',
   'reLaunch',
+  // 基础
+  'canIUse',
+  // 网络
+  'request',
+  // 用户信息
+  'getUserInfo',
 ]
 export const ALI_UNSUPPORTED_API_WARNING = '支付宝小程序不支持'
 export const ALI_UNSUPPORTED_API = [
@@ -78,6 +84,7 @@ export const TT_UNSUPPORTED_API = [
   'setBackgroundTextStyle',
   'setBackgroundColor',
   'chooseAddress',
+  'canIUse',
 ]
 export const SWAN_UNSUPPORTED_API_WARNING = '百度小程序不支持'
 export const SWAN_UNSUPPORTED_API = [
