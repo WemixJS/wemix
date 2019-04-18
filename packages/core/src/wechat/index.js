@@ -15,6 +15,8 @@ import {
 export default class Wechat {
   constructor () {
     this.nativeApi = wx
+    this.unsupportedApi = []
+    this.unsupportedApiWarning = ''
   }
   $createComponent (ComponentClass, wemix) {
     const config = {

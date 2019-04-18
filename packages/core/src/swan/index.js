@@ -12,12 +12,16 @@ import {
   getComponent,
   getAllComponents,
 } from '../cache'
+import {
+  SWAN_UNSUPPORTED_API_WARNING,
+  SWAN_UNSUPPORTED_API,
+} from '../constants'
 
-const UNSUPPORTED_API = '百度小程序不支持'
 export default class Swan {
   constructor () {
     this.nativeApi = swan
-    this.nativeName = 'swan'
+    this.unsupportedApi = SWAN_UNSUPPORTED_API
+    this.unsupportedApiWarning = SWAN_UNSUPPORTED_API_WARNING
   }
   $createComponent (ComponentClass, wemix) {
     const config = {
@@ -187,25 +191,5 @@ export default class Swan {
         }
       },
     })
-  }
-  // 图片
-  compressImage (params) {
-    console.warn(`${UNSUPPORTED_API} compressImage`)
-  }
-  chooseMessageFile (params) {
-    console.warn(`${UNSUPPORTED_API} chooseMessageFile`)
-  }
-  // 转发
-  hideShareMenu () {
-    console.warn(`${UNSUPPORTED_API} hideShareMenu`)
-  }
-  updateShareMenu () {
-    console.warn(`${UNSUPPORTED_API} updateShareMenu`)
-  }
-  showShareMenu () {
-    console.warn(`${UNSUPPORTED_API} showShareMenu`)
-  }
-  getShareInfo () {
-    console.warn(`${UNSUPPORTED_API} getShareInfo`)
   }
 }

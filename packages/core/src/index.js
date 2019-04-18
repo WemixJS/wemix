@@ -261,28 +261,18 @@ class Wemix {
       url: url,
     })
   }
-  showToast (content) {
-    adapter.showToast(content)
-  }
-  showLoading (content) {
-    adapter.showLoading(content)
-  }
-  hideLoading () {
-    adapter.nativeApi.hideLoading()
-  }
-  showModal (params) {
-    adapter.showModal(params)
-  }
-  getSystemInfoSync () {}
-  getSystemInfo () {}
 }
 
 const wemix = new Wemix()
 NATIVE_API.forEach(key => {
-  if (adapter.hasOwnProperty(key)) {
-    wemix[key] = adapter[key]
+  if (~adapter.unsupportedApi.indexOf(key)) {
+    console.warn(`${adapter.unsupportedApiWarning} ${key}`)
   } else {
-    wemix[key] = adapter.nativeApi[key]
+    if (adapter.hasOwnProperty(key)) {
+      wemix[key] = adapter[key]
+    } else {
+      wemix[key] = adapter.nativeApi[key]
+    }
   }
 })
 export default wemix
