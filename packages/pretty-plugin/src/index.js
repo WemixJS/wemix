@@ -22,6 +22,7 @@ export default class PrettyPlugin {
             keepClosingSlash: true,
             removeEmptyAttributes: true,
             removeComments: true,
+            caseSensitive: true,
           })
           if (result.error) {
             cb(result.error)
