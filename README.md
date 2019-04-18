@@ -6,9 +6,6 @@
 
 ```
 
-使用绝对路径
-:key 用字符串 不要用{{}}包裹
-
 # <font color=#34495e>小程序 wemix 框架使用指南</font>
 
 ## <font color=#34495e>使用前阅读</font>
@@ -261,7 +258,9 @@ module.exports = {
 }
 ```
 
-## <font color=#34495e>wemix 属性</font>
+## <font color=#34495e>wemix 属性及方法</font>
+
+部分 api 需要做兼容处理，其他未列出的 api 暂时调用 wemix.wx wemix.my wemix.swan wemix.tt 调用
 
 1. wemix.global // 全局变量可以存在此处
 2. wemix.config // app 和 page 的 json 文件信息
@@ -285,15 +284,61 @@ module.exports = {
 20. wemix.isFunction()
 21. wemix.isSymbol()
 
-22. wemix.navigateTo()
-23. wemix.redirectTo()
-24. wemix.navigateBack()
-25. wemix.switchTab()
-26. wemix.reLaunch()
-27. wemix.showToast()
-28. wemix.showLoading()
-29. wemix.hideLoading()
-30. wemix.showModal()
+22. wemix.saveImageToPhotosAlbum
+23. wemix.previewImage
+24. wemix.getImageInfo
+25. wemix.compressImage
+26. wemix.chooseMessageFile
+27. wemix.chooseImage
+    // 数据存储
+28. wemix.setStorageSync
+29. wemix.setStorage
+30. wemix.removeStorageSync
+31. wemix.removeStorage
+32. wemix.getStorageSync
+33. wemix.getStorage
+34. wemix.getStorageInfoSync
+35. wemix.getStorageInfo
+36. wemix.clearStorageSync
+37. wemix.clearStorage
+    // 下拉刷新
+38. wemix.stopPullDownRefresh
+39. wemix.startPullDownRefresh
+    // 转发
+40. wemix.updateShareMenu
+41. wemix.showShareMenu
+42. wemix.hideShareMenu
+43. wemix.getShareInfo
+    // 位置
+44. wemix.openLocation
+45. wemix.getLocation
+46. wemix.chooseLocation
+    // 导航栏
+47. wemix.showNavigationBarLoading
+48. wemix.setNavigationBarTitle
+49. wemix.setNavigationBarColor
+50. wemix.hideNavigationBarLoading
+    // 背景
+51. wemix.setBackgroundTextStyle
+52. wemix.setBackgroundColor
+    // 收获地址
+53. wemix.chooseAddress
+    // 交互
+54. wemix.showToast
+55. wemix.showModal
+56. wemix.showLoading
+57. wemix.showActionSheet
+58. wemix.hideToast
+59. wemix.hideLoading
+    // 系统信息
+60. wemix.getSystemInfoSync
+61. wemix.getSystemInfo
+    // 路由
+62. wemix.navigateTo
+63. wemix.redirectTo
+64. wemix.navigateBack
+65. wemix.switchTab
+66. wemix.reLaunch
 
 ## <font color=#34495e>page 实例属性</font>
 
