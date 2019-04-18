@@ -236,31 +236,6 @@ class Wemix {
 
     return 0
   }
-  navigateTo (url) {
-    adapter.nativeApi.navigateTo({
-      url: url,
-    })
-  }
-  redirectTo (url) {
-    adapter.nativeApi.redirectTo({
-      url: url,
-    })
-  }
-  navigateBack (delta = 1) {
-    adapter.nativeApi.navigateBack({
-      delta: delta,
-    })
-  }
-  switchTab (url) {
-    adapter.nativeApi.switchTab({
-      url: url,
-    })
-  }
-  reLaunch (url) {
-    adapter.nativeApi.reLaunch({
-      url: url,
-    })
-  }
 }
 
 const wemix = new Wemix()

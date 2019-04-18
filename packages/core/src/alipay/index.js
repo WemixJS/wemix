@@ -147,16 +147,14 @@ export default class Alipay {
       }
     }
   }
-  showToast (content) {
-    this.nativeApi.showToast({
-      content: content,
-      type: 'none',
-    })
+  showToast (params) {
+    params.content = params.title
+    params.type = params.icon
+    this.nativeApi.showToast(params)
   }
-  showLoading (content) {
-    this.nativeApi.showLoading({
-      content: content || '加载中...',
-    })
+  showLoading (params) {
+    params.content = params.title
+    this.nativeApi.showLoading(params)
   }
   showModal (params) {
     if (typeof params.showCancel === 'undefined' || !params.showCancel) {

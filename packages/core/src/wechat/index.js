@@ -155,17 +155,6 @@ export default class Wechat {
       fail: result.fail,
     }
   }
-  showToast (content) {
-    this.nativeApi.showToast({
-      title: content,
-      icon: 'none',
-    })
-  }
-  showLoading (content) {
-    this.nativeApi.showLoading({
-      title: content || '加载中...',
-    })
-  }
   showModal (params) {
     this.nativeApi.showModal({
       title: params.title || '',

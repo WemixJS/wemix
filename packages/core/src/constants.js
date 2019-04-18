@@ -49,6 +49,12 @@ export const NATIVE_API = [
   // 系统信息
   'getSystemInfoSync',
   'getSystemInfo',
+  // 路由
+  'navigateTo',
+  'redirectTo',
+  'navigateBack',
+  'switchTab',
+  'reLaunch',
 ]
 export const ALI_UNSUPPORTED_API_WARNING = '支付宝小程序不支持'
 export const ALI_UNSUPPORTED_API = [
