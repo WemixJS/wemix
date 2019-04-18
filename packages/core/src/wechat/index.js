@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-16 11:34:19
+ * @LastEditTime: 2019-04-17 15:49:06
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -142,6 +142,15 @@ export default class Wechat {
           $wxcomponent.triggerEvent(name, details)
         }
       }
+    }
+  }
+  getShareAppMessage (result) {
+    return {
+      title: result.title,
+      path: result.path,
+      imageUrl: result.imageUrl,
+      success: result.success,
+      fail: result.fail,
     }
   }
   showToast (content) {

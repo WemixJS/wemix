@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-17 10:21:42
+ * @LastEditTime: 2019-04-17 15:46:56
  */
 
 import app from './app'
@@ -99,29 +99,36 @@ class Wemix {
         v !== 'onHide' &&
         v !== 'onUnload'
       ) {
-        config[v] = function (...args) {
-          let formId, data
-          const e = args && args[0]
-          const app = getApp()
-          if (e && e.type && e.currentTarget) {
-            Object.keys(e.currentTarget.dataset).forEach(key => {
-              if (/^wemixlog/.test(key)) {
-                if (!data) {
-                  data = {}
+        if (v === 'onShareAppMessage') {
+          config[v] = function (...args) {
+            const result = this.page[v] && this.page[v].apply(this.page, args)
+            return adapter.getShareAppMessage(result)
+          }
+        } else {
+          config[v] = function (...args) {
+            let formId, data
+            const e = args && args[0]
+            const app = getApp()
+            if (e && e.type && e.currentTarget) {
+              Object.keys(e.currentTarget.dataset).forEach(key => {
+                if (/^wemixlog/.test(key)) {
+                  if (!data) {
+                    data = {}
+                  }
+                  data[
+                    key.substr(8).replace(/( |^)[A-Z]/g, L => L.toLowerCase())
+                  ] = e.currentTarget.dataset[key]
                 }
-                data[
-                  key.substr(8).replace(/( |^)[A-Z]/g, L => L.toLowerCase())
-                ] = e.currentTarget.dataset[key]
-              }
-            })
+              })
+            }
+            if (e && e.type === 'submit' && e.detail && e.detail.formId) {
+              formId = e.detail.formId
+            }
+            if ((data || formId) && app.app.onLog) {
+              app.app.onLog(e.type, formId, data)
+            }
+            return this.page[v] && this.page[v].apply(this.page, args)
           }
-          if (e && e.type === 'submit' && e.detail && e.detail.formId) {
-            formId = e.detail.formId
-          }
-          if ((data || formId) && app.app.onLog) {
-            app.app.onLog(e.type, formId, data)
-          }
-          return this.page[v] && this.page[v].apply(this.page, args)
         }
       }
     })

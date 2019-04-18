@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-16 11:36:11
+ * @LastEditTime: 2019-04-17 15:52:20
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -15,6 +15,7 @@ import {
 export default class Swan {
   constructor () {
     this.nativeApi = swan
+    this.nativeName = 'swan'
   }
   $createComponent (ComponentClass, wemix) {
     const config = {
@@ -143,6 +144,16 @@ export default class Swan {
           $wxcomponent.triggerEvent(name, details)
         }
       }
+    }
+  }
+  getShareAppMessage (result) {
+    return {
+      title: result.title,
+      content: result.desc,
+      path: result.path,
+      imageUrl: result.imageUrl,
+      success: result.success,
+      fail: result.fail,
     }
   }
   showToast (content) {
