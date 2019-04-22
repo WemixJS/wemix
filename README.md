@@ -51,9 +51,26 @@ wemix mkcomponent `path` // path不带/可以自动在components目录内生成
 |   |   |-- index.html
 |   |   |-- index.less
 |   |-- components             页面依赖的组件文件夹
-|   |   |-- index.js
-|   |   |-- index.html
-|   |   |-- index.less
+|   |   |-- normal
+|   |   |   |-- index.js
+|   |   |   |-- index.html
+|   |   |   |-- index.less
+|   |   |-- wechat
+|   |   |   |-- index.js
+|   |   |   |-- index.html
+|   |   |   |-- index.less
+|   |   |-- alipay
+|   |   |   |-- index.js
+|   |   |   |-- index.html
+|   |   |   |-- index.less
+|   |   |-- swan
+|   |   |   |-- index.js
+|   |   |   |-- index.html
+|   |   |   |-- index.less
+|   |   |-- tt
+|   |   |   |-- index.js
+|   |   |   |-- index.html
+|   |   |   |-- index.less
 |   |-- app.js
 |   |-- app.less
 |-- package-lock.json
