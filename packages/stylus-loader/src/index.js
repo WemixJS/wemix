@@ -116,112 +116,98 @@ const _promise = data => {
   })
 }
 
-// 处理import
-let re = []
-const _handleImport = (data, imports, path, loader, compiler) => {
-  if (~data.indexOf('@import')) {
-    data.replace(/@import\s*(["'])(.+?)\1[;|\n]/g, function (word) {
-      imports.push(word)
-    })
-  }
-  let [base, importPath, importSrcPath] = [[], [], '']
+// 合并import
+const _mergeImport = (data, path, loader, compiler, hash) => {
+  const imports = []
   if (loader.imports && loader.imports.length > 0) {
-    for (let i = 0; i < loader.imports.length; i++) {
-      const relative = npath.relative(npath.dirname(path), compiler.options.dir)
-      if (relative) {
-        importSrcPath = relative + '/' + npath.basename(loader.imports[i])
-      } else {
-        importSrcPath = './' + npath.basename(loader.imports[i])
+    loader.imports.forEach(item => {
+      if (item !== path) {
+        imports.push(item)
       }
-      re.push(new RegExp(npath.basename(loader.imports[i])))
-      importPath.push('@import ' + `"${importSrcPath}";` + '\n')
+    })
+  }
 
-      base.push(npath.basename(loader.imports[i]))
-    }
-    re.forEach(element => {
-      if (!element.test(path)) {
-        data = importPath.join('\n') + data
-      }
-    })
-  }
-  if (~data.indexOf('@import')) {
-    data = data.replace(/@import\s*(["'\n])(.+?)\1[;|\n]/g, function (
-      word,
-      word1,
-      word2
-    ) {
-      if (!/;/.test(word)) {
-        word = word.replace('\n', function () {
-          return ';\n'
-        })
-      }
-      let outWord
-      if (/styl/.test(word2)) {
-        if (/^\//.test(word2)) {
-          outWord = '@import ' + `"${compiler.options.dir + word2}";` + '\n'
-        } else {
-          outWord =
-            '@import ' +
-            `"${npath.resolve(npath.parse(path).dir, word2)}";` +
-            '\n'
-        }
-        return outWord
+  data = data.replace(/@import\s*(["'])(.+?)\1\n/g, function (
+    word,
+    word1,
+    word2
+  ) {
+    let outWord
+    if (/styl/.test(word2)) {
+      if (/^\//.test(word2)) {
+        outWord = compiler.options.dir + word2
       } else {
-        console.log(chalk.red('Only allow references to stylus files'))
-        return ''
+        outWord = npath.resolve(npath.parse(path).dir, word2)
       }
-    })
-    let [arr, hash] = [[], []]
-    data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
-      arr.push(words)
+      imports.push(outWord)
       return ''
-    })
-    for (var i = 0; i < arr.length; i++) {
-      if (hash.indexOf(arr[i]) === -1) {
-        hash.push(arr[i])
-      }
+    } else {
+      console.log(chalk.red('Only allow references to less files'))
+      return word
     }
-    data = hash.join('\n') + data
-    return data
-  } else {
-    return data
+  })
+  for (var i = 0; i < imports.length; i++) {
+    if (!~hash.indexOf(imports[i])) {
+      hash.push(imports[i])
+    }
   }
+  return data
+}
+// 处理imports
+const _dealData = (imports, data) => {
+  return (
+    imports
+      .map(item => {
+        return `@import '${item}'`
+      })
+      .join('\n') +
+    `\n.delete_flag
+  color: red\n` +
+    data
+  )
 }
 
-const _filterImport = data => {
-  if (~data.indexOf('@import')) {
-    data = data.replace(/@import\s*(["'])(.+?)\1;/g, function (words) {
-      return ''
+// 注入import
+const _injectImport = (data, compiler, imports) => {
+  const importsString = imports
+    .map(item => {
+      return `@import '${item.replace(compiler.options.dir, '')}';`
     })
-  } else {
-    return data
-  }
+    .join('\n')
+  return data.replace(/[\s\S]*?\.delete_flag\s\{[\s\S]*?\}/, importsString)
 }
 
 export default function (data, loader, path, next, compiler) {
-  if (data) {
-    let ipath = []
-    data.replace(/@import\s*(["'])(.+?)\1[;|\n]/g, function (word) {
-      ipath.push(word)
-    })
-    data = `.delete_flag{color:red;}` + data
-
-    _promise(data).then(data => {
-      const imports = []
-      data = _handleImport(data, imports, path, loader, compiler)
-      const instance = stylus(data)
-
-      instance.render((err, css) => {
-        if (err) {
-          next(err)
-        }
-        css = css.replace(/[\s\S]*?\.delete_flag\s\{[\s\S]*?\}/, '')
-        css = _filterImport(css)
-        css = imports.join('\n') + (imports.length ? ';\n' + css : css)
-        next(null, css)
-      })
-    })
-  } else {
-    next(null, data)
+  if (
+    !data &&
+    (!loader.imports || (loader.imports && loader.imports.length <= 0))
+  ) {
+    return next(null, data)
   }
+  if (!data && (loader.imports && loader.imports.length > 0)) {
+    let importsPath = []
+    loader.imports.forEach(item => {
+      if (path !== item) {
+        importsPath.push(`@import '${item.replace(compiler.options.dir, '')}'`)
+      }
+    })
+    data = importsPath.join('\n') + data
+
+    return next(null, data)
+  }
+
+  _promise(data).then(data => {
+    const imports = []
+    data = _mergeImport(data, path, loader, compiler, imports)
+    data = _dealData(imports, data)
+    const instance = stylus(data)
+
+    instance.render((err, css) => {
+      if (err) {
+        next(err)
+      }
+      css = _injectImport(css, compiler, imports)
+      next(null, css)
+    })
+  })
 }
