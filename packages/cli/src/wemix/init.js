@@ -2,7 +2,7 @@
  * @Description: 初始化项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:44:27
- * @LastEditTime: 2019-04-22 19:18:09
+ * @LastEditTime: 2019-04-24 11:51:59
  */
 
 import fs from 'fs-extra'
@@ -25,7 +25,7 @@ function install () {
     '@wemix/postcss-loader',
     '@wemix/less-loader',
   ]
-  const devDependencies = []
+  const devDependencies = ['@wemix/cli']
   // 安装依赖包
   const cmd = 'npm install --registry https://registry.npm.taobao.org'
   const cmdSave = `npm install ${dependencies.join(
