@@ -2,7 +2,7 @@
  * @Description: 初始化项目
  * @LastEditors: sanshao
  * @Date: 2019-02-20 15:44:27
- * @LastEditTime: 2019-04-15 16:44:01
+ * @LastEditTime: 2019-04-22 19:18:09
  */
 
 import fs from 'fs-extra'
@@ -22,7 +22,6 @@ function install () {
     '@wemix/uglifyimg-plugin',
     '@wemix/pretty-plugin',
     '@wemix/babel-loader',
-    '@wemix/css-loader',
     '@wemix/postcss-loader',
     '@wemix/less-loader',
   ]

@@ -358,9 +358,9 @@ module.exports = {
 1. wemix.switchTab
 1. wemix.reLaunch
    // 网络
-1. request
+1. wemix.request
    // 用户信息
-1. getUserInfo
+1. wemix.getUserInfo
 
 ## <font color=#34495e>page 实例属性</font>
 
