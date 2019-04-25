@@ -1,7 +1,7 @@
 {
   "name": "{{name}}",
   "version": "0.0.1",
-  "description": "a wemix project",
+  "description": "{{description}}",
   "scripts": {
     {{#lint}}
     "precommit": "lint-staged",
