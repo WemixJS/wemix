@@ -502,13 +502,14 @@ const splitConfig = function (
             ClassDeclaration (astPath) {
               const id = astPath.get('id')
               const superClass = astPath.get('superClass')
-              const object = superClass.get('object')
-              const property = superClass.get('property')
+              const object = superClass.node && superClass.get('object')
+              const property = superClass.node && superClass.get('property')
               if (
+                object &&
                 object.isIdentifier({ name: name }) &&
-                (property.isIdentifier({ name: 'app' }) ||
-                  property.isIdentifier({ name: 'page' }) ||
-                  property.isIdentifier({ name: 'component' }))
+                ((property && property.isIdentifier({ name: 'app' })) ||
+                  (property && property.isIdentifier({ name: 'page' })) ||
+                  (property && property.isIdentifier({ name: 'component' })))
               ) {
                 className = id.node.name
                 componentName = property.node.name
