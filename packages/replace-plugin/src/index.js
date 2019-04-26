@@ -27,7 +27,12 @@ export default class ReplacePlugin {
       (data, path, cb) => {
         if (/\.js$/.test(path)) {
           for (let i = 0; i < re.length; i++) {
-            data = data.replace(re[i].reg, re[i].replaceValue)
+            data = data.replace(
+              re[i].reg,
+              typeof re[i].replaceValue === 'string'
+                ? `"${re[i].replaceValue}"`
+                : re[i].replaceValue
+            )
           }
           cb(null, data)
         } else {
