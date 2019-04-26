@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-18 18:56:35
+ * @LastEditTime: 2019-04-26 17:03:53
  */
 
 import app from './app'
@@ -73,6 +73,10 @@ class Wemix {
   $createPage (PageClass, pagePath) {
     const [config, _this] = [{}, this]
     _this.config.pages[`/${pagePath}`] = PageClass.config
+    let dataPage = new PageClass()
+    // 只支持常规的几种数据格式，所以这里简单的做parse处理
+    config['data'] = JSON.parse(JSON.stringify(dataPage.data || {}))
+    dataPage = null
     config['onLoad'] = function (...args) {
       this.page = new PageClass()
       this.page.$init(_this, this, pagePath, ...args)
