@@ -43,14 +43,9 @@ program
   .description('Compile')
   .action(build)
   .option(
-    '-ex, --export <export>',
+    '-e, --export <export>',
     'Choose a type [wechat|alipay|tt|swan]',
     /^(wechat|alipay|tt|swan)$/i
-  )
-  .option(
-    '-e, --env <env>',
-    'Choose a env [production|development]',
-    /^(production|development)$/i
   )
   .option('-c, --config <config>', 'Path to the config file')
   .option('-i, --entry <entry>', 'origin code dir or files')

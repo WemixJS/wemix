@@ -35,7 +35,6 @@ const wemix = function (options, callback) {
   compiler.hooks.environment.callAsync(callback)
   compiler.hooks.afterEnvironment.callAsync(callback)
   compiler.options = new OptionsApply().process(options, compiler, callback)
-  process.env.NODE_ENV = compiler.options.env
   compiler.vendorDistPath = npath.join(
     compiler.options.output,
     compiler.vendorName

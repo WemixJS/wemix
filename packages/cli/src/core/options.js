@@ -10,7 +10,6 @@ import npath from 'path'
 import * as util from '../utils'
 
 const DEFAULT_OPTIONS = {
-  env: { type: String, default: 'production' },
   entry: { type: Array, default: ['src/app.js', 'src/assets'] },
   export: { type: String, default: 'wechat' },
   watch: { type: Boolean, default: false },
@@ -136,12 +135,6 @@ export const convert = function (args) {
     throw new Error(
       `No export type found. Add --export <wechat|alipay|tt|swan>`
     ) // eslint-disable-line
-  }
-  if (
-    !config.env ||
-    (config.env !== 'production' && config.env !== 'development')
-  ) {
-    throw new Error(`No env type found. Add --env <production|development>`) // eslint-disable-line
   }
 
   config.context = process.cwd()
