@@ -22,6 +22,10 @@ export default class Wechat {
     const config = {
       methods: {},
     }
+    let dataComponent = new ComponentClass()
+    // 只支持常规的几种数据格式，所以这里简单的做parse处理
+    config['data'] = JSON.parse(JSON.stringify(dataComponent.data || {}))
+    dataComponent = null
     config['properties'] = Object.assign(
       { wemixCopyId: { type: String, value: '' } },
       { wemixCopyClass: { type: String, value: '' } },

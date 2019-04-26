@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-17 15:51:31
+ * @LastEditTime: 2019-04-26 16:56:00
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -24,6 +24,10 @@ export default class Alipay {
     const config = {
       methods: {},
     }
+    let dataComponent = new ComponentClass()
+    // 只支持常规的几种数据格式，所以这里简单的做parse处理
+    config['data'] = JSON.parse(JSON.stringify(dataComponent.data || {}))
+    dataComponent = null
     config['props'] = Object.assign(
       { wemixCopyId: { type: String, value: '' } },
       { wemixCopyClass: { type: String, value: '' } },
