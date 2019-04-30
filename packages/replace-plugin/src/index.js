@@ -22,23 +22,26 @@ export default class ReplacePlugin {
       })
     }
     walkOptions(definitions, '')
-    compiler.hooks.beforeSingleCompile.tapAsync(
-      'DefinePlugin',
-      (data, path, cb) => {
-        if (/\.js$/.test(path)) {
+
+    compiler.hooks.emit.tapAsync('ReplacePlugin', (compilation, cb) => {
+      for (const distPath in compilation.modules) {
+        let value = compilation.modules[distPath]
+        if (
+          /\.js$/.test(distPath) &&
+          toString.call(value) === '[object String]'
+        ) {
           for (let i = 0; i < re.length; i++) {
-            data = data.replace(
+            value = value.replace(
               re[i].reg,
               typeof re[i].replaceValue === 'string'
                 ? `"${re[i].replaceValue}"`
                 : re[i].replaceValue
             )
           }
-          cb(null, data)
-        } else {
-          cb(null, data)
+          compilation.modules[distPath] = value
         }
       }
-    )
+      cb()
+    })
   }
 }
