@@ -6,6 +6,7 @@ const UglifyimgPlugin = require('@wemix/uglifyimg-plugin')
 const PrettyPlugin = require('@wemix/pretty-plugin')
 
 module.exports = Object.assign(baseConfig, {
+  env: 'production',
   plugins: baseConfig.plugins.concat([
     new PrettyPlugin(),
     new UglifyjsPlugin(),

@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-26 16:56:00
+ * @LastEditTime: 2019-05-02 00:07:29
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -50,6 +50,8 @@ export default class Alipay {
           this.component
         )
       }
+      // rematch data hack
+      this.$initRematch && this.$initRematch.call(this.component)
       return (
         this.component['onLoad'] &&
         this.component['onLoad'].apply(this.component, args)

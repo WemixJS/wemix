@@ -1,6 +1,6 @@
 {
   "name": "@wemix/cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "小程序开发脚手架",
   "main": "lib/wemix.js",
   "bin": {

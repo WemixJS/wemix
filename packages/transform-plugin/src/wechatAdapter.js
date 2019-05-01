@@ -25,6 +25,12 @@ export default {
     }
   },
   npmCodeHack (content, filePath) {
+    if (/@rematch\/core/.test(filePath)) {
+      content = content.replace(
+        /process\.env\.NODE_ENV/g,
+        `"${process.env.NODE_ENV}"`
+      )
+    }
     const basename = npath.basename(filePath)
     switch (basename) {
       case 'lodash.js':

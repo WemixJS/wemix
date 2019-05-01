@@ -18,42 +18,85 @@ import tt from './ttAdapter'
 import swan from './swanAdapter'
 
 const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
-  if (/^(app|page|component)$/.test(type)) {
-    let replace = ''
-    content = content.replace(
-      /exports\.default\s*=\s*((\w+);)/gi,
-      (m, b, defaultExport) => {
-        if (defaultExport === 'undefined') {
-          return ''
-        }
-        if (type === 'app') {
-          const vars = content.match(/\((.+?)\.default\.app\)/)[1]
-          replace = `\nApp(${vars}.default.$createApp(${defaultExport}));\n`
-        } else if (type === 'page') {
-          const pagePath = npath
-            .join(
-              npath.relative(compiler.options.dir, pathParse.dir),
-              pathParse.name
-            )
-            .replace(/\\/gi, '/')
-          const vars = content.match(/\((.+?)\.default\.page\)/)[1]
-          replace = `\nPage(${vars}.default.$createPage(${defaultExport} , '${pagePath}'));\n`
-        } else if (type === 'component') {
-          const pagePath = npath
-            .join(
-              npath.relative(compiler.options.dir, pathParse.dir),
-              pathParse.name
-            )
-            .replace(/\\/gi, '/')
-          const vars = content.match(/\((.+?)\.default\.component\)/)[1]
-          replace = `\nComponent(${vars}.default.$createComponent(${defaultExport} , '${pagePath}'));\n`
-        }
-        return ''
+  let isRematch = false
+  const pagePath = npath
+    .join(npath.relative(compiler.options.dir, pathParse.dir), pathParse.name)
+    .replace(/\\/gi, '/')
+  switch (type) {
+    case 'app':
+      const appClassName = content.match(/\((.+?)\.default\.app\)/)[1]
+      if (/Provider\)\((.+?)\)\((\w+)\);/.test(content)) {
+        content = content.replace(/Provider\)\((.+?)\)\((\w+)\);/, function (
+          m,
+          b,
+          defaultExport
+        ) {
+          isRematch = true
+          return `Provider)(${b})(${appClassName}.default.$createApp(${defaultExport}));`
+        })
       }
-    )
-    content += replace
+      return content.replace(/exports\.default\s*=\s*((\w+);)/, function (
+        m,
+        b,
+        defaultExport
+      ) {
+        if (isRematch) {
+          return `App(${defaultExport});`
+        } else {
+          return `App(${appClassName}.default.$createApp(${defaultExport}));`
+        }
+      })
+    case 'page':
+      const pageClassName = content.match(/\((.+?)\.default\.page\)/)[1]
+      if (/connect\)\((.+?)\)\((\w+)\);/.test(content)) {
+        content = content.replace(/connect\)\((.+?)\)\((\w+)\);/, function (
+          m,
+          b,
+          defaultExport
+        ) {
+          isRematch = true
+          return `connect)(${b})(${pageClassName}.default.$createPage(${defaultExport}), ${defaultExport}, '${type}');`
+        })
+      }
+      return content.replace(/exports\.default\s*=\s*((\w+);)/, function (
+        m,
+        b,
+        defaultExport
+      ) {
+        if (isRematch) {
+          return `Page(${defaultExport});`
+        } else {
+          return `Page(${pageClassName}.default.$createPage(${defaultExport}, '/${pagePath}'));`
+        }
+      })
+    case 'component':
+      const componentClassName = content.match(
+        /\((.+?)\.default\.component\)/
+      )[1]
+      if (/connect\)\((.+?)\)\((\w+)\);/.test(content)) {
+        content = content.replace(/connect\)\((.+?)\)\((\w+)\);/, function (
+          m,
+          b,
+          defaultExport
+        ) {
+          isRematch = true
+          return `connect)(${b})(${componentClassName}.default.$createComponent(${defaultExport}), ${defaultExport}, '${type}');`
+        })
+      }
+      return content.replace(/exports\.default\s*=\s*((\w+);)/, function (
+        m,
+        b,
+        defaultExport
+      ) {
+        if (isRematch) {
+          return `Component(${defaultExport});`
+        } else {
+          return `Component(${componentClassName}.default.$createComponent(${defaultExport}));`
+        }
+      })
+    default:
+      return content
   }
-  return content
 }
 
 const customHack = function (data, oriPath, compiler, type, pathParse) {

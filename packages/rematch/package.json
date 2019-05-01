@@ -1,6 +1,6 @@
 {
-  "name": "@wemix/core",
-  "version": "1.0.3",
+  "name": "@wemix/rematch",
+  "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
   "scripts": {},

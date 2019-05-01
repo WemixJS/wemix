@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-26 16:55:21
+ * @LastEditTime: 2019-05-01 23:48:17
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -39,7 +39,6 @@ export default class Tt {
       this.component.$init(wemix, this)
     }
     config['attached'] = function (...args) {
-      this.component.setData(this.component.data)
       this.component.__webviewId__ = this.__webviewId__
       this.component.__exparserNodeId__ = this.__nodeid__
       if (

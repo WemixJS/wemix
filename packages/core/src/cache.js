@@ -41,9 +41,13 @@ export const getComponent = function (webviewId, selector) {
 export const getAllComponents = function (webviewId, selector) {
   if (toString.call(componentIns[webviewId]) === '[object Array]') {
     if (!selector) {
-      return componentIns[webviewId].filter(val => {
-        return val
-      })
+      return componentIns[webviewId]
+        .filter(val => {
+          return val
+        })
+        .map(item => {
+          return item.ins
+        })
     }
     const components = []
     if (selector[0] === '.' || selector[0] === '#') {

@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-26 17:03:53
+ * @LastEditTime: 2019-05-02 01:03:18
  */
 
 import app from './app'
@@ -80,7 +80,8 @@ class Wemix {
     config['onLoad'] = function (...args) {
       this.page = new PageClass()
       this.page.$init(_this, this, pagePath, ...args)
-      this.page.setData(this.page.data)
+      // rematch data hack
+      this.$initRematch && this.$initRematch.call(this.page)
       return this.page['onLoad'] && this.page['onLoad'].apply(this.page, args)
     }
     config['onShow'] = function (...args) {
@@ -151,7 +152,7 @@ class Wemix {
     })
     return config
   }
-  $createComponent (ComponentClass, pagePath) {
+  $createComponent (ComponentClass) {
     return adapter.$createComponent(ComponentClass, this)
   }
   getApp () {
@@ -215,7 +216,7 @@ class Wemix {
       return false
     }
     for (const n in obj) {
-      if (obj.hasOwnProperty(n) && obj[n]) {
+      if (obj.hasOwnProperty(n) && !this.isUndefined(obj[n])) {
         return false
       }
     }

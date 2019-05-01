@@ -2,7 +2,7 @@
  * @Description: alipayAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-12 16:41:55
+ * @LastEditTime: 2019-04-30 13:17:37
  */
 import npath from 'path'
 import { parse } from '@babel/parser'
@@ -54,6 +54,12 @@ export default {
     })
   },
   npmCodeHack (content, filePath) {
+    if (/@rematch\/core/.test(filePath)) {
+      content = content.replace(
+        /process\.env\.NODE_ENV/g,
+        `"${process.env.NODE_ENV}"`
+      )
+    }
     const basename = npath.basename(filePath)
     switch (basename) {
       case 'lodash.js':

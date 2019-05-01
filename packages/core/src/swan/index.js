@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-04-26 16:55:41
+ * @LastEditTime: 2019-05-01 23:48:28
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -43,7 +43,6 @@ export default class Swan {
     }
     config['attached'] = function (...args) {
       const pages = getCurrentPages()
-      this.component.setData(this.component.data)
       this.component.__webviewId__ = pages[pages.length - 1].__webviewId__
       this.component.__exparserNodeId__ = this.nodeId
       if (
