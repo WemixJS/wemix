@@ -35,7 +35,7 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
           return `Provider)(${b})(${appClassName}.default.$createApp(${defaultExport}));`
         })
       }
-      return content.replace(/exports\.default\s*=\s*((\w+);)/, function (
+      content = content.replace(/exports\.default\s*=\s*((\w+);)/, function (
         m,
         b,
         defaultExport
@@ -46,6 +46,12 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
           return `App(${appClassName}.default.$createApp(${defaultExport}));`
         }
       })
+      let appLine = ''
+      content = content.replace(/\sApp\((.+?)\);/, function (m) {
+        appLine = m
+        return ''
+      })
+      return content + '\n' + appLine
     case 'page':
       const pageClassName = content.match(/\((.+?)\.default\.page\)/)[1]
       if (/connect\)\((.+?)\)\((\w+)\);/.test(content)) {
@@ -58,7 +64,7 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
           return `connect)(${b})(${pageClassName}.default.$createPage(${defaultExport}), ${defaultExport}, '${type}');`
         })
       }
-      return content.replace(/exports\.default\s*=\s*((\w+);)/, function (
+      content = content.replace(/exports\.default\s*=\s*((\w+);)/, function (
         m,
         b,
         defaultExport
@@ -69,6 +75,12 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
           return `Page(${pageClassName}.default.$createPage(${defaultExport}, '/${pagePath}'));`
         }
       })
+      let pageLine = ''
+      content = content.replace(/\sPage\((.+?)\);/, function (m) {
+        pageLine = m
+        return ''
+      })
+      return content + '\n' + pageLine
     case 'component':
       const componentClassName = content.match(
         /\((.+?)\.default\.component\)/
@@ -83,7 +95,7 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
           return `connect)(${b})(${componentClassName}.default.$createComponent(${defaultExport}), ${defaultExport}, '${type}');`
         })
       }
-      return content.replace(/exports\.default\s*=\s*((\w+);)/, function (
+      content = content.replace(/exports\.default\s*=\s*((\w+);)/, function (
         m,
         b,
         defaultExport
@@ -94,6 +106,12 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
           return `Component(${componentClassName}.default.$createComponent(${defaultExport}));`
         }
       })
+      let componentLine = ''
+      content = content.replace(/\sComponent\((.+?)\);/, function (m) {
+        componentLine = m
+        return ''
+      })
+      return content + '\n' + componentLine
     default:
       return content
   }
