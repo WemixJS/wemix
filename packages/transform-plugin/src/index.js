@@ -2,7 +2,7 @@
  * @Description: wechat plugin
  * @LastEditors: sanshao
  * @Date: 2019-02-26 15:07:03
- * @LastEditTime: 2019-04-18 19:38:21
+ * @LastEditTime: 2019-05-06 15:01:08
  */
 
 import fs from 'fs-extra'
@@ -15,7 +15,7 @@ export default class TransformPlugin {
       let rdata = fs.readFileSync(oriPath, 'utf8') || ''
       switch (pathParse.ext) {
         case '.js':
-          if (/@wemix\/core\/index\.js$/.test(oriPath)) {
+          if (/@wemix\/core\/lib\/index\.js$/.test(oriPath)) {
             compiler.adapter.adapterCorePkg(compiler, rdata, resolve, reject)
           } else {
             compiler.adapter.splitConfig(
