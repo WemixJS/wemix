@@ -69,7 +69,7 @@ const _promise = data => {
           })
           res.on('end', () => {
             let match = content.match(
-              new RegExp(`[\\s\\r\\n]@font-face[\\s\\r\\n]*`)
+              new RegExp(`[\\s\\r\\n]*@font-face[\\s\\r\\n]*`)
             )
             match = match ? match[0] : undefined
             let replaceContent = match
