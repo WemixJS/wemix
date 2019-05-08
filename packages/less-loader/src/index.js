@@ -2,7 +2,7 @@
  * @Description: less-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-04-15 14:20:10
+ * @LastEditTime: 2019-05-08 20:31:45
  */
 
 import less from 'less'
@@ -196,32 +196,36 @@ export default function (data, loader, path, next, compiler) {
 
     return next(null, data)
   }
-  _promise(data).then(data => {
-    // return 合并import，将合并并去重且过滤掉与当前路径相同的path的数组
-    const imports = []
-    data = _mergeImport(data, path, loader, compiler, imports)
-    data = _dealData(imports, data)
+  _promise(data)
+    .then(data => {
+      // return 合并import，将合并并去重且过滤掉与当前路径相同的path的数组
+      const imports = []
+      data = _mergeImport(data, path, loader, compiler, imports)
+      data = _dealData(imports, data)
 
-    const loaderOptions =
-      (loader.options && loaderUtils.getOptions({ query: loader.options })) ||
-      {}
+      const loaderOptions =
+        (loader.options && loaderUtils.getOptions({ query: loader.options })) ||
+        {}
 
-    if (Object.prototype.hasOwnProperty.call(loaderOptions, 'path')) {
-      delete loader.options.path
-      console.warn(chalk.red('Please use data to compile!'))
-    }
-    if (Object.prototype.hasOwnProperty.call(loaderOptions, 'file')) {
-      delete loader.options.file
-      console.warn(chalk.red('Please use data to compile!'))
-    }
-    less
-      .render(data, loaderOptions)
-      .then(output => {
-        output.css = _injectImport(output.css, compiler, imports)
-        next(null, output.css)
-      })
-      .catch(err => {
-        next(err)
-      })
-  })
+      if (Object.prototype.hasOwnProperty.call(loaderOptions, 'path')) {
+        delete loader.options.path
+        console.warn(chalk.red('Please use data to compile!'))
+      }
+      if (Object.prototype.hasOwnProperty.call(loaderOptions, 'file')) {
+        delete loader.options.file
+        console.warn(chalk.red('Please use data to compile!'))
+      }
+      less
+        .render(data, loaderOptions)
+        .then(output => {
+          output.css = _injectImport(output.css, compiler, imports)
+          next(null, output.css)
+        })
+        .catch(err => {
+          next(err)
+        })
+    })
+    .catch(err => {
+      next(err)
+    })
 }

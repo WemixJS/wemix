@@ -2,7 +2,7 @@
  * @Description: sass-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-03-27 10:11:10
+ * @LastEditTime: 2019-05-08 20:18:33
  */
 
 import nodeSass from 'node-sass'
@@ -212,25 +212,30 @@ export default function (data, loader, path, next, compiler) {
   }
 
   if (data) {
-    _promise(data).then(data => {
-      // return 合并import，将合并并去重且过滤掉与当前路径相同的path的数组
-      const imports = []
-      data = _mergeImport(data, path, loader, compiler, imports)
-      data = _dealData(imports, data)
-      const loaderOptions =
-        (loader.options && loaderUtils.getOptions({ query: loader.options })) ||
-        {}
-      try {
-        const result = nodeSass.renderSync({
-          data,
-          ...loaderOptions,
-        })
-        let outCss = _injectImport(result.css.toString(), compiler, imports)
-        next(null, outCss)
-      } catch (error) {
+    _promise(data)
+      .then(data => {
+        // return 合并import，将合并并去重且过滤掉与当前路径相同的path的数组
+        const imports = []
+        data = _mergeImport(data, path, loader, compiler, imports)
+        data = _dealData(imports, data)
+        const loaderOptions =
+          (loader.options &&
+            loaderUtils.getOptions({ query: loader.options })) ||
+          {}
+        try {
+          const result = nodeSass.renderSync({
+            data,
+            ...loaderOptions,
+          })
+          let outCss = _injectImport(result.css.toString(), compiler, imports)
+          next(null, outCss)
+        } catch (error) {
+          next(error)
+        }
+      })
+      .catch(error => {
         next(error)
-      }
-    })
+      })
   } else {
     next(null, data)
   }

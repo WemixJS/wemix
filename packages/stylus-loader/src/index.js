@@ -2,7 +2,7 @@
  * @Description: stylus-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-03-27 10:11:17
+ * @LastEditTime: 2019-05-08 20:19:04
  */
 import https from 'https'
 import stylus from 'stylus'
@@ -196,18 +196,22 @@ export default function (data, loader, path, next, compiler) {
     return next(null, data)
   }
 
-  _promise(data).then(data => {
-    const imports = []
-    data = _mergeImport(data, path, loader, compiler, imports)
-    data = _dealData(imports, data)
-    const instance = stylus(data)
+  _promise(data)
+    .then(data => {
+      const imports = []
+      data = _mergeImport(data, path, loader, compiler, imports)
+      data = _dealData(imports, data)
+      const instance = stylus(data)
 
-    instance.render((err, css) => {
-      if (err) {
-        next(err)
-      }
-      css = _injectImport(css, compiler, imports)
-      next(null, css)
+      instance.render((err, css) => {
+        if (err) {
+          next(err)
+        }
+        css = _injectImport(css, compiler, imports)
+        next(null, css)
+      })
     })
-  })
+    .catch(err => {
+      next(err)
+    })
 }

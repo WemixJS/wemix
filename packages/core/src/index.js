@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-05-02 01:03:18
+ * @LastEditTime: 2019-05-08 20:11:01
  */
 
 import app from './app'
@@ -268,7 +268,7 @@ NATIVE_API.forEach(key => {
     } else {
       method = adapter.nativeApi[key]
     }
-    wemix[key] = function (params) {
+    wemix[key] = function (params = {}) {
       if (wemix.isFunction(params.fail)) {
         const fail = params.fail
         params.fail = function (err) {
@@ -281,7 +281,7 @@ NATIVE_API.forEach(key => {
           fail(res)
         }
       }
-      method(params)
+      return method(params)
     }
   }
 })
