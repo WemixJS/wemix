@@ -2,7 +2,7 @@
  * @Description: wemix config options
  * @LastEditors: sanshao
  * @Date: 2019-02-20 16:40:28
- * @LastEditTime: 2019-04-30 13:12:47
+ * @LastEditTime: 2019-05-09 19:21:01
  */
 
 import fs from 'fs-extra'
@@ -12,6 +12,7 @@ import * as util from '../utils'
 const DEFAULT_OPTIONS = {
   env: { type: String, default: 'production' },
   entry: { type: Array, default: ['src/app.js', 'src/assets'] },
+  styleInject: { type: Object, default: {} },
   export: { type: String, default: 'wechat' },
   watch: { type: Boolean, default: false },
   loaders: { type: Array, default: [] },
