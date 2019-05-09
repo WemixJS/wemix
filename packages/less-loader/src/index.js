@@ -2,7 +2,7 @@
  * @Description: less-loader
  * @LastEditors: sanshao
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-05-09 19:45:35
+ * @LastEditTime: 2019-05-09 19:59:23
  */
 
 import less from 'less'
@@ -151,42 +151,29 @@ function injectFullPathImports (data, imports) {
 }
 
 function compileData (data, styleInject = {}, imports, path, compiler) {
-  if (
-    styleInject.ext &&
-    styleInject.imports &&
-    styleInject.imports.length > 0
-  ) {
-    if (~path.indexOf(styleInject.ext)) {
-      if (styleInject.include && styleInject.include.length > 0) {
-        let [exitInclude, include] = [false, []]
-        const includeType = _type(styleInject.include)
-        if (includeType !== '[object Array]') {
-          include.push(styleInject.include)
+  if (styleInject.imports && styleInject.imports.length > 0) {
+    if (styleInject.include && styleInject.include.length > 0) {
+      let [exitInclude, include] = [false, []]
+      const includeType = _type(styleInject.include)
+      if (includeType !== '[object Array]') {
+        include.push(styleInject.include)
+      } else {
+        include = styleInject.include || []
+      }
+      for (let i = 0; i < include.length; i++) {
+        if (_type(include[i]) === '[object RegExp]') {
+          if (include[i].test(path)) {
+            exitInclude = true
+            break
+          }
         } else {
-          include = styleInject.include || []
-        }
-        for (let i = 0; i < include.length; i++) {
-          if (_type(include[i]) === '[object RegExp]') {
-            if (include[i].test(path)) {
-              exitInclude = true
-              break
-            }
-          } else {
-            if (~path.indexOf(_dealPath(include[i]))) {
-              exitInclude = true
-              break
-            }
+          if (~path.indexOf(_dealPath(include[i]))) {
+            exitInclude = true
+            break
           }
         }
-        if (exitInclude) {
-          styleInject.imports.forEach(item => {
-            // 避免同名文件嵌套引用
-            if (item !== path) {
-              imports.add(item)
-            }
-          })
-        }
-      } else {
+      }
+      if (exitInclude) {
         styleInject.imports.forEach(item => {
           // 避免同名文件嵌套引用
           if (item !== path) {
@@ -194,6 +181,13 @@ function compileData (data, styleInject = {}, imports, path, compiler) {
           }
         })
       }
+    } else {
+      styleInject.imports.forEach(item => {
+        // 避免同名文件嵌套引用
+        if (item !== path) {
+          imports.add(item)
+        }
+      })
     }
   }
 
@@ -222,9 +216,9 @@ export default function (data, loader, path, next, compiler) {
   if (
     !data &&
     !(
-      compiler.options.styleInject &&
-      compiler.options.styleInject.imports &&
-      compiler.options.styleInject.imports.length > 0
+      loader.inject &&
+      loader.inject.imports &&
+      loader.inject.imports.length > 0
     )
   ) {
     return next(null, data)
@@ -232,13 +226,7 @@ export default function (data, loader, path, next, compiler) {
   loadIconfont(data)
     .then(data => {
       const imports = new Set()
-      data = compileData(
-        data,
-        compiler.options.styleInject,
-        imports,
-        path,
-        compiler
-      )
+      data = compileData(data, loader.inject, imports, path, compiler)
       data = injectFullPathImports(data, imports)
       loader.options = loader.options || {}
       loader.options.filename = path

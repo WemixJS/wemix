@@ -23,7 +23,6 @@ module.exports = {
     },
     {
       test: /\.less$/,
-      imports: [path.join(__dirname, 'src/global.less')],
       use: [
         {
           loader: '@wemix/postcss-loader',
@@ -33,6 +32,14 @@ module.exports = {
         },
         { loader: '@wemix/less-loader' },
       ],
+      inject: {
+        include: [
+          path.join(__dirname, 'src/components'),
+        ],
+        imports: [
+          path.join(__dirname, 'src/global.less'),
+        ],
+      },
     },
   ],
   plugins: [new TransformPlugin()],
