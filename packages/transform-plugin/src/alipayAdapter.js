@@ -2,7 +2,7 @@
  * @Description: alipayAdapter
  * @LastEditors: sanshao
  * @Date: 2019-04-01 11:43:15
- * @LastEditTime: 2019-04-30 13:17:37
+ * @LastEditTime: 2019-05-28 19:13:08
  */
 import npath from 'path'
 import { parse } from '@babel/parser'
@@ -54,6 +54,12 @@ export default {
     })
   },
   npmCodeHack (content, filePath) {
+    if (/regenerator-runtime\/runtime/.test(filePath)) {
+      content = content.replace(
+        /regeneratorRuntime\s*=\s*runtime/g,
+        `module.exports = runtime`
+      )
+    }
     if (/@rematch\/core/.test(filePath)) {
       content = content.replace(
         /process\.env\.NODE_ENV/g,

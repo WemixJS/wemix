@@ -129,7 +129,7 @@ const customHack = function (data, oriPath, compiler, type, pathParse) {
         oriPath + ': Use wemix.getApp() or wemix.getCurrentPages()'
       )
     }
-    if (/(wx|my|tt|swan)\.[^(__wemix_require)]/.test(data)) {
+    if (/[^.](wx|my|tt|swan)\.[^(__wemix_require)]/.test(data)) {
       compiler.logger.warn(oriPath + ': wx|my|tt|swan replaceWith wemix')
     }
   }
