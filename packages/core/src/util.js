@@ -2,7 +2,7 @@
  * @Description: util
  * @LastEditors: sanshao
  * @Date: 2019-04-05 20:43:27
- * @LastEditTime: 2019-04-09 14:27:12
+ * @LastEditTime: 2019-05-28 11:24:15
  */
 
 const parseKey = function (e) {
@@ -67,15 +67,15 @@ export const diffData = function (wemix, differData, wxData, data, lastDotKey) {
   let cacheWXData = wxData
   let cacheData = data
   for (const key in cacheData) {
-    let newDotKey = lastDotKey + key
+    let newDotKey = lastDotKey + key + '.'
     if (wemix.isObject(cacheData[key])) {
       if (wemix.isObject(cacheWXData[key])) {
         diffData(wemix, differData, cacheWXData[key], cacheData[key], newDotKey)
       } else {
-        differData[newDotKey] = cacheData[key]
+        differData[newDotKey.substr(0, newDotKey.length - 1)] = cacheData[key]
       }
     } else if (wemix.isArray(cacheData[key])) {
-      differData[newDotKey] = cacheData[key]
+      differData[newDotKey.substr(0, newDotKey.length - 1)] = cacheData[key]
     } else if (
       wemix.isString(cacheData[key]) ||
       wemix.isNumber(cacheData[key]) ||
@@ -84,7 +84,7 @@ export const diffData = function (wemix, differData, wxData, data, lastDotKey) {
       wemix.isSymbol(cacheData[key])
     ) {
       if (cacheWXData[key] !== cacheData[key]) {
-        differData[newDotKey] = cacheData[key]
+        differData[newDotKey.substr(0, newDotKey.length - 1)] = cacheData[key]
       }
     }
   }
