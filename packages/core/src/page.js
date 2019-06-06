@@ -2,9 +2,9 @@
  * @Description: extends Page
  * @LastEditors: sanshao
  * @Date: 2019-04-05 20:45:45
- * @LastEditTime: 2019-04-12 19:09:05
+ * @LastEditTime: 2019-06-06 17:56:51
  */
-import { diffData, mergeData } from './util'
+import { diffData, mergeData, filterData } from './util'
 import { getComponent, getAllComponents } from './cache'
 export default class {
   $init (wemix, $wxpage, pagePath, ...args) {
@@ -25,7 +25,20 @@ export default class {
       if (!wemix.isEmptyObject(data)) {
         const differData = {}
         diffData(wemix, differData, $wxpage.data, data, '')
+        $wxpage.dispatchPropsKeys &&
+          filterData(differData, $wxpage.dispatchPropsKeys)
         mergeData(wemix, differData, this.data)
+        $wxpage.setData(differData, func)
+      }
+    }
+    this.setProps = (data, func) => {
+      if (!wemix.isObject(data)) {
+        throw new Error('Data should be an ["object Object"]')
+      }
+      if (!wemix.isEmptyObject(data)) {
+        const differData = {}
+        diffData(wemix, differData, $wxpage.data, data, '')
+        mergeData(wemix, differData, this.props)
         $wxpage.setData(differData, func)
       }
     }

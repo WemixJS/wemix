@@ -17,15 +17,15 @@ function createStore (config) {
     const rootState = store.getState() // 这里必须重新取一次state,是因为有些state是纯数字，没法通过引用自动修改
     const pages = getCurrentPages() || []
     pages.map(page => {
-      if (page.page.constructor.mapStateToData) {
-        const data = page.page.constructor.mapStateToData(rootState)
-        page.page.setData(data)
+      if (page.page.constructor.mapStateToProps) {
+        const data = page.page.constructor.mapStateToProps(rootState)
+        page.page.setProps(data)
       }
       const instances = page.page.selectAllComponents()
       instances.map(item => {
-        if (item.constructor.mapStateToData) {
-          const data = item.constructor.mapStateToData(rootState)
-          item.setData(data)
+        if (item.constructor.mapStateToProps) {
+          const data = item.constructor.mapStateToProps(rootState)
+          item.setProps(data)
         }
       })
     })

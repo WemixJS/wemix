@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-05-01 23:48:28
+ * @LastEditTime: 2019-06-06 17:52:55
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -55,6 +55,8 @@ export default class Swan {
           this.component
         )
       }
+      // rematch data hack
+      this.$initRematch && this.$initRematch.call(this.component)
       return (
         this.component['onLoad'] &&
         this.component['onLoad'].apply(this.component, args)
@@ -124,8 +126,24 @@ export default class Swan {
           if (!wemix.isEmptyObject(data)) {
             const differData = {}
             diffData(wemix, differData, $wxcomponent.data, data, '')
-            filterData(differData, $wxcomponent.propsKeys)
+            filterData(
+              differData,
+              []
+                .concat($wxcomponent.propsKeys)
+                .concat($wxcomponent.dispatchPropsKeys)
+            )
             mergeData(wemix, differData, this.data)
+            $wxcomponent.setData(differData, func)
+          }
+        }
+        this.setProps = (data, func) => {
+          if (!wemix.isObject(data)) {
+            throw new Error('Data should be an ["object Object"]')
+          }
+          if (!wemix.isEmptyObject(data)) {
+            const differData = {}
+            diffData(wemix, differData, $wxcomponent.data, data, '')
+            mergeData(wemix, differData, this.props)
             $wxcomponent.setData(differData, func)
           }
         }
