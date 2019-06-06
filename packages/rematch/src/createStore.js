@@ -41,16 +41,16 @@ function createStore (config) {
     const reducerInDispatch = {}
     for (const func in reducers) {
       const fn = reducers[func]
-      reducerInDispatch[func] = store.dispatch[key][func] = (...payload) => {
-        model.state = fn.call({}, model.state, ...payload)
+      reducerInDispatch[func] = store.dispatch[key][func] = (a, b) => {
+        model.state = fn.call({}, model.state, a, b)
         handleChange()
       }
     }
     for (const func in effects) {
       const fn = effects[func]
 
-      store.dispatch[key][func] = (...payload) => {
-        fn.call(reducerInDispatch, ...payload, rootState) // TODO，这里需要验证一下rootState是否需要临时取
+      store.dispatch[key][func] = (a, b) => {
+        fn.call(reducerInDispatch, a, rootState, b) // TODO，这里需要验证一下rootState是否需要临时取
       }
     }
   })
