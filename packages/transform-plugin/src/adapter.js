@@ -61,7 +61,7 @@ const wrapPageUp = function (content, oriPath, compiler, type, pathParse) {
           defaultExport
         ) {
           isRematch = true
-          return `connect)(${b})(${pageClassName}.default.$createPage(${defaultExport}), ${defaultExport}, '${type}');`
+          return `connect)(${b})(${pageClassName}.default.$createPage(${defaultExport}, '/${pagePath}'), ${defaultExport}, '${type}');`
         })
       }
       content = content.replace(/exports\.default\s*=\s*((\w+);)/, function (
