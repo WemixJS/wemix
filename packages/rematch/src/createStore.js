@@ -11,7 +11,7 @@ function createStore (config) {
     },
     dispatch: {},
   }
-  const rootState = store.getState()
+
   // 由事件触发一次所有view的变更
   function handleChange () {
     const rootState = store.getState() // 这里必须重新取一次state,是因为有些state是纯数字，没法通过引用自动修改
@@ -50,6 +50,7 @@ function createStore (config) {
       const fn = effects[func]
 
       store.dispatch[key][func] = (a, b) => {
+        const rootState = store.getState()
         fn.call(reducerInDispatch, a, rootState, b) // TODO，这里需要验证一下rootState是否需要临时取
       }
     }
