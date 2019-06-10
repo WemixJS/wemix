@@ -2,7 +2,7 @@
  * @Description: extends Page
  * @LastEditors: sanshao
  * @Date: 2019-04-05 20:45:45
- * @LastEditTime: 2019-06-06 17:56:51
+ * @LastEditTime: 2019-06-10 19:49:28
  */
 import { diffData, mergeData, filterData } from './util'
 import { getComponent, getAllComponents } from './cache'
@@ -15,7 +15,7 @@ export default class {
       +new Date()
     this.data = this.data || {}
     this.options = args[0]
-    this.route = `/${pagePath}`
+    this.route = `${pagePath}`
     let strOpt = wemix.stringify(this.options, false)
     this.search = strOpt ? '?' + strOpt : strOpt
     this.setData = (data, func) => {
