@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-05-08 20:11:01
+ * @LastEditTime: 2019-06-13 17:25:06
  */
 
 import app from './app'
@@ -17,6 +17,7 @@ class Wemix {
     this.app = app
     this.component = adapter.getComponent()
     this.page = page
+    this.appOptions = {}
     // env 会根据export参数动态注入对应的环境
     this.env = ''
     switch (this.env) {
@@ -41,6 +42,7 @@ class Wemix {
     const [config, _this] = [{}, this]
     this.config.app = AppClass.config
     config['onLaunch'] = function (...args) {
+      _this.appOptions = args[0]
       if (!this.app) {
         this.app = new AppClass()
         this.app.$init(_this, AppClass)
@@ -78,6 +80,7 @@ class Wemix {
     config['data'] = JSON.parse(JSON.stringify(dataPage.data || {}))
     dataPage = null
     config['onLoad'] = function (...args) {
+      args[0].appOptions = Object.assign({}, _this.appOptions)
       this.page = new PageClass()
       this.page.$init(_this, this, pagePath, ...args)
       // rematch data hack
