@@ -2,7 +2,7 @@
  * @Description: wechat core
  * @LastEditors: sanshao
  * @Date: 2019-03-28 19:00:41
- * @LastEditTime: 2019-06-06 17:52:27
+ * @LastEditTime: 2019-06-14 13:48:09
  */
 
 import { diffData, mergeData, filterData } from '../util'
@@ -238,7 +238,7 @@ export default class Alipay {
   // 网络
   request (params) {
     params.headers = params.header
-    this.nativeApi.setNavigationBar(params)
+    this.nativeApi.request(params)
   }
   // 用户信息
   getUserInfo (params) {
