@@ -224,7 +224,8 @@ const transformHtml = function (
             attr.indexOf('bind') === 0 &&
             _this.platform.name === EXPORT_ALIPAY
           ) {
-            name.replaceWith(t.jsxIdentifier(attr.replace('bind', 'on')))
+            let attrName = attr.charAt(4).toUpperCase() + attr.slice(5)
+            name.replaceWith(t.jsxIdentifier('on' + attrName))
           }
           if (attr === 'id') {
             astPath.insertAfter(
