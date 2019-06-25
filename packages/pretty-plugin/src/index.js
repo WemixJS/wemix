@@ -1,8 +1,8 @@
 /*
  * @Description: pretty-plugin
- * @LastEditors: sanshao
+ * @LastEditors: Please set LastEditors
  * @Date: 2019-02-28 14:32:47
- * @LastEditTime: 2019-02-28 14:40:41
+ * @LastEditTime: 2019-06-25 16:04:45
  */
 import { minify } from 'html-minifier'
 import JSONFormatter from 'json-fmt'
@@ -17,7 +17,7 @@ export default class PrettyPlugin {
           toString.call(value) === '[object String]'
         ) {
           const result = minify(value, {
-            maxLineLength: 100,
+            // maxLineLength: 100,
             collapseWhitespace: true,
             keepClosingSlash: true,
             removeEmptyAttributes: true,
