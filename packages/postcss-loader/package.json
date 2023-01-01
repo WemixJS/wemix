@@ -17,7 +17,7 @@
   "dependencies": {
     "@babel/runtime": "^7.4.3",
     "core-js": "^2.6.5",
-    "loader-utils": "^1.2.3",
+    "loader-utils": "^3.2.1",
     "postcss": "^7.0.14",
     "postcss-load-config": "^2.0.0",
     "schema-utils": "^1.0.0"
